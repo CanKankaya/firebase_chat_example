@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/auth_screen.dart';
+import 'package:firebase_chat_example/screens/chat_screen.dart';
+import 'package:firebase_chat_example/screens/profile_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -30,9 +34,16 @@ class _AppDrawerState extends State<AppDrawer> {
               child: ListView(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.shop),
-                    title: const Text('Temp Listtile'),
-                    onTap: () {},
+                    leading: const Icon(Icons.chat),
+                    title: const Text('Chat Screen'),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChatScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
                   ListTile(
@@ -136,7 +147,15 @@ class _AppDrawerState extends State<AppDrawer> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfileScreen(),
+                            ),
+                          );
+                        },
                         icon: const Icon(Icons.account_circle,
                             size: 32, color: Colors.white),
                       ),
@@ -154,13 +173,14 @@ class _AppDrawerState extends State<AppDrawer> {
                             '',
                             'Yes',
                             () {
-                              Navigator.of(context).pop();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AuthScreen(),
-                                ),
-                              );
+                              FirebaseAuth.instance.signOut();
+                              // Navigator.of(context).pop();
+                              // Navigator.pushReplacement(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => const AuthScreen(),
+                              //   ),
+                              // );
                             },
                           );
                         },

@@ -1,5 +1,8 @@
-import 'package:firebase_chat_example/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:firebase_chat_example/screens/chat_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -9,6 +12,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  var _isLoading = false;
+  final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   bool isLogin = true;
   String? _userEmail = '';
@@ -19,17 +24,52 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _trySubmit() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      print(_userEmail);
-      print(_username);
-      print(_userPassword);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ChatScreen(),
-        ),
-      );
-    } else {
-      return;
+
+      UserCredential authResult;
+      try {
+        setState(() {
+          _isLoading = true;
+        });
+        if (isLogin) {
+          await _auth
+              .signInWithEmailAndPassword(
+                  email: _userEmail.toString().trim(),
+                  password: _userPassword.toString().trim())
+              .then((value) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ChatScreen(),
+              ),
+            );
+          });
+        } else {
+          authResult = await _auth.createUserWithEmailAndPassword(
+              email: _userEmail.toString().trim(),
+              password: _userPassword.toString().trim());
+          await authResult.user?.updateDisplayName(_username).then((value) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ChatScreen(),
+              ),
+            );
+          });
+        }
+        setState(() {
+          _isLoading = false;
+        });
+      } on PlatformException catch (error) {
+        //
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.message.toString()),
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -110,6 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       if (!isLogin)
                         TextFormField(
                           key: const ValueKey('confirmPassword'),
+                          enabled: !isLogin,
                           onSaved: (newValue) {
                             _userPassword = newValue;
                           },
@@ -119,8 +160,8 @@ class _AuthScreenState extends State<AuthScreen> {
                             if (value == null ||
                                 value.isEmpty ||
                                 value.length < 8 ||
-                                value == _userPasswordController.text) {
-                              return 'error';
+                                value != _userPasswordController.text) {
+                              return 'Passwords do not match';
                             } else {
                               return null;
                             }
@@ -129,24 +170,28 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelText: 'Confirm Password'),
                         ),
                       const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          _trySubmit();
-                        },
-                        child: isLogin
-                            ? const Text('Login')
-                            : const Text('Sign Up'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isLogin = !isLogin;
-                          });
-                        },
-                        child: isLogin
-                            ? const Text('Create New Account')
-                            : const Text('I already have an account'),
-                      ),
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                              onPressed: () {
+                                _trySubmit();
+                              },
+                              child: isLogin
+                                  ? const Text('Login')
+                                  : const Text('Sign Up'),
+                            ),
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  isLogin = !isLogin;
+                                });
+                              },
+                              child: isLogin
+                                  ? const Text('Create New Account')
+                                  : const Text('I already have an account'),
+                            ),
                     ],
                   ),
                 ),
