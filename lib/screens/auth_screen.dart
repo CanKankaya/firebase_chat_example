@@ -16,7 +16,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
-  bool isLogin = true;
+  bool _isLogin = true;
 
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
@@ -27,6 +27,15 @@ class _AuthScreenState extends State<AuthScreen> {
   XFile? _pickedImage;
 
   Future<void> _trySubmit() async {
+    if (!_isLogin && _pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pick an Image Please'),
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -35,7 +44,7 @@ class _AuthScreenState extends State<AuthScreen> {
         setState(() {
           _isLoading = true;
         });
-        if (isLogin) {
+        if (_isLogin) {
           await _auth
               .signInWithEmailAndPassword(
                   email: _userEmail.toString().trim(),
@@ -103,14 +112,14 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!isLogin)
+                      if (!_isLogin)
                         CircleAvatar(
                           radius: 40,
                           backgroundImage: _pickedImage != null
                               ? FileImage(_pickedImage as File)
                               : null,
                         ),
-                      if (!isLogin)
+                      if (!_isLogin)
                         TextButton.icon(
                           onPressed: _selectImage,
                           icon: const Icon(Icons.camera),
@@ -135,7 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         decoration:
                             const InputDecoration(labelText: 'Email address'),
                       ),
-                      if (!isLogin)
+                      if (!_isLogin)
                         TextFormField(
                           key: const ValueKey('username'),
                           onSaved: (newValue) {
@@ -172,10 +181,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         decoration:
                             const InputDecoration(labelText: 'Password'),
                       ),
-                      if (!isLogin)
+                      if (!_isLogin)
                         TextFormField(
                           key: const ValueKey('confirmPassword'),
-                          enabled: !isLogin,
+                          enabled: !_isLogin,
                           onSaved: (newValue) {
                             _userPassword = newValue;
                           },
@@ -201,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               onPressed: () {
                                 _trySubmit();
                               },
-                              child: isLogin
+                              child: _isLogin
                                   ? const Text('Login')
                                   : const Text('Sign Up'),
                             ),
@@ -210,10 +219,10 @@ class _AuthScreenState extends State<AuthScreen> {
                           : TextButton(
                               onPressed: () {
                                 setState(() {
-                                  isLogin = !isLogin;
+                                  _isLogin = !_isLogin;
                                 });
                               },
-                              child: isLogin
+                              child: _isLogin
                                   ? const Text('Create New Account')
                                   : const Text('I already have an account'),
                             ),
