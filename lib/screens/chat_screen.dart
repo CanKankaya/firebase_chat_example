@@ -34,14 +34,17 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   var _enteredMessage = '';
   final _controller = TextEditingController();
-  void _sendMessage() {
+  void _sendMessage() async {
+    final user = FirebaseAuth.instance.currentUser;
+
     FirebaseFirestore.instance
         .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
         .add({
       'text': _enteredMessage,
       'createdAt': Timestamp.now(),
-      'userId': FirebaseAuth.instance.currentUser?.uid,
-      'username': FirebaseAuth.instance.currentUser?.displayName,
+      'userId': user?.uid,
+      'username': user?.displayName,
+      'userImageUrl': user?.photoURL,
     });
     _controller.clear();
   }
@@ -103,52 +106,68 @@ class Messages extends StatelessWidget {
           itemBuilder: (context, index) {
             bool isMe = documents?[index]['userId'] ==
                 FirebaseAuth.instance.currentUser?.uid;
-            return Row(
-              key: ValueKey(documents?[index].id),
-              mainAxisAlignment:
-                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            return Stack(
+              clipBehavior: Clip.none,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(12),
-                      topRight: const Radius.circular(12),
-                      bottomLeft: isMe
-                          ? const Radius.circular(12)
-                          : const Radius.circular(0),
-                      bottomRight: !isMe
-                          ? const Radius.circular(12)
-                          : const Radius.circular(0),
-                    ),
-                  ),
-                  width: 140,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 16,
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: isMe
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        documents?[index]['username'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                Row(
+                  key: ValueKey(documents?[index].id),
+                  mainAxisAlignment:
+                      isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(12),
+                          topRight: const Radius.circular(12),
+                          bottomLeft: isMe
+                              ? const Radius.circular(12)
+                              : const Radius.circular(0),
+                          bottomRight: !isMe
+                              ? const Radius.circular(12)
+                              : const Radius.circular(0),
                         ),
                       ),
-                      Text(
-                        textAlign: isMe ? TextAlign.end : TextAlign.start,
-                        documents?[index]['text'],
-                        style: const TextStyle(color: Colors.black),
+                      width: 140,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 16,
                       ),
-                    ],
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            documents?[index]['username'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            textAlign: isMe ? TextAlign.end : TextAlign.start,
+                            documents?[index]['text'],
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: -10,
+                  left: isMe ? null : 120,
+                  right: isMe ? 120 : null,
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundImage: NetworkImage(
+                      documents?[index]['userImageUrl'],
+                    ),
                   ),
                 ),
               ],

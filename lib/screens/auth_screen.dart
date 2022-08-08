@@ -1,11 +1,11 @@
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:firebase_chat_example/screens/chat_screen.dart';
-import 'package:image_picker/image_picker.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -35,11 +35,10 @@ class _AuthScreenState extends State<AuthScreen> {
       );
       return;
     }
-
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      UserCredential authResult;
+      // UserCredential authResult;
       try {
         setState(() {
           _isLoading = true;
@@ -58,9 +57,21 @@ class _AuthScreenState extends State<AuthScreen> {
             );
           });
         } else {
-          authResult = await _auth.createUserWithEmailAndPassword(
+          var authResult = await _auth.createUserWithEmailAndPassword(
               email: _userEmail.toString().trim(),
               password: _userPassword.toString().trim());
+
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child('user_image')
+              .child('${authResult.user!.uid}.jpg');
+
+          await ref.putFile(_pickedImage as File);
+
+          final url = await ref.getDownloadURL();
+
+          await authResult.user?.updatePhotoURL(url);
+
           await authResult.user?.updateDisplayName(_username).then((value) {
             Navigator.pushReplacement(
               context,
@@ -88,7 +99,11 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future _selectImage() async {
-    var image = await ImagePicker().pickImage(source: ImageSource.camera);
+    var image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 30,
+      maxWidth: 150,
+    );
     setState(() {
       _pickedImage = image;
     });
