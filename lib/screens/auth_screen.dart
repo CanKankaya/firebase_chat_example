@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_chat_example/screens/chat_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -12,14 +15,16 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  var _isLoading = false;
+  bool _isLoading = false;
+  bool isLogin = true;
+
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
-  bool isLogin = true;
   String? _userEmail = '';
   String? _username = '';
   String? _userPassword = '';
   final _userPasswordController = TextEditingController();
+  XFile? _pickedImage;
 
   Future<void> _trySubmit() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
@@ -73,6 +78,13 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  Future _selectImage() async {
+    var image = await ImagePicker().pickImage(source: ImageSource.camera);
+    setState(() {
+      _pickedImage = image;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -91,6 +103,19 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (!isLogin)
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage: _pickedImage != null
+                              ? FileImage(_pickedImage as File)
+                              : null,
+                        ),
+                      if (!isLogin)
+                        TextButton.icon(
+                          onPressed: _selectImage,
+                          icon: const Icon(Icons.camera),
+                          label: const Text('Add Image'),
+                        ),
                       TextFormField(
                         key: const ValueKey('email'),
                         maxLength: 50,

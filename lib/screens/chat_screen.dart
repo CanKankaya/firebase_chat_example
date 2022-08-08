@@ -131,9 +131,24 @@ class Messages extends StatelessWidget {
                     vertical: 4,
                     horizontal: 8,
                   ),
-                  child: Text(
-                    documents?[index]['text'],
-                    style: const TextStyle(color: Colors.black),
+                  child: Column(
+                    crossAxisAlignment: isMe
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        documents?[index]['username'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        textAlign: isMe ? TextAlign.end : TextAlign.start,
+                        documents?[index]['text'],
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
                   ),
                 ),
               ],
