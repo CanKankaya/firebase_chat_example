@@ -142,6 +142,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       TextFormField(
                         key: const ValueKey('email'),
+                        autocorrect: false,
+                        textCapitalization: TextCapitalization.none,
                         maxLength: 50,
                         onSaved: (newValue) {
                           _userEmail = newValue;
@@ -162,6 +164,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       if (!_isLogin)
                         TextFormField(
                           key: const ValueKey('username'),
+                          autocorrect: false,
+                          textCapitalization: TextCapitalization.none,
                           onSaved: (newValue) {
                             _username = newValue;
                           },
