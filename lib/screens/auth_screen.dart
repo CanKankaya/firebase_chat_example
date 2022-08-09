@@ -49,7 +49,7 @@ class _AuthScreenState extends State<AuthScreen> {
               .signInWithEmailAndPassword(
                   email: _userEmail.toString().trim(),
                   password: _userPassword.toString().trim())
-              .then((value) {
+              .then((_) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -66,13 +66,9 @@ class _AuthScreenState extends State<AuthScreen> {
               .ref()
               .child('user_image')
               .child('${authResult.user!.uid}.jpg');
-
           await ref.putFile(File(_pickedImage!.path));
-
           final url = await ref.getDownloadURL();
-
           await authResult.user?.updatePhotoURL(url);
-
           await authResult.user?.updateDisplayName(_username).then((value) {
             Navigator.pushReplacement(
               context,

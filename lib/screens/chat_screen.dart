@@ -11,14 +11,17 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const AppDrawer(),
-      appBar: AppBar(),
-      body: Column(
-        children: const [
-          Expanded(child: Messages()),
-          NewMessage(),
-        ],
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        drawer: const AppDrawer(),
+        appBar: AppBar(),
+        body: Column(
+          children: const [
+            Expanded(child: Messages()),
+            NewMessage(),
+          ],
+        ),
       ),
     );
   }
@@ -50,37 +53,45 @@ class _NewMessageState extends State<NewMessage> {
       'userImageUrl': user?.photoURL,
     });
     _controller.clear();
+    setState(() {
+      _enteredMessage = '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              autocorrect: true,
-              enableSuggestions: true,
-              textCapitalization: TextCapitalization.sentences,
-              controller: _controller,
-              decoration: const InputDecoration(labelText: 'Send a message...'),
-              onChanged: (value) {
-                setState(() {
-                  _enteredMessage = value.trim();
-                });
-              },
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Container(
+        color: Colors.grey[800],
+        // margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                autocorrect: true,
+                enableSuggestions: true,
+                textCapitalization: TextCapitalization.sentences,
+                controller: _controller,
+                decoration:
+                    const InputDecoration(labelText: 'Send a message...'),
+                onChanged: (value) {
+                  setState(() {
+                    _enteredMessage = value.trim();
+                  });
+                },
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: _enteredMessage.isEmpty ? null : _sendMessage,
-            icon: Icon(
-              Icons.send,
-              color: _enteredMessage.isEmpty ? Colors.grey : Colors.amber,
+            IconButton(
+              onPressed: _enteredMessage.isEmpty ? null : _sendMessage,
+              icon: Icon(
+                Icons.send,
+                color: _enteredMessage.isEmpty ? Colors.grey : Colors.amber,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -103,103 +114,106 @@ class Messages extends StatelessWidget {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        }
-        final documents = snapshot.data?.docs;
-
-        return ListView.builder(
-          reverse: true,
-          itemCount: documents?.length,
-          itemBuilder: (context, index) {
-            bool isMe = documents?[index]['userId'] ==
-                FirebaseAuth.instance.currentUser?.uid;
-            return InkWell(
-              splashColor: Colors.amber,
-              onLongPress: () {
-                DateTime dt =
-                    (documents?[index]['createdAt'] as Timestamp).toDate();
-                String formattedDate =
-                    DateFormat('yyyy-MM-dd – kk:mm').format(dt);
-                showMyDialog(
-                  context,
-                  true,
-                  'Message Detail',
-                  'Sent by \'${documents?[index]['username']}\'',
-                  formattedDate,
-                  'ok',
-                  Navigator.of(context).pop,
-                );
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Row(
-                    key: ValueKey(documents?[index].id),
-                    mainAxisAlignment:
-                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isMe ? Colors.white : Colors.black,
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(12),
-                            topRight: const Radius.circular(12),
-                            bottomLeft: isMe
-                                ? const Radius.circular(12)
-                                : const Radius.circular(0),
-                            bottomRight: !isMe
-                                ? const Radius.circular(12)
-                                : const Radius.circular(0),
+        } else {
+          final documents = snapshot.data?.docs;
+          return ListView.builder(
+            reverse: true,
+            itemCount: documents?.length,
+            itemBuilder: (context, index) {
+              bool isMe = documents?[index]['userId'] ==
+                  FirebaseAuth.instance.currentUser?.uid;
+              return InkWell(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                splashColor: Colors.amber,
+                onLongPress: () {
+                  DateTime dt =
+                      (documents?[index]['createdAt'] as Timestamp).toDate();
+                  String formattedDate =
+                      DateFormat('yyyy-MM-dd – kk:mm').format(dt);
+                  showMyDialog(
+                    context,
+                    true,
+                    'Message Detail',
+                    'Sent by \'${documents?[index]['username']}\'',
+                    formattedDate,
+                    'ok',
+                    Navigator.of(context).pop,
+                  );
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Row(
+                      key: ValueKey(documents?[index].id),
+                      mainAxisAlignment: isMe
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.white : Colors.black,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(12),
+                              topRight: const Radius.circular(12),
+                              bottomLeft: isMe
+                                  ? const Radius.circular(12)
+                                  : const Radius.circular(0),
+                              bottomRight: !isMe
+                                  ? const Radius.circular(12)
+                                  : const Radius.circular(0),
+                            ),
+                          ),
+                          width: 140,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 16,
+                          ),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isMe
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                documents?[index]['username'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isMe ? Colors.black : Colors.white,
+                                ),
+                              ),
+                              Text(
+                                documents?[index]['text'],
+                                style: TextStyle(
+                                  color: isMe ? Colors.black : Colors.white,
+                                ),
+                                textAlign:
+                                    isMe ? TextAlign.end : TextAlign.start,
+                              ),
+                            ],
                           ),
                         ),
-                        width: 140,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 16,
+                      ],
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: isMe ? null : 120,
+                      right: isMe ? 120 : null,
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(
+                          documents?[index]['userImageUrl'],
                         ),
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 8,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              documents?[index]['username'],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: isMe ? Colors.black : Colors.white,
-                              ),
-                            ),
-                            Text(
-                              documents?[index]['text'],
-                              style: TextStyle(
-                                color: isMe ? Colors.black : Colors.white,
-                              ),
-                              textAlign: isMe ? TextAlign.end : TextAlign.start,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                    top: 0,
-                    left: isMe ? null : 120,
-                    right: isMe ? 120 : null,
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(
-                        documents?[index]['userImageUrl'],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+                  ],
+                ),
+              );
+            },
+          );
+        }
       },
     );
   }

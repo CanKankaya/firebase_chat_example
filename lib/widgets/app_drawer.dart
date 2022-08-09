@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -178,15 +179,15 @@ class _AppDrawerState extends State<AppDrawer> {
                             'Are you sure you want to logout?',
                             '',
                             'Yes',
-                            () {
-                              FirebaseAuth.instance.signOut();
-                              Navigator.of(context).pop();
-                              // Navigator.pushReplacement(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => const AuthScreen(),
-                              //   ),
-                              // );
+                            () async {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AuthScreen(),
+                                ),
+                              ).then((value) {
+                                FirebaseAuth.instance.signOut();
+                              });
                             },
                           );
                         },
