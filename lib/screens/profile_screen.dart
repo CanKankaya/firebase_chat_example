@@ -177,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onPressed: _isUpdatable
                     ? () {
-                        // do update here, then show loading spinner, then set updatable to false again,
+                        // do an update here, then show loading spinner, then set updatable to false again,
                         _tryUpdate();
                         setState(() {
                           _isUpdatable = false;
