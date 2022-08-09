@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -119,7 +120,14 @@ class _AppDrawerState extends State<AppDrawer> {
                       Icons.construction,
                     ),
                     title: const Text('Go to Test Page'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TestScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
