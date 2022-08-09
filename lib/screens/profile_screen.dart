@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +15,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
   bool _isUpdatable = false;
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -36,21 +37,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future _tryUpdate() async {
-    // if (_pickedImage == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text('Pick an Image Please'),
-    //     ),
-    //   );
-    //   return;
-    // } else {
-    //   final ref = FirebaseStorage.instance
-    //       .ref()
-    //       .child('user_image')
-    //       .child('${auth.currentUser!.uid}.jpg');
-    //   await ref.delete();
-    //   await ref.putFile(File(_pickedImage!.path));
-    // }
+    if (_pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pick an Image Please'),
+        ),
+      );
+      return;
+    } else {
+      if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+        _formKey.currentState?.save();
+      }
+      // final ref = FirebaseStorage.instance
+      //     .ref()
+      //     .child('user_image')
+      //     .child('${auth.currentUser!.uid}.jpg');
+      // await ref.delete();
+      // await ref.putFile(File(_pickedImage!.path));
+    }
   }
 
   @override
@@ -103,48 +107,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextFormField(
-                    key: const ValueKey('username'),
-                    autocorrect: false,
-                    textCapitalization: TextCapitalization.none,
-                    controller: _usernameController,
-                    onChanged: (value) {
-                      setState(() {
-                        _isUpdatable = true;
-                      });
-                    },
-                    maxLength: 30,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'error';
-                      } else {
-                        return null;
-                      }
-                    },
-                    decoration: const InputDecoration(labelText: 'Username'),
-                  ),
-                  TextFormField(
-                    key: const ValueKey('email'),
-                    autocorrect: false,
-                    textCapitalization: TextCapitalization.none,
-                    keyboardType: TextInputType.emailAddress,
-                    controller: _emailController,
-                    onChanged: (value) {
-                      setState(() {
-                        _isUpdatable = true;
-                      });
-                    },
-                    maxLength: 50,
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          !value.contains('@')) {
-                        return 'Enter a valid email';
-                      } else {
-                        return null;
-                      }
-                    },
-                    decoration: const InputDecoration(labelText: 'Email'),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          key: const ValueKey('username'),
+                          autocorrect: false,
+                          textCapitalization: TextCapitalization.none,
+                          controller: _usernameController,
+                          onSaved: (newValue) {
+                            _usernameController.text = newValue ?? '';
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _isUpdatable = true;
+                            });
+                          },
+                          maxLength: 30,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Username cant be empty';
+                            } else {
+                              return null;
+                            }
+                          },
+                          decoration:
+                              const InputDecoration(labelText: 'Username'),
+                        ),
+                        TextFormField(
+                          key: const ValueKey('email'),
+                          autocorrect: false,
+                          textCapitalization: TextCapitalization.none,
+                          keyboardType: TextInputType.emailAddress,
+                          controller: _emailController,
+                          onSaved: (newValue) {
+                            _emailController.text = newValue ?? '';
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _isUpdatable = true;
+                            });
+                          },
+                          maxLength: 50,
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty ||
+                                !value.contains('@')) {
+                              return 'Enter a valid email';
+                            } else {
+                              return null;
+                            }
+                          },
+                          decoration: const InputDecoration(labelText: 'Email'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -153,6 +171,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.amber,
+                ),
                 onPressed: _isUpdatable
                     ? () {
                         // do update here, then show loading spinner, then set updatable to false again,
@@ -162,7 +183,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         });
                       }
                     : null,
-                child: const Text('Update'),
+                child: Text(
+                  'Update',
+                  style: TextStyle(
+                    color: _isUpdatable ? Colors.black : Colors.grey,
+                  ),
+                ),
               ),
             ),
           ],
