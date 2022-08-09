@@ -37,23 +37,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future _tryUpdate() async {
-    if (_pickedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pick an Image Please'),
-        ),
-      );
-      return;
-    } else {
-      if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-        _formKey.currentState?.save();
+    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+      _formKey.currentState?.save();
+      print('yey form is fine');
+      if (_pickedImage != null) {
+        print('Update img aswell');
+        //Do user update here INCLUDING NEW IMAGE;
+
+        // final ref = FirebaseStorage.instance
+        //     .ref()
+        //     .child('user_image')
+        //     .child('${auth.currentUser!.uid}.jpg');
+        // await ref.delete();
+        // await ref.putFile(File(_pickedImage!.path));
+
+      } else {
+        print('dont update img');
+        //Do user update here WITHOUT NEW IMAGE;
       }
-      // final ref = FirebaseStorage.instance
-      //     .ref()
-      //     .child('user_image')
-      //     .child('${auth.currentUser!.uid}.jpg');
-      // await ref.delete();
-      // await ref.putFile(File(_pickedImage!.path));
     }
   }
 
