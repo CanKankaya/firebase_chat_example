@@ -178,14 +178,14 @@ class Messages extends StatelessWidget {
                                 : CrossAxisAlignment.start,
                             children: [
                               Text(
-                                documents?[index]['username'],
+                                documents?[index]['username'] ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: isMe ? Colors.black : Colors.white,
                                 ),
                               ),
                               Text(
-                                documents?[index]['text'],
+                                documents?[index]['text'] ?? '',
                                 style: TextStyle(
                                   color: isMe ? Colors.black : Colors.white,
                                 ),
@@ -204,7 +204,7 @@ class Messages extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 20,
                         backgroundImage: NetworkImage(
-                          documents?[index]['userImageUrl'],
+                          documents?[index]['userImageUrl'] ?? '',
                         ),
                       ),
                     ),

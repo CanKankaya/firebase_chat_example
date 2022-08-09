@@ -39,7 +39,6 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // UserCredential authResult;
       try {
         setState(() {
           _isLoading = true;

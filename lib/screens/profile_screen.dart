@@ -1,60 +1,172 @@
+import 'dart:io';
+
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isUpdatable = false;
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  XFile? _pickedImage;
+  final auth = FirebaseAuth.instance;
+
+  Future _selectImage() async {
+    var image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 50,
+      maxWidth: 150,
+    );
+    if (image != null) {
+      setState(() {
+        _pickedImage = image;
+        _isUpdatable = true;
+      });
+    }
+  }
+
+  Future _tryUpdate() async {
+    // if (_pickedImage == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Pick an Image Please'),
+    //     ),
+    //   );
+    //   return;
+    // } else {
+    //   final ref = FirebaseStorage.instance
+    //       .ref()
+    //       .child('user_image')
+    //       .child('${auth.currentUser!.uid}.jpg');
+    //   await ref.delete();
+    //   await ref.putFile(File(_pickedImage!.path));
+    // }
+  }
+
+  @override
+  void initState() {
+    _usernameController.text = auth.currentUser?.displayName ?? '';
+    _emailController.text = auth.currentUser?.email ?? '';
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final auth = FirebaseAuth.instance;
     return Scaffold(
       appBar: AppBar(),
       drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.network(
-                  auth.currentUser?.photoURL ?? '',
-                  width: 50,
-                ),
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Center(
+                    child: Stack(
+                      children: [
+                        _pickedImage == null
+                            ? CircleAvatar(
+                                radius: 60,
+                                backgroundImage: NetworkImage(
+                                    auth.currentUser?.photoURL ?? ''),
+                              )
+                            : CircleAvatar(
+                                radius: 60,
+                                backgroundImage:
+                                    FileImage(File(_pickedImage!.path)),
+                              ),
+                        Positioned(
+                          top: 75,
+                          left: 75,
+                          child: IconButton(
+                            iconSize: 40,
+                            onPressed: _selectImage,
+                            icon: const Icon(
+                              Icons.camera,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    key: const ValueKey('username'),
+                    autocorrect: false,
+                    textCapitalization: TextCapitalization.none,
+                    controller: _usernameController,
+                    onChanged: (value) {
+                      setState(() {
+                        _isUpdatable = true;
+                      });
+                    },
+                    maxLength: 30,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'error';
+                      } else {
+                        return null;
+                      }
+                    },
+                    decoration: const InputDecoration(labelText: 'Username'),
+                  ),
+                  TextFormField(
+                    key: const ValueKey('email'),
+                    autocorrect: false,
+                    textCapitalization: TextCapitalization.none,
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _emailController,
+                    onChanged: (value) {
+                      setState(() {
+                        _isUpdatable = true;
+                      });
+                    },
+                    maxLength: 50,
+                    validator: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          !value.contains('@')) {
+                        return 'Enter a valid email';
+                      } else {
+                        return null;
+                      }
+                    },
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(auth.currentUser?.email ?? 'email here'),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _isUpdatable
+                    ? () {
+                        // do update here, then show loading spinner, then set updatable to false again,
+                        _tryUpdate();
+                        setState(() {
+                          _isUpdatable = false;
+                        });
+                      }
+                    : null,
+                child: const Text('Update'),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(auth.currentUser?.emailVerified.toString() ??
-                    'verified or not'),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(auth.currentUser?.displayName ?? 'username here'),
-              ),
-            ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
