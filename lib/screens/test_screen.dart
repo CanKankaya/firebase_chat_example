@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/custom_loading.dart';
 import 'package:firebase_chat_example/widgets/error_message.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
-import 'package:flutter/material.dart';
 
 class TestScreen extends StatefulWidget {
   static const routeName = '/test-screen';
@@ -305,7 +306,7 @@ class TestChart extends StatelessWidget {
                           child: Icon(Icons.bar_chart_rounded, size: 40),
                         ),
                         const Text('Temp Data Text Here',
-                            style: TextStyle(fontSize: 20)),
+                            style: TextStyle(fontSize: 16)),
                         const Spacer(),
                         Padding(
                           padding: const EdgeInsets.all(8.0),

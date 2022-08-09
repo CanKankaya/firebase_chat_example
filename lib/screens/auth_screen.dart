@@ -67,7 +67,7 @@ class _AuthScreenState extends State<AuthScreen> {
               .child('user_image')
               .child('${authResult.user!.uid}.jpg');
 
-          await ref.putFile(_pickedImage as File);
+          await ref.putFile(File(_pickedImage!.path));
 
           final url = await ref.getDownloadURL();
 
@@ -102,7 +102,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Future _selectImage() async {
     var image = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      imageQuality: 30,
+      imageQuality: 50,
       maxWidth: 150,
     );
     setState(() {
@@ -132,7 +132,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         CircleAvatar(
                           radius: 40,
                           backgroundImage: _pickedImage != null
-                              ? FileImage(_pickedImage as File)
+                              ? FileImage(File(_pickedImage!.path))
                               : null,
                         ),
                       if (!_isLogin)

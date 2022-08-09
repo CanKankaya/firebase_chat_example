@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -94,7 +96,7 @@ class Messages extends StatelessWidget {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
-          .orderBy('createdAt')
+          .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,71 +112,91 @@ class Messages extends StatelessWidget {
           itemBuilder: (context, index) {
             bool isMe = documents?[index]['userId'] ==
                 FirebaseAuth.instance.currentUser?.uid;
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Row(
-                  key: ValueKey(documents?[index].id),
-                  mainAxisAlignment:
-                      isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(12),
-                          topRight: const Radius.circular(12),
-                          bottomLeft: isMe
-                              ? const Radius.circular(12)
-                              : const Radius.circular(0),
-                          bottomRight: !isMe
-                              ? const Radius.circular(12)
-                              : const Radius.circular(0),
+            return InkWell(
+              splashColor: Colors.amber,
+              onLongPress: () {
+                DateTime dt =
+                    (documents?[index]['createdAt'] as Timestamp).toDate();
+                String formattedDate =
+                    DateFormat('yyyy-MM-dd – kk:mm').format(dt);
+                showMyDialog(
+                  context,
+                  true,
+                  'Message Detail',
+                  'Sent by \'${documents?[index]['username']}\'',
+                  formattedDate,
+                  'ok',
+                  Navigator.of(context).pop,
+                );
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    key: ValueKey(documents?[index].id),
+                    mainAxisAlignment:
+                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isMe ? Colors.white : Colors.black,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(12),
+                            topRight: const Radius.circular(12),
+                            bottomLeft: isMe
+                                ? const Radius.circular(12)
+                                : const Radius.circular(0),
+                            bottomRight: !isMe
+                                ? const Radius.circular(12)
+                                : const Radius.circular(0),
+                          ),
+                        ),
+                        width: 140,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 16,
+                        ),
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 8,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              documents?[index]['username'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isMe ? Colors.black : Colors.white,
+                              ),
+                            ),
+                            Text(
+                              documents?[index]['text'],
+                              style: TextStyle(
+                                color: isMe ? Colors.black : Colors.white,
+                              ),
+                              textAlign: isMe ? TextAlign.end : TextAlign.start,
+                            ),
+                          ],
                         ),
                       ),
-                      width: 140,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 16,
+                    ],
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: isMe ? null : 120,
+                    right: isMe ? 120 : null,
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: NetworkImage(
+                        documents?[index]['userImageUrl'],
                       ),
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 8,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            documents?[index]['username'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            textAlign: isMe ? TextAlign.end : TextAlign.start,
-                            documents?[index]['text'],
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  top: -10,
-                  left: isMe ? null : 120,
-                  right: isMe ? 120 : null,
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundImage: NetworkImage(
-                      documents?[index]['userImageUrl'],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         );

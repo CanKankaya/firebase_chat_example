@@ -19,6 +19,18 @@ class ProfileScreen extends StatelessWidget {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
+                child: Image.network(
+                  auth.currentUser?.photoURL ?? '',
+                  width: 50,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Text(auth.currentUser?.email ?? 'email here'),
               ),
             ),
