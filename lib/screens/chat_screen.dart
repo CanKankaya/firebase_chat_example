@@ -118,10 +118,11 @@ class Messages extends StatelessWidget {
           final documents = snapshot.data?.docs;
           return ListView.builder(
             reverse: true,
-            itemCount: documents?.length,
+            itemCount: documents?.length ?? 0,
             itemBuilder: (context, index) {
               bool isMe = documents?[index]['userId'] ==
                   FirebaseAuth.instance.currentUser?.uid;
+              // final whichUserId = documents?[index]['userId'];
               return InkWell(
                 onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                 splashColor: Colors.amber,

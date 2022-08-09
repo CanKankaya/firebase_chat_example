@@ -193,7 +193,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         },
                         child: const Text(
                           'Logout',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20, color: Colors.amber),
                         ),
                       ),
                     )

@@ -48,7 +48,14 @@ class _AuthScreenState extends State<AuthScreen> {
               .signInWithEmailAndPassword(
                   email: _userEmail.toString().trim(),
                   password: _userPassword.toString().trim())
-              .then((_) {
+              .catchError((error) {
+            //
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error.toString()),
+              ),
+            );
+          }).then((_) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -57,9 +64,18 @@ class _AuthScreenState extends State<AuthScreen> {
             );
           });
         } else {
-          var authResult = await _auth.createUserWithEmailAndPassword(
-              email: _userEmail.toString().trim(),
-              password: _userPassword.toString().trim());
+          var authResult = await _auth
+              .createUserWithEmailAndPassword(
+                  email: _userEmail.toString().trim(),
+                  password: _userPassword.toString().trim())
+              .catchError((error) {
+            //
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error.toString()),
+              ),
+            );
+          });
 
           final ref = FirebaseStorage.instance
               .ref()
@@ -80,11 +96,11 @@ class _AuthScreenState extends State<AuthScreen> {
         setState(() {
           _isLoading = false;
         });
-      } on PlatformException catch (error) {
+      } catch (error) {
         //
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error.message.toString()),
+            content: Text(error.toString()),
           ),
         );
         setState(() {
@@ -168,7 +184,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           maxLength: 30,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'error';
+                              return 'Username cant be empty';
                             } else {
                               return null;
                             }
