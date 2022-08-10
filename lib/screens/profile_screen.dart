@@ -1,7 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'dart:io';
 
-// import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,8 +19,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isUpdatable = false;
+  bool _isLoading = false;
+
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
+
   XFile? _pickedImage;
   final auth = FirebaseAuth.instance;
 
@@ -40,19 +44,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future _tryUpdate() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
-      //TODO While updating, update collection>participantsData aswell
       if (_pickedImage != null) {
-        //TODO user update here INCLUDING NEW IMAGE;
+        setState(() {
+          _isLoading = true;
+        });
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_image')
+            .child('${auth.currentUser!.uid}.jpg');
+        await ref.delete();
+        await ref.putFile(File(_pickedImage!.path));
+        final url = await ref.getDownloadURL();
+        await auth.currentUser?.updatePhotoURL(url);
+        await auth.currentUser?.updateDisplayName(_usernameController.text);
 
-        // final ref = FirebaseStorage.instance
-        //     .ref()
-        //     .child('user_image')
-        //     .child('${auth.currentUser!.uid}.jpg');
-        // await ref.delete();
-        // await ref.putFile(File(_pickedImage!.path));
+        final userCollection = FirebaseFirestore.instance
+            .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        QuerySnapshot userSnapshot = await userCollection.get();
+        final whichParticipant = userSnapshot.docs.firstWhere((element) {
+          return element['userId'] == auth.currentUser?.uid;
+        });
 
+        await userCollection.doc(whichParticipant.id).update({
+          'username': _usernameController.text,
+          'userImageUrl': url,
+        }).then((_) {
+          setState(() {
+            _isLoading = false;
+          });
+        });
       } else {
-        //TODO user update here WITHOUT NEW IMAGE;
+        setState(() {
+          _isLoading = true;
+        });
+
+        await auth.currentUser?.updateDisplayName(_usernameController.text);
+
+        final userCollection = FirebaseFirestore.instance
+            .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        QuerySnapshot userSnapshot = await userCollection.get();
+        final whichParticipant = userSnapshot.docs.firstWhere((element) {
+          return element['userId'] == auth.currentUser?.uid;
+        });
+
+        await userCollection.doc(whichParticipant.id).update({
+          'username': _usernameController.text,
+        }).then((value) {
+          setState(() {
+            _isLoading = false;
+          });
+        });
       }
     }
   }
@@ -140,10 +181,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const InputDecoration(labelText: 'Username'),
                             ),
                             TextFormField(
+                              style: const TextStyle(color: Colors.grey),
+                              enabled: false,
                               key: const ValueKey('email'),
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
                               keyboardType: TextInputType.emailAddress,
+                              // maxLength: 50,
                               controller: _emailController,
                               onSaved: (newValue) {
                                 _emailController.text = newValue ?? '';
@@ -153,7 +197,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   _isUpdatable = true;
                                 });
                               },
-                              maxLength: 50,
                               validator: (value) {
                                 if (value == null ||
                                     value.isEmpty ||
@@ -181,19 +224,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onPressed: _isUpdatable
                         ? () {
-                            //TODO an update here, then show loading spinner, then set updatable to false again,
                             _tryUpdate();
                             setState(() {
                               _isUpdatable = false;
                             });
                           }
                         : null,
-                    child: Text(
-                      'Update',
-                      style: TextStyle(
-                        color: _isUpdatable ? Colors.black : Colors.grey,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            'Update',
+                            style: TextStyle(
+                              color: _isUpdatable ? Colors.black : Colors.grey,
+                            ),
+                          ),
                   ),
                 ),
               ],
