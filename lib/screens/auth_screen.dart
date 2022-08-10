@@ -50,11 +50,6 @@ class _AuthScreenState extends State<AuthScreen> {
               .catchError((error) {
             print('login error');
             throw error;
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   SnackBar(
-            //     content: Text(error.toString()),
-            //   ),
-            // );
           }).then((_) {
             Navigator.pushReplacement(
               context,
@@ -71,11 +66,6 @@ class _AuthScreenState extends State<AuthScreen> {
               .catchError((error) {
             print('signup error');
             throw error;
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   SnackBar(
-            //     content: Text(error.toString()),
-            //   ),
-            // );
           });
 
           final ref = FirebaseStorage.instance
