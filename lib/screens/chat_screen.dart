@@ -104,6 +104,8 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).size;
+
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
@@ -164,7 +166,7 @@ class Messages extends StatelessWidget {
                                   : const Radius.circular(0),
                             ),
                           ),
-                          width: 140,
+                          width: deviceSize.width * 0.4,
                           padding: const EdgeInsets.symmetric(
                             vertical: 10,
                             horizontal: 16,
@@ -200,8 +202,8 @@ class Messages extends StatelessWidget {
                     ),
                     Positioned(
                       top: 0,
-                      left: isMe ? null : 120,
-                      right: isMe ? 120 : null,
+                      left: isMe ? null : deviceSize.width * 0.37,
+                      right: isMe ? deviceSize.width * 0.37 : null,
                       child: CircleAvatar(
                         radius: 20,
                         backgroundImage: NetworkImage(
