@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -39,10 +40,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future _tryUpdate() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
-      print('yey form is fine');
+      //TODO While updating, update collection>participantsData aswell
       if (_pickedImage != null) {
-        print('Update img aswell');
-        //Do user update here INCLUDING NEW IMAGE;
+        //TODO user update here INCLUDING NEW IMAGE;
 
         // final ref = FirebaseStorage.instance
         //     .ref()
@@ -52,8 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // await ref.putFile(File(_pickedImage!.path));
 
       } else {
-        print('dont update img');
-        //Do user update here WITHOUT NEW IMAGE;
+        //TODO user update here WITHOUT NEW IMAGE;
       }
     }
   }
@@ -68,134 +67,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        appBar: AppBar(),
-        drawer: const AppDrawer(),
-        body: Center(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    Center(
-                      child: Stack(
-                        children: [
-                          _pickedImage == null
-                              ? CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: NetworkImage(
-                                      auth.currentUser?.photoURL ?? ''),
-                                )
-                              : CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage:
-                                      FileImage(File(_pickedImage!.path)),
+    return WillPopScope(
+      onWillPop: () => showExitPopup(context),
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          appBar: AppBar(),
+          drawer: const AppDrawer(),
+          body: Center(
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      Center(
+                        child: Stack(
+                          children: [
+                            _pickedImage == null
+                                ? CircleAvatar(
+                                    radius: 60,
+                                    backgroundImage: NetworkImage(
+                                        auth.currentUser?.photoURL ?? ''),
+                                  )
+                                : CircleAvatar(
+                                    radius: 60,
+                                    backgroundImage:
+                                        FileImage(File(_pickedImage!.path)),
+                                  ),
+                            Positioned(
+                              top: 75,
+                              left: 75,
+                              child: IconButton(
+                                iconSize: 40,
+                                onPressed: _selectImage,
+                                icon: const Icon(
+                                  Icons.camera,
+                                  color: Colors.amber,
                                 ),
-                          Positioned(
-                            top: 75,
-                            left: 75,
-                            child: IconButton(
-                              iconSize: 40,
-                              onPressed: _selectImage,
-                              icon: const Icon(
-                                Icons.camera,
-                                color: Colors.amber,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            key: const ValueKey('username'),
-                            autocorrect: false,
-                            textCapitalization: TextCapitalization.none,
-                            controller: _usernameController,
-                            onSaved: (newValue) {
-                              _usernameController.text = newValue ?? '';
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                _isUpdatable = true;
-                              });
-                            },
-                            maxLength: 30,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Username cant be empty';
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Username'),
-                          ),
-                          TextFormField(
-                            key: const ValueKey('email'),
-                            autocorrect: false,
-                            textCapitalization: TextCapitalization.none,
-                            keyboardType: TextInputType.emailAddress,
-                            controller: _emailController,
-                            onSaved: (newValue) {
-                              _emailController.text = newValue ?? '';
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                _isUpdatable = true;
-                              });
-                            },
-                            maxLength: 50,
-                            validator: (value) {
-                              if (value == null ||
-                                  value.isEmpty ||
-                                  !value.contains('@')) {
-                                return 'Enter a valid email';
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Email'),
-                          ),
-                        ],
+                      const SizedBox(height: 20),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              key: const ValueKey('username'),
+                              autocorrect: false,
+                              textCapitalization: TextCapitalization.none,
+                              controller: _usernameController,
+                              onSaved: (newValue) {
+                                _usernameController.text = newValue ?? '';
+                              },
+                              onChanged: (value) {
+                                setState(() {
+                                  _isUpdatable = true;
+                                });
+                              },
+                              maxLength: 30,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Username cant be empty';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              decoration:
+                                  const InputDecoration(labelText: 'Username'),
+                            ),
+                            TextFormField(
+                              key: const ValueKey('email'),
+                              autocorrect: false,
+                              textCapitalization: TextCapitalization.none,
+                              keyboardType: TextInputType.emailAddress,
+                              controller: _emailController,
+                              onSaved: (newValue) {
+                                _emailController.text = newValue ?? '';
+                              },
+                              onChanged: (value) {
+                                setState(() {
+                                  _isUpdatable = true;
+                                });
+                              },
+                              maxLength: 50,
+                              validator: (value) {
+                                if (value == null ||
+                                    value.isEmpty ||
+                                    !value.contains('@')) {
+                                  return 'Enter a valid email';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              decoration:
+                                  const InputDecoration(labelText: 'Email'),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.amber,
-                  ),
-                  onPressed: _isUpdatable
-                      ? () {
-                          // do an update here, then show loading spinner, then set updatable to false again,
-                          _tryUpdate();
-                          setState(() {
-                            _isUpdatable = false;
-                          });
-                        }
-                      : null,
-                  child: Text(
-                    'Update',
-                    style: TextStyle(
-                      color: _isUpdatable ? Colors.black : Colors.grey,
-                    ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.amber,
+                    ),
+                    onPressed: _isUpdatable
+                        ? () {
+                            //TODO an update here, then show loading spinner, then set updatable to false again,
+                            _tryUpdate();
+                            setState(() {
+                              _isUpdatable = false;
+                            });
+                          }
+                        : null,
+                    child: Text(
+                      'Update',
+                      style: TextStyle(
+                        color: _isUpdatable ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

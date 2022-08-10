@@ -6,22 +6,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        drawer: const AppDrawer(),
-        appBar: AppBar(),
-        body: Column(
-          children: const [
-            Expanded(child: Messages()),
-            NewMessage(),
-          ],
+    return WillPopScope(
+      onWillPop: () => showExitPopup(context),
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          drawer: const AppDrawer(),
+          appBar: AppBar(),
+          body: Column(
+            children: const [
+              Expanded(child: Messages()),
+              NewMessage(),
+            ],
+          ),
         ),
       ),
     );
@@ -98,11 +102,16 @@ class _NewMessageState extends State<NewMessage> {
   }
 }
 
-class Messages extends StatelessWidget {
+class Messages extends StatefulWidget {
   const Messages({
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<Messages> createState() => _MessagesState();
+}
+
+class _MessagesState extends State<Messages> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -118,104 +127,125 @@ class Messages extends StatelessWidget {
         } else {
           final documents = snapshot.data?.docs;
           final deviceSize = MediaQuery.of(context).size;
-
-          return ListView.builder(
-            reverse: true,
-            itemCount: documents?.length ?? 0,
-            itemBuilder: (context, index) {
-              bool isMe = documents?[index]['userId'] ==
-                  FirebaseAuth.instance.currentUser?.uid;
-              return InkWell(
-                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                splashColor: Colors.amber,
-                onLongPress: () {
-                  DateTime dt =
-                      (documents?[index]['createdAt'] as Timestamp).toDate();
-                  String formattedDate =
-                      DateFormat('yyyy-MM-dd – kk:mm').format(dt);
-                  showMyDialog(
-                    context,
-                    true,
-                    'Message Detail',
-                    'Sent by \'${documents?[index]['username']}\'',
-                    formattedDate,
-                    'ok',
-                    Navigator.of(context).pop,
+          return StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                },
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Row(
-                      key: ValueKey(documents?[index].id),
-                      mainAxisAlignment: isMe
-                          ? MainAxisAlignment.end
-                          : MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: isMe ? Colors.white : Colors.black,
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(12),
-                              topRight: const Radius.circular(12),
-                              bottomLeft: isMe
-                                  ? const Radius.circular(12)
-                                  : const Radius.circular(0),
-                              bottomRight: !isMe
-                                  ? const Radius.circular(12)
-                                  : const Radius.circular(0),
-                            ),
-                          ),
-                          width: deviceSize.width * 0.4,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 16,
-                          ),
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: isMe
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
+                }
+                final participantsData = userSnapshot.data?.docs;
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: documents?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    bool isMe = documents?[index]['userId'] ==
+                        FirebaseAuth.instance.currentUser?.uid;
+                    final whichParticipant = participantsData?.firstWhere(
+                      (element) {
+                        return element['userId'] == documents?[index]['userId'];
+                      },
+                    );
+                    return InkWell(
+                      onTap: () =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      splashColor: Colors.amber,
+                      onLongPress: () {
+                        DateTime dt =
+                            (documents?[index]['createdAt'] as Timestamp)
+                                .toDate();
+                        String formattedDate =
+                            DateFormat('yyyy-MM-dd – kk:mm').format(dt);
+                        showMyDialog(
+                          context,
+                          true,
+                          'Message Detail',
+                          'Sent by \'${whichParticipant?['username']}\'',
+                          formattedDate,
+                          'ok',
+                          Navigator.of(context).pop,
+                        );
+                      },
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Row(
+                            key: ValueKey(documents?[index].id),
+                            mainAxisAlignment: isMe
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
                             children: [
-                              Text(
-                                documents?[index]['username'] ?? '',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isMe ? Colors.black : Colors.white,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: isMe ? Colors.white : Colors.black,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(12),
+                                    topRight: const Radius.circular(12),
+                                    bottomLeft: isMe
+                                        ? const Radius.circular(12)
+                                        : const Radius.circular(0),
+                                    bottomRight: !isMe
+                                        ? const Radius.circular(12)
+                                        : const Radius.circular(0),
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                documents?[index]['text'] ?? '',
-                                style: TextStyle(
-                                  color: isMe ? Colors.black : Colors.white,
+                                width: deviceSize.width * 0.4,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 16,
                                 ),
-                                textAlign:
-                                    isMe ? TextAlign.end : TextAlign.start,
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: isMe
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      whichParticipant?['username'] ?? '',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            isMe ? Colors.black : Colors.white,
+                                      ),
+                                    ),
+                                    Text(
+                                      documents?[index]['text'] ?? '',
+                                      style: TextStyle(
+                                        color:
+                                            isMe ? Colors.black : Colors.white,
+                                      ),
+                                      textAlign: isMe
+                                          ? TextAlign.end
+                                          : TextAlign.start,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: isMe ? null : deviceSize.width * 0.4 - 22,
-                      right: isMe ? deviceSize.width * 0.4 - 22 : null,
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(
-                          documents?[index]['userImageUrl'] ?? '',
-                        ),
+                          Positioned(
+                            top: 0,
+                            left: isMe ? null : deviceSize.width * 0.4 - 22,
+                            right: isMe ? deviceSize.width * 0.4 - 22 : null,
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(
+                                whichParticipant?['userImageUrl'] ?? '',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
+                    );
+                  },
+                );
+              });
         }
       },
     );

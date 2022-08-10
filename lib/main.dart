@@ -30,6 +30,10 @@ class MyApp extends StatelessWidget {
               return snapshot.hasData ? const ChatScreen() : const AuthScreen();
             }
           }),
+      routes: {
+        //
+        AuthScreen.routeName: (ctx) => const AuthScreen(),
+      },
     );
   }
 }

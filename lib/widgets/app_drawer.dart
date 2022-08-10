@@ -180,12 +180,12 @@ class _AppDrawerState extends State<AppDrawer> {
                             '',
                             'Yes',
                             () async {
+                              Navigator.pop(context);
                               Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AuthScreen(),
-                                ),
-                              );
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const AuthScreen(),
+                                  ));
                               FirebaseAuth.instance.signOut();
                             },
                           );
