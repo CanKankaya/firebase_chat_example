@@ -131,93 +131,82 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         child: Scaffold(
           body: Center(
-            child: Card(
+            child: AnimatedContainer(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              curve: Curves.easeIn,
+              duration: const Duration(milliseconds: 600),
+              height: _isLogin ? 320 : 500,
               margin: const EdgeInsets.all(20),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!_isLogin)
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundImage: _pickedImage != null
-                                ? FileImage(File(_pickedImage!.path))
-                                : null,
-                          ),
-                        if (!_isLogin)
-                          TextButton.icon(
-                            onPressed: _selectImage,
-                            icon: const Icon(Icons.camera),
-                            label: const Text('Add Image'),
-                          ),
-                        TextFormField(
-                          key: const ValueKey('email'),
-                          autocorrect: false,
-                          textCapitalization: TextCapitalization.none,
-                          maxLength: 50,
-                          onSaved: (newValue) {
-                            _userEmail = newValue;
-                          },
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty ||
-                                !value.contains('@')) {
-                              return 'Enter a valid email';
-                            } else {
-                              return null;
-                            }
-                          },
-                          keyboardType: TextInputType.emailAddress,
-                          decoration:
-                              const InputDecoration(labelText: 'Email address'),
-                        ),
-                        if (!_isLogin)
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!_isLogin)
+                            CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              radius: 40,
+                              backgroundImage: _pickedImage != null
+                                  ? FileImage(File(_pickedImage!.path))
+                                  : null,
+                            ),
+                          if (!_isLogin)
+                            TextButton.icon(
+                              onPressed: _selectImage,
+                              icon: const Icon(Icons.camera),
+                              label: const Text('Add Image'),
+                            ),
                           TextFormField(
-                            key: const ValueKey('username'),
+                            key: const ValueKey('email'),
                             autocorrect: false,
                             textCapitalization: TextCapitalization.none,
+                            maxLength: 50,
                             onSaved: (newValue) {
-                              _username = newValue;
+                              _userEmail = newValue;
                             },
-                            maxLength: 30,
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Username cant be empty';
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  !value.contains('@')) {
+                                return 'Enter a valid email';
                               } else {
                                 return null;
                               }
                             },
-                            decoration:
-                                const InputDecoration(labelText: 'Username'),
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                                labelText: 'Email address'),
                           ),
-                        TextFormField(
-                          key: const ValueKey('password'),
-                          controller: _userPasswordController,
-                          onSaved: (newValue) {
-                            _userPassword = newValue;
-                          },
-                          maxLength: 30,
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty ||
-                                value.length < 8) {
-                              return 'Password must be longer than 8 characters';
-                            } else {
-                              return null;
-                            }
-                          },
-                          decoration:
-                              const InputDecoration(labelText: 'Password'),
-                        ),
-                        if (!_isLogin)
+                          if (!_isLogin)
+                            TextFormField(
+                              key: const ValueKey('username'),
+                              autocorrect: false,
+                              textCapitalization: TextCapitalization.none,
+                              onSaved: (newValue) {
+                                _username = newValue;
+                              },
+                              maxLength: 30,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Username cant be empty';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              decoration:
+                                  const InputDecoration(labelText: 'Username'),
+                            ),
                           TextFormField(
-                            key: const ValueKey('confirmPassword'),
-                            enabled: !_isLogin,
+                            key: const ValueKey('password'),
+                            controller: _userPasswordController,
                             onSaved: (newValue) {
                               _userPassword = newValue;
                             },
@@ -226,40 +215,62 @@ class _AuthScreenState extends State<AuthScreen> {
                             validator: (value) {
                               if (value == null ||
                                   value.isEmpty ||
-                                  value.length < 8 ||
-                                  value != _userPasswordController.text) {
-                                return 'Passwords do not match';
+                                  value.length < 8) {
+                                return 'Password must be longer than 8 characters';
                               } else {
                                 return null;
                               }
                             },
-                            decoration: const InputDecoration(
-                                labelText: 'Confirm Password'),
+                            decoration:
+                                const InputDecoration(labelText: 'Password'),
                           ),
-                        const SizedBox(height: 12),
-                        _isLoading
-                            ? const CircularProgressIndicator()
-                            : ElevatedButton(
-                                onPressed: () {
-                                  _trySubmit();
-                                },
-                                child: _isLogin
-                                    ? const Text('Login')
-                                    : const Text('Sign Up'),
-                              ),
-                        _isLoading
-                            ? const CircularProgressIndicator()
-                            : TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isLogin = !_isLogin;
-                                  });
-                                },
-                                child: _isLogin
-                                    ? const Text('Create New Account')
-                                    : const Text('I already have an account'),
-                              ),
-                      ],
+                          if (!_isLogin)
+                            TextFormField(
+                              key: const ValueKey('confirmPassword'),
+                              enabled: !_isLogin,
+                              onSaved: (newValue) {
+                                _userPassword = newValue;
+                              },
+                              maxLength: 30,
+                              obscureText: true,
+                              validator: (value) {
+                                if (value == null ||
+                                    value.isEmpty ||
+                                    value.length < 8 ||
+                                    value != _userPasswordController.text) {
+                                  return 'Passwords do not match';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              decoration: const InputDecoration(
+                                  labelText: 'Confirm Password'),
+                            ),
+                          const SizedBox(height: 12),
+                          _isLoading
+                              ? const CircularProgressIndicator()
+                              : ElevatedButton(
+                                  onPressed: () {
+                                    _trySubmit();
+                                  },
+                                  child: _isLogin
+                                      ? const Text('Login')
+                                      : const Text('Sign Up'),
+                                ),
+                          _isLoading
+                              ? const CircularProgressIndicator()
+                              : TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isLogin = !_isLogin;
+                                    });
+                                  },
+                                  child: _isLogin
+                                      ? const Text('Create New Account')
+                                      : const Text('I already have an account'),
+                                ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
