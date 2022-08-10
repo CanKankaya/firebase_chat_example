@@ -129,7 +129,6 @@ class TestHome extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Text('data'),
-                      SizedBox(height: 10),
                       Text('data'),
                     ],
                   ),
