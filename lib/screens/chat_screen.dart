@@ -65,7 +65,6 @@ class _NewMessageState extends State<NewMessage> {
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: Container(
         color: Colors.grey[800],
-        // margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.all(8),
         child: Row(
           children: [

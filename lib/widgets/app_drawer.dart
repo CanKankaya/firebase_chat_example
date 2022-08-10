@@ -185,9 +185,8 @@ class _AppDrawerState extends State<AppDrawer> {
                                 MaterialPageRoute(
                                   builder: (context) => const AuthScreen(),
                                 ),
-                              ).then((value) {
-                                FirebaseAuth.instance.signOut();
-                              });
+                              );
+                              FirebaseAuth.instance.signOut();
                             },
                           );
                         },

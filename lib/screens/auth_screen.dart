@@ -48,12 +48,13 @@ class _AuthScreenState extends State<AuthScreen> {
                   email: _userEmail.toString().trim(),
                   password: _userPassword.toString().trim())
               .catchError((error) {
-            //
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(error.toString()),
-              ),
-            );
+            print('login error');
+            throw error;
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text(error.toString()),
+            //   ),
+            // );
           }).then((_) {
             Navigator.pushReplacement(
               context,
@@ -68,12 +69,13 @@ class _AuthScreenState extends State<AuthScreen> {
                   email: _userEmail.toString().trim(),
                   password: _userPassword.toString().trim())
               .catchError((error) {
-            //
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(error.toString()),
-              ),
-            );
+            print('signup error');
+            throw error;
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text(error.toString()),
+            //   ),
+            // );
           });
 
           final ref = FirebaseStorage.instance
@@ -96,7 +98,8 @@ class _AuthScreenState extends State<AuthScreen> {
           _isLoading = false;
         });
       } catch (error) {
-        //
+        print('try catch error');
+        print(error);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error.toString()),
