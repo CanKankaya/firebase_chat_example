@@ -65,7 +65,8 @@ class _NewMessageState extends State<NewMessage> {
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: Container(
         color: Colors.grey[800],
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
+        height: 65,
         child: Row(
           children: [
             Expanded(
@@ -104,8 +105,6 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
-
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
@@ -118,13 +117,14 @@ class Messages extends StatelessWidget {
           );
         } else {
           final documents = snapshot.data?.docs;
+          final deviceSize = MediaQuery.of(context).size;
+
           return ListView.builder(
             reverse: true,
             itemCount: documents?.length ?? 0,
             itemBuilder: (context, index) {
               bool isMe = documents?[index]['userId'] ==
                   FirebaseAuth.instance.currentUser?.uid;
-              // final whichUserId = documents?[index]['userId'];
               return InkWell(
                 onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                 splashColor: Colors.amber,
@@ -202,8 +202,8 @@ class Messages extends StatelessWidget {
                     ),
                     Positioned(
                       top: 0,
-                      left: isMe ? null : deviceSize.width * 0.37,
-                      right: isMe ? deviceSize.width * 0.37 : null,
+                      left: isMe ? null : deviceSize.width * 0.4 - 22,
+                      right: isMe ? deviceSize.width * 0.4 - 22 : null,
                       child: CircleAvatar(
                         radius: 20,
                         backgroundImage: NetworkImage(
