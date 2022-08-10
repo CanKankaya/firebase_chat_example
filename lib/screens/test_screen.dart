@@ -384,40 +384,44 @@ class _TestSettingsState extends State<TestSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 50,
-          ),
-          const Text(
-            'Under Construction',
-            style: TextStyle(fontSize: 30),
-          ),
-          AnimatedRotation(
-            alignment: Alignment.center,
-            duration: duration,
-            curve: Curves.easeInOut,
-            turns: turns,
-            child: IconButton(
-              iconSize: 150,
-              onPressed: () {
-                _changeRotation();
-                errorMessage(
-                  context,
-                  'Dont press on me ffs -_-',
-                  'Ok, sorry',
-                  () {},
-                  true,
-                );
-              },
-              icon: const Icon(
-                Icons.construction,
+    return ListView(
+      children: [
+        Center(
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 50,
               ),
-            ),
+              const Text(
+                'Under Construction',
+                style: TextStyle(fontSize: 30),
+              ),
+              AnimatedRotation(
+                alignment: Alignment.center,
+                duration: duration,
+                curve: Curves.easeInOut,
+                turns: turns,
+                child: IconButton(
+                  iconSize: 150,
+                  onPressed: () {
+                    _changeRotation();
+                    errorMessage(
+                      context,
+                      'Dont press on me ffs -_-',
+                      'Ok, sorry',
+                      () {},
+                      true,
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.construction,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -429,43 +433,48 @@ class TestCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 50,
-          ),
-          const Text(
-            'Also Under Construction',
-            style: TextStyle(fontSize: 30),
-          ),
-          IconButton(
-            iconSize: 150,
-            onPressed: () {
-              errorMessage(context, 'Dont press on me yet', '', () {}, true);
-            },
-            icon: const Icon(
-              Icons.construction,
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(150),
-            ),
-            width: 150,
-            height: 150,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(150),
-              child: const ColorLoader2(
-                color1: Colors.amber,
-                color2: Colors.black,
-                color3: Colors.blue,
+    return ListView(
+      children: [
+        Center(
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 50,
               ),
-            ),
+              const Text(
+                'Also Under Construction',
+                style: TextStyle(fontSize: 30),
+              ),
+              IconButton(
+                iconSize: 150,
+                onPressed: () {
+                  errorMessage(
+                      context, 'Dont press on me yet', '', () {}, true);
+                },
+                icon: const Icon(
+                  Icons.construction,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(150),
+                ),
+                width: 150,
+                height: 150,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150),
+                  child: const ColorLoader2(
+                    color1: Colors.amber,
+                    color2: Colors.black,
+                    color3: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
