@@ -426,11 +426,16 @@ class _TestSettingsState extends State<TestSettings> {
   }
 }
 
-class TestCode extends StatelessWidget {
+class TestCode extends StatefulWidget {
   const TestCode({
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<TestCode> createState() => _TestCodeState();
+}
+
+class _TestCodeState extends State<TestCode> {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -449,7 +454,12 @@ class TestCode extends StatelessWidget {
                 iconSize: 150,
                 onPressed: () {
                   errorMessage(
-                      context, 'Dont press on me yet', '', () {}, true);
+                    context,
+                    'Dont press on me yet',
+                    '',
+                    () {},
+                    true,
+                  );
                 },
                 icon: const Icon(
                   Icons.construction,

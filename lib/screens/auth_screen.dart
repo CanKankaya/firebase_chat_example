@@ -100,7 +100,7 @@ class _AuthScreenState extends State<AuthScreen> {
       } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error.message.toString()),
+            content: Text(error.message ?? 'Unknown Error'),
           ),
         );
         setState(() {
