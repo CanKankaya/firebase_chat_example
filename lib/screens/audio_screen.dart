@@ -60,7 +60,9 @@ class _AudioScreenState extends State<AudioScreen> {
                           children: [
                             const Padding(
                               padding: EdgeInsets.all(15.0),
-                              child: Center(child: Text('data3')),
+                              child: Center(
+                                child: Text('data3'),
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(15.0),
@@ -89,7 +91,9 @@ class _AudioScreenState extends State<AudioScreen> {
                           children: [
                             const Padding(
                               padding: EdgeInsets.all(15.0),
-                              child: Center(child: Text('data3')),
+                              child: Center(
+                                child: Text('data3'),
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(15.0),

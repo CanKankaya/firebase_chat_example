@@ -24,7 +24,8 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.connectionState == ConnectionState.none) {
               return const SplashScreen();
             } else {
               return snapshot.hasData ? const ChatScreen() : const AuthScreen();
