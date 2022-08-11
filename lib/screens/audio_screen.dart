@@ -10,8 +10,96 @@ class AudioScreen extends StatefulWidget {
 }
 
 class _AudioScreenState extends State<AudioScreen> {
-  //Temp Screen Below
   //TODO Try audio stuff here later
+
+// FlutterSoundRecorder _recordingSession;
+//   final recordingPlayer = AssetsAudioPlayer();
+//   String pathToAudio;
+//   bool _playAudio = false;
+//   String _timerText = '00:00:00';
+//   @override
+//   void initState() {
+//     super.initState();
+//     initializer();
+//   }
+//    void initializer() async {
+//     pathToAudio = '/sdcard/Download/temp.wav';
+//     _recordingSession = FlutterSoundRecorder();
+//     await _recordingSession.openAudioSession(
+//         focus: AudioFocus.requestFocusAndStopOthers,
+//         category: SessionCategory.playAndRecord,
+//         mode: SessionMode.modeDefault,
+//         device: AudioDevice.speaker);
+//     await _recordingSession.setSubscriptionDuration(Duration(milliseconds: 10));
+//     await initializeDateFormatting();
+//     await Permission.microphone.request();
+//     await Permission.storage.request();
+//     await Permission.manageExternalStorage.request();
+//   }
+
+  ElevatedButton createElevatedButton({
+    IconData? icon,
+    Color? iconColor,
+    Function()? onPressFunc,
+  }) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.all(6.0),
+        side: const BorderSide(
+          color: Colors.amber,
+          width: 2.0,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        primary: Colors.black,
+        elevation: 9.0,
+      ),
+      onPressed: onPressFunc,
+      icon: Icon(
+        icon,
+        color: iconColor,
+        size: 38.0,
+      ),
+      label: const Text(''),
+    );
+  }
+// Future<void> startRecording() async {
+//     Directory directory = Directory(path.dirname(pathToAudio));
+//     if (!directory.existsSync()) {
+//       directory.createSync();
+//     }
+//     _recordingSession.openAudioSession();
+//     await _recordingSession.startRecorder(
+//       toFile: pathToAudio,
+//       codec: Codec.pcm16WAV,
+//     );
+//     StreamSubscription _recorderSubscription =
+//         _recordingSession.onProgress.listen((e) {
+//       var date = DateTime.fromMillisecondsSinceEpoch(e.duration.inMilliseconds,
+//           isUtc: true);
+//       var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+//       setState(() {
+//         _timerText = timeText.substring(0, 8);
+//       });
+//     });
+//     _recorderSubscription.cancel();
+//   }
+//   Future<String> stopRecording() async {
+//     _recordingSession.closeAudioSession();
+//     return await _recordingSession.stopRecorder();
+//   }
+//   Future<void> playFunc() async {
+//     recordingPlayer.open(
+//       Audio.file(pathToAudio),
+//       autoStart: true,
+//       showNotification: true,
+//     );
+//   }
+//   Future<void> stopPlayFunc() async {
+//     recordingPlayer.stop();
+//   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +110,7 @@ class _AudioScreenState extends State<AudioScreen> {
           Expanded(
             flex: 5,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(25),
                 child: Container(
@@ -39,12 +127,16 @@ class _AudioScreenState extends State<AudioScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Center(
-                              child: Text('data2'),
+                            createElevatedButton(
+                              icon: Icons.mic,
+                              iconColor: Colors.amber,
+                              onPressFunc: null,
                             ),
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: const Text('button2'),
+                            const SizedBox(width: 30),
+                            createElevatedButton(
+                              icon: Icons.stop,
+                              iconColor: Colors.amber,
+                              onPressFunc: null,
                             ),
                           ],
                         ),
