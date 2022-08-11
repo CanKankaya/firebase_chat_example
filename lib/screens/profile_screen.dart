@@ -18,15 +18,17 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _isUpdatable = false;
-  bool _isLoading = false;
+  final auth = FirebaseAuth.instance;
+
+  final ValueNotifier<bool> _isUpdatable = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
+  final ValueNotifier<XFile?> _pickedImage = ValueNotifier<XFile?>(null);
 
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _userDetailController = TextEditingController();
 
-  XFile? _pickedImage;
-  final auth = FirebaseAuth.instance;
+  XFile? pickedImage;
 
   Future _selectImage() async {
     var image = await ImagePicker().pickImage(
@@ -36,25 +38,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     if (image != null) {
       setState(() {
-        _pickedImage = image;
-        _isUpdatable = true;
+        pickedImage = image;
       });
+      _isUpdatable.value = true;
     }
   }
 
   Future _tryUpdate() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
-      if (_pickedImage != null) {
-        setState(() {
-          _isLoading = true;
-        });
+      if (pickedImage != null) {
+        _isLoading.value = true;
+
         final ref = FirebaseStorage.instance
             .ref()
             .child('user_image')
             .child('${auth.currentUser!.uid}.jpg');
         await ref.delete();
-        await ref.putFile(File(_pickedImage!.path));
+        await ref.putFile(File(pickedImage!.path));
         final url = await ref.getDownloadURL();
         await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.updateDisplayName(_usernameController.text);
@@ -71,14 +72,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'userImageUrl': url,
           'userDetail': _userDetailController.text,
         }).then((_) {
-          setState(() {
-            _isLoading = false;
-          });
+          _isLoading.value = false;
         });
       } else {
-        setState(() {
-          _isLoading = true;
-        });
+        _isLoading.value = true;
+
         await auth.currentUser?.updateDisplayName(_usernameController.text);
         final userCollection = FirebaseFirestore.instance
             .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
@@ -91,9 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'username': _usernameController.text,
           'userDetail': _userDetailController.text,
         }).then((value) {
-          setState(() {
-            _isLoading = false;
-          });
+          _isLoading.value = false;
         });
       }
     }
@@ -113,9 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    _getAndSetUserData().then((_) {
-      _isLoading = false;
-    });
+    _getAndSetUserData();
     super.initState();
   }
 
@@ -138,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Center(
                         child: Stack(
                           children: [
-                            _pickedImage == null
+                            pickedImage == null
                                 ? CircleAvatar(
                                     radius: 60,
                                     backgroundImage: NetworkImage(
@@ -147,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : CircleAvatar(
                                     radius: 60,
                                     backgroundImage:
-                                        FileImage(File(_pickedImage!.path)),
+                                        FileImage(File(pickedImage!.path)),
                                   ),
                             Positioned(
                               top: 75,
@@ -181,9 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _usernameController.text = newValue ?? '';
                               },
                               onChanged: (_) {
-                                setState(() {
-                                  _isUpdatable = true;
-                                });
+                                _isUpdatable.value = true;
                               },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -207,9 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _userDetailController.text = newValue ?? '';
                               },
                               onChanged: (_) {
-                                setState(() {
-                                  _isUpdatable = true;
-                                });
+                                _isUpdatable.value = true;
                               },
                               validator: (value) {
                                 return null;
@@ -227,20 +217,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onSaved: (newValue) {
                                 _emailController.text = newValue ?? '';
                               },
-                              onChanged: (_) {
-                                setState(() {
-                                  _isUpdatable = true;
-                                });
-                              },
-                              validator: (value) {
-                                if (value == null ||
-                                    value.isEmpty ||
-                                    !value.contains('@')) {
-                                  return 'Enter a valid email';
-                                } else {
-                                  return null;
-                                }
-                              },
                               decoration:
                                   const InputDecoration(labelText: 'Email'),
                             ),
@@ -253,27 +229,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.amber,
-                    ),
-                    onPressed: _isUpdatable
-                        ? () {
-                            _tryUpdate();
-                            setState(() {
-                              _isUpdatable = false;
+                  child: ValueListenableBuilder(
+                      valueListenable: _isLoading,
+                      builder: (_, bool loadingValue, __) {
+                        return ValueListenableBuilder(
+                            valueListenable: _isUpdatable,
+                            builder: (_, bool updateValue, __) {
+                              return ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.amber,
+                                ),
+                                onPressed: updateValue
+                                    ? () {
+                                        _tryUpdate();
+                                        _isUpdatable.value = false;
+                                      }
+                                    : null,
+                                child: loadingValue
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                        'Update',
+                                        style: TextStyle(
+                                          color: updateValue
+                                              ? Colors.black
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                              );
                             });
-                          }
-                        : null,
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : Text(
-                            'Update',
-                            style: TextStyle(
-                              color: _isUpdatable ? Colors.black : Colors.grey,
-                            ),
-                          ),
-                  ),
+                      }),
                 ),
               ],
             ),
