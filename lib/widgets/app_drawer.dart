@@ -10,14 +10,9 @@ import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
 
-class AppDrawer extends StatefulWidget {
+class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
 
-  @override
-  State<AppDrawer> createState() => _AppDrawerState();
-}
-
-class _AppDrawerState extends State<AppDrawer> {
   @override
   Widget build(BuildContext context) {
     return Theme(
