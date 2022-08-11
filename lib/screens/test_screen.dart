@@ -19,11 +19,11 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   int selectedIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
-  static const List<Widget> pages = [
-    TestHome(),
-    TestChart(),
+  static List<Widget> pages = [
+    const TestHome(),
+    const TestChart(),
     TestSettings(),
-    TestCode(),
+    const TestCode(),
   ];
 
   void onSelect(int index) {
@@ -363,23 +363,13 @@ class TestChart extends StatelessWidget {
   }
 }
 
-class TestSettings extends StatefulWidget {
-  const TestSettings({
-    Key? key,
-  }) : super(key: key);
+class TestSettings extends StatelessWidget {
+  TestSettings({Key? key}) : super(key: key);
 
-  @override
-  State<TestSettings> createState() => _TestSettingsState();
-}
-
-class _TestSettingsState extends State<TestSettings> {
-  double turns = 0.0;
-  Duration duration = const Duration(milliseconds: 2000);
+  final ValueNotifier<double> _turns = ValueNotifier<double>(0.0);
 
   void _changeRotation() {
-    setState(() {
-      turns += 4.0 / 8.0;
-    });
+    _turns.value += 4.0 / 8.0;
   }
 
   @override
@@ -396,28 +386,32 @@ class _TestSettingsState extends State<TestSettings> {
                 'Under Construction',
                 style: TextStyle(fontSize: 30),
               ),
-              AnimatedRotation(
-                alignment: Alignment.center,
-                duration: duration,
-                curve: Curves.easeInOut,
-                turns: turns,
-                child: IconButton(
-                  iconSize: 150,
-                  onPressed: () {
-                    _changeRotation();
-                    errorMessage(
-                      context,
-                      'Dont press on me ffs -_-',
-                      'Ok, sorry',
-                      () {},
-                      true,
+              ValueListenableBuilder(
+                  valueListenable: _turns,
+                  builder: (_, double value, __) {
+                    return AnimatedRotation(
+                      alignment: Alignment.center,
+                      duration: const Duration(milliseconds: 2000),
+                      curve: Curves.easeInOut,
+                      turns: value,
+                      child: IconButton(
+                        iconSize: 150,
+                        onPressed: () {
+                          _changeRotation();
+                          errorMessage(
+                            context,
+                            'Dont press on me ffs -_-',
+                            'Ok, sorry',
+                            () {},
+                            true,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.construction,
+                        ),
+                      ),
                     );
-                  },
-                  icon: const Icon(
-                    Icons.construction,
-                  ),
-                ),
-              ),
+                  }),
             ],
           ),
         ),
@@ -426,16 +420,9 @@ class _TestSettingsState extends State<TestSettings> {
   }
 }
 
-class TestCode extends StatefulWidget {
-  const TestCode({
-    Key? key,
-  }) : super(key: key);
+class TestCode extends StatelessWidget {
+  const TestCode({Key? key}) : super(key: key);
 
-  @override
-  State<TestCode> createState() => _TestCodeState();
-}
-
-class _TestCodeState extends State<TestCode> {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -488,6 +475,7 @@ class _TestCodeState extends State<TestCode> {
     );
   }
 }
+
 
 // //Chart's data class
 // class DataType {
