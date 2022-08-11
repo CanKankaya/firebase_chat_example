@@ -1,14 +1,15 @@
-import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
-import 'package:firebase_chat_example/widgets/error_message.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:firebase_chat_example/widgets/error_message.dart';
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
+
+import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -178,8 +179,8 @@ class _MessagesState extends State<Messages> {
                         (documents?[index]['createdAt'] as Timestamp).toDate();
                     final isToday = dt.day == DateTime.now().day;
                     String formattedDate = isToday
-                        ? DateFormat('kk:mm').format(dt)
-                        : DateFormat('yyyy-MM-dd').format(dt);
+                        ? DateFormat.Hm().format(dt)
+                        : DateFormat.yMMMMd().format(dt);
 
                     return Dismissible(
                       key: ValueKey(documents?[index]),

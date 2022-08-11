@@ -11,7 +11,6 @@ import 'package:firebase_chat_example/widgets/exit_popup.dart';
 import 'package:firebase_chat_example/screens/chat_screen.dart';
 
 class AuthScreen extends StatefulWidget {
-  static const routeName = '/auth-screen';
   const AuthScreen({Key? key}) : super(key: key);
 
   @override

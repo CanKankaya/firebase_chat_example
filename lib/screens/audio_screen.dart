@@ -1,5 +1,6 @@
-import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
+
+import 'package:firebase_chat_example/widgets/app_drawer.dart';
 
 class AudioScreen extends StatefulWidget {
   const AudioScreen({Key? key}) : super(key: key);

@@ -22,19 +22,16 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
       home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                snapshot.connectionState == ConnectionState.none) {
-              return const SplashScreen();
-            } else {
-              return snapshot.hasData ? const ChatScreen() : const AuthScreen();
-            }
-          }),
-      routes: {
-        //
-        AuthScreen.routeName: (ctx) => const AuthScreen(),
-      },
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.connectionState == ConnectionState.none) {
+            return const SplashScreen();
+          } else {
+            return snapshot.hasData ? const ChatScreen() : const AuthScreen();
+          }
+        },
+      ),
     );
   }
 }
