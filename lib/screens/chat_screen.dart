@@ -213,13 +213,6 @@ class _MessagesState extends State<Messages> {
                           case DismissDirection.endToStart:
                             {
                               _deleteMessage(documents?[index].id);
-                              // errorMessage(
-                              //   context,
-                              //   'Delete?',
-                              //   'Yes',
-                              //   _deleteMessage(documents?[index].id),
-                              //   true,
-                              // );
                               break;
                             }
                           default:
