@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
               snapshot.connectionState == ConnectionState.none) {
             return const SplashScreen();
           } else {
-            return snapshot.hasData ? const ChatScreen() : const AuthScreen();
+            return snapshot.hasData ? const ChatScreen() : AuthScreen();
           }
         },
       ),
