@@ -19,17 +19,23 @@ class OtherUserDataScreen extends StatelessWidget {
                   Center(
                     child: CircleAvatar(
                       radius: 60,
-                      backgroundImage: NetworkImage(whichParticipantData[1]),
+                      backgroundImage: NetworkImage(
+                        whichParticipantData[1],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Column(
                     children: [
                       Card(
-                        child: Text(whichParticipantData[2]),
+                        child: Text(
+                          whichParticipantData[2],
+                        ),
                       ),
-                      const Card(
-                        child: Text('Temp Text Here'),
+                      Card(
+                        child: Text(
+                          whichParticipantData[3],
+                        ),
                       ),
                     ],
                   ),

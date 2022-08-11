@@ -23,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _userDetailController = TextEditingController();
 
   XFile? _pickedImage;
   final auth = FirebaseAuth.instance;
@@ -68,6 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await userCollection.doc(whichParticipant.id).update({
           'username': _usernameController.text,
           'userImageUrl': url,
+          'userDetail': _userDetailController.text,
         }).then((_) {
           setState(() {
             _isLoading = false;
@@ -77,7 +79,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _isLoading = true;
         });
-
         await auth.currentUser?.updateDisplayName(_usernameController.text);
         final userCollection = FirebaseFirestore.instance
             .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
@@ -88,6 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         await userCollection.doc(whichParticipant.id).update({
           'username': _usernameController.text,
+          'userDetail': _userDetailController.text,
         }).then((value) {
           setState(() {
             _isLoading = false;
@@ -97,11 +99,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  @override
-  void initState() {
+  Future _getAndSetUserData() async {
     _usernameController.text = auth.currentUser?.displayName ?? '';
     _emailController.text = auth.currentUser?.email ?? '';
+    final userCollection = FirebaseFirestore.instance
+        .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+    QuerySnapshot userSnapshot = await userCollection.get();
+    final whichParticipant = userSnapshot.docs.firstWhere((element) {
+      return element['userId'] == auth.currentUser?.uid;
+    });
+    _userDetailController.text = whichParticipant['userDetail'];
+  }
 
+  @override
+  void initState() {
+    _getAndSetUserData().then((_) {
+      _isLoading = false;
+    });
     super.initState();
   }
 
@@ -160,15 +174,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
                               controller: _usernameController,
+                              maxLength: 30,
+                              decoration:
+                                  const InputDecoration(labelText: 'Username'),
                               onSaved: (newValue) {
                                 _usernameController.text = newValue ?? '';
                               },
-                              onChanged: (value) {
+                              onChanged: (_) {
                                 setState(() {
                                   _isUpdatable = true;
                                 });
                               },
-                              maxLength: 30,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Username cant be empty';
@@ -176,22 +192,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   return null;
                                 }
                               },
-                              decoration:
-                                  const InputDecoration(labelText: 'Username'),
                             ),
                             TextFormField(
+                              key: const ValueKey('userDetail'),
+                              autocorrect: true,
+                              textCapitalization: TextCapitalization.sentences,
+                              controller: _userDetailController,
+                              maxLength: 200,
+                              decoration: const InputDecoration(
+                                  labelText: 'User Detail'),
+                              maxLines: 10,
+                              minLines: 1,
+                              onSaved: (newValue) {
+                                _userDetailController.text = newValue ?? '';
+                              },
+                              onChanged: (_) {
+                                setState(() {
+                                  _isUpdatable = true;
+                                });
+                              },
+                              validator: (value) {
+                                return null;
+                              },
+                            ),
+                            TextFormField(
+                              key: const ValueKey('email'),
                               style: const TextStyle(color: Colors.grey),
                               enabled: false,
-                              key: const ValueKey('email'),
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
                               keyboardType: TextInputType.emailAddress,
-                              // maxLength: 50,
                               controller: _emailController,
+                              // maxLength: 50,
                               onSaved: (newValue) {
                                 _emailController.text = newValue ?? '';
                               },
-                              onChanged: (value) {
+                              onChanged: (_) {
                                 setState(() {
                                   _isUpdatable = true;
                                 });

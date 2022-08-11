@@ -84,6 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
             'userId': authResult.user?.uid,
             'username': _username,
             'userImageUrl': url,
+            'userDetail': '',
           }).then((_) {
             Navigator.pushReplacement(
               context,

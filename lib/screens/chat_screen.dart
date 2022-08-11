@@ -362,6 +362,7 @@ class _MessagesState extends State<Messages> {
                                           whichParticipant?['userImageUrl'] ??
                                               '',
                                           whichParticipant?['username'] ?? '',
+                                          whichParticipant?['userDetail'] ?? '',
                                         ],
                                       ),
                                     ),
