@@ -79,7 +79,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
 
         await auth.currentUser?.updateDisplayName(_usernameController.text);
-
         final userCollection = FirebaseFirestore.instance
             .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
         QuerySnapshot userSnapshot = await userCollection.get();

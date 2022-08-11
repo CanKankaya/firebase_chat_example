@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
 import 'package:flutter/material.dart';
@@ -47,9 +48,16 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                   const Divider(),
                   ListTile(
-                    leading: const Icon(Icons.payment),
-                    title: const Text('Temp Listtile'),
-                    onTap: () {},
+                    leading: const Icon(Icons.audiotrack),
+                    title: const Text('Audio Test Page'),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AudioScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
                   ListTile(

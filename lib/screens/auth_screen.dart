@@ -207,11 +207,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           TextFormField(
                             key: const ValueKey('password'),
                             controller: _userPasswordController,
+                            autocorrect: false,
+                            textCapitalization: TextCapitalization.none,
+                            maxLength: 30,
+                            obscureText: true,
                             onSaved: (newValue) {
                               _userPassword = newValue;
                             },
-                            maxLength: 30,
-                            obscureText: true,
                             validator: (value) {
                               if (value == null ||
                                   value.isEmpty ||
