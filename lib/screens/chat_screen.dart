@@ -135,193 +135,219 @@ class _MessagesState extends State<Messages> {
           final documents = snapshot.data?.docs;
           final deviceSize = MediaQuery.of(context).size;
           return StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+            stream: FirebaseFirestore.instance
+                .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final participantsData = userSnapshot.data?.docs;
+              return ListView.builder(
+                reverse: true,
+                itemCount: documents?.length ?? 0,
+                itemBuilder: (context, index) {
+                  bool isMe = documents?[index]['userId'] ==
+                      FirebaseAuth.instance.currentUser?.uid;
+                  final whichParticipant = participantsData?.firstWhere(
+                    (element) {
+                      return element['userId'] == documents?[index]['userId'];
+                    },
                   );
-                }
-                final participantsData = userSnapshot.data?.docs;
-                return ListView.builder(
-                  reverse: true,
-                  itemCount: documents?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    bool isMe = documents?[index]['userId'] ==
-                        FirebaseAuth.instance.currentUser?.uid;
-                    final whichParticipant = participantsData?.firstWhere(
-                      (element) {
-                        return element['userId'] == documents?[index]['userId'];
-                      },
-                    );
-                    return Dismissible(
-                      key: ValueKey(documents?[index]),
-                      background: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.green,
+                  DateTime dt =
+                      (documents?[index]['createdAt'] as Timestamp).toDate();
+                  final isToday = dt.day == DateTime.now().day;
+                  String formattedDate = isToday
+                      ? DateFormat('kk:mm').format(dt)
+                      : DateFormat('yyyy-MM-dd').format(dt);
+
+                  return Dismissible(
+                    key: ValueKey(documents?[index]),
+                    background: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.green,
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Not a delete',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
                         ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Not a delete',
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.red,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Delete',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
-                        ),
+                          Icon(Icons.delete)
+                        ],
                       ),
-                      secondaryBackground: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.red,
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: const [
-                            Text(
-                              'Delete',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
-                            ),
-                            Icon(Icons.delete)
-                          ],
-                        ),
-                      ),
-                      direction: isMe
-                          ? DismissDirection.horizontal
-                          : DismissDirection.startToEnd,
-                      onDismissed: (direction) {},
-                      confirmDismiss:
-                          (DismissDirection dismissDirection) async {
-                        switch (dismissDirection) {
-                          case DismissDirection.startToEnd:
-                            {
-                              errorMessage(
-                                context,
-                                'Don\'t slide me to the left please',
-                                'Uhm ok...',
-                                () => {},
-                                true,
-                              );
-                              break;
-                            }
-                          case DismissDirection.endToStart:
-                            {
-                              _deleteMessage(documents?[index].id);
-                              break;
-                            }
-                          default:
+                    ),
+                    direction: isMe
+                        ? DismissDirection.horizontal
+                        : DismissDirection.startToEnd,
+                    onDismissed: (direction) {},
+                    confirmDismiss: (DismissDirection dismissDirection) async {
+                      switch (dismissDirection) {
+                        case DismissDirection.startToEnd:
+                          {
+                            errorMessage(
+                              context,
+                              'Don\'t slide me to the left please',
+                              'Uhm ok...',
+                              () => {},
+                              true,
+                            );
                             break;
-                        }
-                        return false;
+                          }
+                        case DismissDirection.endToStart:
+                          {
+                            _deleteMessage(documents?[index].id);
+                            break;
+                          }
+                        default:
+                          break;
+                      }
+                      return false;
+                    },
+                    child: InkWell(
+                      onTap: () =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      splashColor: Colors.amber,
+                      onLongPress: () {
+                        showMyDialog(
+                          context,
+                          true,
+                          'Message Detail',
+                          'Sent by \'${whichParticipant?['username']}\'',
+                          formattedDate,
+                          'ok',
+                          Navigator.of(context).pop,
+                        );
                       },
-                      child: InkWell(
-                        onTap: () =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                        splashColor: Colors.amber,
-                        onLongPress: () {
-                          DateTime dt =
-                              (documents?[index]['createdAt'] as Timestamp)
-                                  .toDate();
-                          String formattedDate =
-                              DateFormat('yyyy-MM-dd – kk:mm').format(dt);
-                          showMyDialog(
-                            context,
-                            true,
-                            'Message Detail',
-                            'Sent by \'${whichParticipant?['username']}\'',
-                            formattedDate,
-                            'ok',
-                            Navigator.of(context).pop,
-                          );
-                        },
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Row(
-                              key: ValueKey(documents?[index].id),
-                              mainAxisAlignment: isMe
-                                  ? MainAxisAlignment.end
-                                  : MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: isMe ? Colors.white : Colors.black,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: const Radius.circular(12),
-                                      topRight: const Radius.circular(12),
-                                      bottomLeft: isMe
-                                          ? const Radius.circular(12)
-                                          : const Radius.circular(0),
-                                      bottomRight: !isMe
-                                          ? const Radius.circular(12)
-                                          : const Radius.circular(0),
-                                    ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Row(
+                            key: ValueKey(documents?[index].id),
+                            mainAxisAlignment: isMe
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: isMe ? Colors.white : Colors.black,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(15),
+                                    topRight: const Radius.circular(15),
+                                    bottomLeft: isMe
+                                        ? const Radius.circular(15)
+                                        : const Radius.circular(0),
+                                    bottomRight: isMe
+                                        ? const Radius.circular(0)
+                                        : const Radius.circular(15),
                                   ),
-                                  width: deviceSize.width * 0.4,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                    horizontal: 16,
-                                  ),
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                    horizontal: 8,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: isMe
-                                        ? CrossAxisAlignment.end
-                                        : CrossAxisAlignment.start,
-                                    children: [
+                                ),
+                                width: deviceSize.width * 0.65,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 16,
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: isMe
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
+                                  children: [
+                                    if (!isMe)
                                       Text(
                                         whichParticipant?['username'] ?? '',
                                         style: TextStyle(
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: isMe
                                               ? Colors.black
                                               : Colors.white,
                                         ),
                                       ),
-                                      Text(
-                                        documents?[index]['text'] ?? '',
-                                        style: TextStyle(
-                                          color: isMe
-                                              ? Colors.black
-                                              : Colors.white,
-                                        ),
-                                        textAlign: isMe
-                                            ? TextAlign.end
-                                            : TextAlign.start,
+                                    if (!isMe) const SizedBox(height: 5),
+                                    Text(
+                                      documents?[index]['text'] ?? '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            isMe ? Colors.black : Colors.white,
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Positioned(
-                              top: 0,
-                              left: isMe ? null : deviceSize.width * 0.4 - 22,
-                              right: isMe ? deviceSize.width * 0.4 - 22 : null,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtherUserDataScreen(
-                                        whichParticipantData: [
-                                          whichParticipant?['userId'] ?? '',
-                                          whichParticipant?['userImageUrl'] ??
-                                              '',
-                                          whichParticipant?['username'] ?? '',
-                                        ],
-                                      ),
+                                      textAlign: isMe
+                                          ? TextAlign.end
+                                          : TextAlign.start,
                                     ),
-                                  );
-                                },
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      formattedDate,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: isMe
+                                            ? const Color.fromARGB(
+                                                255, 60, 60, 60)
+                                            : const Color.fromARGB(
+                                                255, 195, 195, 195),
+                                      ),
+                                      textAlign: isMe
+                                          ? TextAlign.end
+                                          : TextAlign.start,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                            top: 0,
+                            left: isMe ? null : deviceSize.width * 0.65 - 22,
+                            right: isMe ? deviceSize.width * 0.65 - 22 : null,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => OtherUserDataScreen(
+                                      whichParticipantData: [
+                                        whichParticipant?['userId'] ?? '',
+                                        whichParticipant?['userImageUrl'] ?? '',
+                                        whichParticipant?['username'] ?? '',
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 2,
+                                    color: Colors.amber,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
                                 child: CircleAvatar(
                                   radius: 20,
                                   backgroundImage: NetworkImage(
@@ -330,13 +356,15 @@ class _MessagesState extends State<Messages> {
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                );
-              });
+                    ),
+                  );
+                },
+              );
+            },
+          );
         }
       },
     );
