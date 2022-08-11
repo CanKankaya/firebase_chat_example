@@ -119,6 +119,7 @@ class _MessagesState extends State<Messages> {
         .delete();
   }
 
+  int itemcount = 10;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -145,223 +146,244 @@ class _MessagesState extends State<Messages> {
                 );
               }
               final participantsData = userSnapshot.data?.docs;
-              return ListView.builder(
-                reverse: true,
-                itemCount: documents?.length ?? 0,
-                itemBuilder: (context, index) {
-                  bool isMe = documents?[index]['userId'] ==
-                      FirebaseAuth.instance.currentUser?.uid;
-                  final whichParticipant = participantsData?.firstWhere(
-                    (element) {
-                      return element['userId'] == documents?[index]['userId'];
-                    },
-                  );
-                  DateTime dt =
-                      (documents?[index]['createdAt'] as Timestamp).toDate();
-                  final isToday = dt.day == DateTime.now().day;
-                  String formattedDate = isToday
-                      ? DateFormat('kk:mm').format(dt)
-                      : DateFormat('yyyy-MM-dd').format(dt);
 
-                  return Dismissible(
-                    key: ValueKey(documents?[index]),
-                    background: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.green,
+              return RefreshIndicator(
+                onRefresh: () async {
+                  if ((documents?.length ?? 0) > itemcount) {
+                    setState(() {
+                      itemcount += 10;
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('You are already seeing all messages'),
                       ),
-                      padding: const EdgeInsets.all(8),
-                      child: const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Not a delete',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
+                    );
+                  }
+                },
+                child: ListView.builder(
+                  reverse: true,
+                  itemCount: (documents?.length ?? 0) > itemcount
+                      ? itemcount
+                      : (documents?.length ?? 0),
+                  itemBuilder: (context, index) {
+                    bool isMe = documents?[index]['userId'] ==
+                        FirebaseAuth.instance.currentUser?.uid;
+                    final whichParticipant = participantsData?.firstWhere(
+                      (element) {
+                        return element['userId'] == documents?[index]['userId'];
+                      },
+                    );
+                    DateTime dt =
+                        (documents?[index]['createdAt'] as Timestamp).toDate();
+                    final isToday = dt.day == DateTime.now().day;
+                    String formattedDate = isToday
+                        ? DateFormat('kk:mm').format(dt)
+                        : DateFormat('yyyy-MM-dd').format(dt);
+
+                    return Dismissible(
+                      key: ValueKey(documents?[index]),
+                      background: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.green,
                         ),
-                      ),
-                    ),
-                    secondaryBackground: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.red,
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Delete',
+                        padding: const EdgeInsets.all(8),
+                        child: const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Not a delete',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
-                          Icon(Icons.delete)
-                        ],
+                        ),
                       ),
-                    ),
-                    direction: isMe
-                        ? DismissDirection.horizontal
-                        : DismissDirection.startToEnd,
-                    onDismissed: (direction) {},
-                    confirmDismiss: (DismissDirection dismissDirection) async {
-                      switch (dismissDirection) {
-                        case DismissDirection.startToEnd:
-                          {
-                            errorMessage(
-                              context,
-                              'Don\'t slide me to the left please',
-                              'Uhm ok...',
-                              () => {},
-                              true,
-                            );
+                      secondaryBackground: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.red,
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: const [
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                            Icon(Icons.delete)
+                          ],
+                        ),
+                      ),
+                      direction: isMe
+                          ? DismissDirection.horizontal
+                          : DismissDirection.startToEnd,
+                      onDismissed: (direction) {},
+                      confirmDismiss:
+                          (DismissDirection dismissDirection) async {
+                        switch (dismissDirection) {
+                          case DismissDirection.startToEnd:
+                            {
+                              errorMessage(
+                                context,
+                                'Don\'t slide me to the left please',
+                                'Uhm ok...',
+                                () => {},
+                                true,
+                              );
+                              break;
+                            }
+                          case DismissDirection.endToStart:
+                            {
+                              _deleteMessage(documents?[index].id);
+                              break;
+                            }
+                          default:
                             break;
-                          }
-                        case DismissDirection.endToStart:
-                          {
-                            _deleteMessage(documents?[index].id);
-                            break;
-                          }
-                        default:
-                          break;
-                      }
-                      return false;
-                    },
-                    child: InkWell(
-                      onTap: () =>
-                          FocusManager.instance.primaryFocus?.unfocus(),
-                      splashColor: Colors.amber,
-                      onLongPress: () {
-                        showMyDialog(
-                          context,
-                          true,
-                          'Message Detail',
-                          'Sent by \'${whichParticipant?['username']}\'',
-                          formattedDate,
-                          'ok',
-                          Navigator.of(context).pop,
-                        );
+                        }
+                        return false;
                       },
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Row(
-                            key: ValueKey(documents?[index].id),
-                            mainAxisAlignment: isMe
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: isMe ? Colors.white : Colors.black,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: const Radius.circular(15),
-                                    topRight: const Radius.circular(15),
-                                    bottomLeft: isMe
-                                        ? const Radius.circular(15)
-                                        : const Radius.circular(0),
-                                    bottomRight: isMe
-                                        ? const Radius.circular(0)
-                                        : const Radius.circular(15),
+                      child: InkWell(
+                        onTap: () =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        splashColor: Colors.amber,
+                        onLongPress: () {
+                          showMyDialog(
+                            context,
+                            true,
+                            'Message Detail',
+                            'Sent by \'${whichParticipant?['username']}\'',
+                            formattedDate,
+                            'ok',
+                            Navigator.of(context).pop,
+                          );
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Row(
+                              key: ValueKey(documents?[index].id),
+                              mainAxisAlignment: isMe
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: isMe ? Colors.white : Colors.black,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: const Radius.circular(15),
+                                      topRight: const Radius.circular(15),
+                                      bottomLeft: isMe
+                                          ? const Radius.circular(15)
+                                          : const Radius.circular(0),
+                                      bottomRight: isMe
+                                          ? const Radius.circular(0)
+                                          : const Radius.circular(15),
+                                    ),
                                   ),
-                                ),
-                                width: deviceSize.width * 0.65,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 16,
-                                ),
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 8,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: isMe
-                                      ? CrossAxisAlignment.end
-                                      : CrossAxisAlignment.start,
-                                  children: [
-                                    if (!isMe)
+                                  width: deviceSize.width * 0.65,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                    horizontal: 16,
+                                  ),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: isMe
+                                        ? CrossAxisAlignment.end
+                                        : CrossAxisAlignment.start,
+                                    children: [
+                                      if (!isMe)
+                                        Text(
+                                          whichParticipant?['username'] ?? '',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: isMe
+                                                ? Colors.black
+                                                : Colors.white,
+                                          ),
+                                        ),
+                                      if (!isMe) const SizedBox(height: 5),
                                       Text(
-                                        whichParticipant?['username'] ?? '',
+                                        documents?[index]['text'] ?? '',
                                         style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
                                           color: isMe
                                               ? Colors.black
                                               : Colors.white,
                                         ),
+                                        textAlign: isMe
+                                            ? TextAlign.end
+                                            : TextAlign.start,
                                       ),
-                                    if (!isMe) const SizedBox(height: 5),
-                                    Text(
-                                      documents?[index]['text'] ?? '',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color:
-                                            isMe ? Colors.black : Colors.white,
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        formattedDate,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: isMe
+                                              ? const Color.fromARGB(
+                                                  255, 60, 60, 60)
+                                              : const Color.fromARGB(
+                                                  255, 195, 195, 195),
+                                        ),
+                                        textAlign: isMe
+                                            ? TextAlign.end
+                                            : TextAlign.start,
                                       ),
-                                      textAlign: isMe
-                                          ? TextAlign.end
-                                          : TextAlign.start,
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      formattedDate,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: isMe
-                                            ? const Color.fromARGB(
-                                                255, 60, 60, 60)
-                                            : const Color.fromARGB(
-                                                255, 195, 195, 195),
-                                      ),
-                                      textAlign: isMe
-                                          ? TextAlign.end
-                                          : TextAlign.start,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Positioned(
-                            top: 0,
-                            left: isMe ? null : deviceSize.width * 0.65 - 22,
-                            right: isMe ? deviceSize.width * 0.65 - 22 : null,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => OtherUserDataScreen(
-                                      whichParticipantData: [
-                                        whichParticipant?['userId'] ?? '',
-                                        whichParticipant?['userImageUrl'] ?? '',
-                                        whichParticipant?['username'] ?? '',
-                                      ],
-                                    ),
+                                    ],
                                   ),
-                                );
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 2,
-                                    color: Colors.amber,
-                                  ),
-                                  borderRadius: BorderRadius.circular(22),
                                 ),
-                                child: CircleAvatar(
-                                  radius: 20,
-                                  backgroundImage: NetworkImage(
-                                    whichParticipant?['userImageUrl'] ?? '',
+                              ],
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: isMe ? null : deviceSize.width * 0.65 - 22,
+                              right: isMe ? deviceSize.width * 0.65 - 22 : null,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => OtherUserDataScreen(
+                                        whichParticipantData: [
+                                          whichParticipant?['userId'] ?? '',
+                                          whichParticipant?['userImageUrl'] ??
+                                              '',
+                                          whichParticipant?['username'] ?? '',
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 2,
+                                      color: Colors.amber,
+                                    ),
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage: NetworkImage(
+                                      whichParticipant?['userImageUrl'] ?? '',
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             },
           );
