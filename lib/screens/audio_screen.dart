@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 
-class AudioScreen extends StatefulWidget {
+class AudioScreen extends StatelessWidget {
   const AudioScreen({Key? key}) : super(key: key);
 
-  @override
-  State<AudioScreen> createState() => _AudioScreenState();
-}
-
-class _AudioScreenState extends State<AudioScreen> {
   //TODO Try audio stuff here later
 
 // FlutterSoundRecorder _recordingSession;
