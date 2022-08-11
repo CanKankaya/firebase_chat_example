@@ -351,6 +351,7 @@ class _MessagesState extends State<Messages> {
                               right: isMe ? deviceSize.width * 0.65 - 22 : null,
                               child: GestureDetector(
                                 onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
