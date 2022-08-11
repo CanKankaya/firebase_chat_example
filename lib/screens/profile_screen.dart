@@ -9,14 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen extends StatelessWidget {
+  ProfileScreen({Key? key}) : super(key: key);
 
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final auth = FirebaseAuth.instance;
 
@@ -28,8 +23,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _emailController = TextEditingController();
   final _userDetailController = TextEditingController();
 
-  XFile? pickedImage;
-
   Future _selectImage() async {
     var image = await ImagePicker().pickImage(
       source: ImageSource.camera,
@@ -37,9 +30,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       maxWidth: 150,
     );
     if (image != null) {
-      setState(() {
-        pickedImage = image;
-      });
+      _pickedImage.value = image;
+
       _isUpdatable.value = true;
     }
   }
@@ -47,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future _tryUpdate() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
-      if (pickedImage != null) {
+      if (_pickedImage.value != null) {
         _isLoading.value = true;
 
         final ref = FirebaseStorage.instance
@@ -55,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .child('user_image')
             .child('${auth.currentUser!.uid}.jpg');
         await ref.delete();
-        await ref.putFile(File(pickedImage!.path));
+        await ref.putFile(File(_pickedImage.value!.path));
         final url = await ref.getDownloadURL();
         await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.updateDisplayName(_usernameController.text);
@@ -108,13 +100,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  void initState() {
-    _getAndSetUserData();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    _getAndSetUserData();
     return WillPopScope(
       onWillPop: () => showExitPopup(context),
       child: GestureDetector(
@@ -130,33 +117,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       Center(
-                        child: Stack(
-                          children: [
-                            pickedImage == null
-                                ? CircleAvatar(
-                                    radius: 60,
-                                    backgroundImage: NetworkImage(
-                                        auth.currentUser?.photoURL ?? ''),
-                                  )
-                                : CircleAvatar(
-                                    radius: 60,
-                                    backgroundImage:
-                                        FileImage(File(pickedImage!.path)),
+                        child: ValueListenableBuilder(
+                            valueListenable: _pickedImage,
+                            builder: (_, XFile? value, __) {
+                              return Stack(
+                                children: [
+                                  value == null
+                                      ? CircleAvatar(
+                                          radius: 60,
+                                          backgroundImage: NetworkImage(
+                                              auth.currentUser?.photoURL ?? ''),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 60,
+                                          backgroundImage:
+                                              FileImage(File(value.path)),
+                                        ),
+                                  Positioned(
+                                    top: 75,
+                                    left: 75,
+                                    child: IconButton(
+                                      iconSize: 40,
+                                      onPressed: _selectImage,
+                                      icon: const Icon(
+                                        Icons.camera,
+                                        color: Colors.amber,
+                                      ),
+                                    ),
                                   ),
-                            Positioned(
-                              top: 75,
-                              left: 75,
-                              child: IconButton(
-                                iconSize: 40,
-                                onPressed: _selectImage,
-                                icon: const Icon(
-                                  Icons.camera,
-                                  color: Colors.amber,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                                ],
+                              );
+                            }),
                       ),
                       const SizedBox(height: 20),
                       Form(
