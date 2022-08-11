@@ -217,6 +217,10 @@ class _MessagesState extends State<Messages> {
                           ],
                         ),
                       ),
+                      dismissThresholds: const {
+                        DismissDirection.startToEnd: 0.6,
+                        DismissDirection.endToStart: 0.6,
+                      },
                       direction: isMe
                           ? DismissDirection.horizontal
                           : DismissDirection.startToEnd,
