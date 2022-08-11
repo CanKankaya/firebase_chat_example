@@ -1,13 +1,14 @@
-import 'package:firebase_chat_example/screens/audio_screen.dart';
-import 'package:firebase_chat_example/screens/auth_screen.dart';
-import 'package:firebase_chat_example/screens/test_screen.dart';
 import 'package:flutter/material.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/chat_screen.dart';
 import 'package:firebase_chat_example/screens/profile_screen.dart';
+import 'package:firebase_chat_example/screens/audio_screen.dart';
+import 'package:firebase_chat_example/screens/auth_screen.dart';
+import 'package:firebase_chat_example/screens/test_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -133,7 +134,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const TestScreen(),
+                          builder: (context) => TestScreen(),
                         ),
                       );
                     },

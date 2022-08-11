@@ -7,17 +7,12 @@ import 'package:firebase_chat_example/widgets/custom_loading.dart';
 import 'package:firebase_chat_example/widgets/error_message.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
-class TestScreen extends StatefulWidget {
-  static const routeName = '/test-screen';
+class TestScreen extends StatelessWidget {
+  TestScreen({Key? key}) : super(key: key);
 
-  const TestScreen({Key? key}) : super(key: key);
+  final int selectedIndex = 0;
+  final ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
 
-  @override
-  State<TestScreen> createState() => _TestScreenState();
-}
-
-class _TestScreenState extends State<TestScreen> {
-  int selectedIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
   static List<Widget> pages = [
     const TestHome(),
@@ -27,9 +22,7 @@ class _TestScreenState extends State<TestScreen> {
   ];
 
   void onSelect(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
+    _selectedIndex.value = index;
   }
 
   @override
@@ -66,39 +59,43 @@ class _TestScreenState extends State<TestScreen> {
             children: pages,
           ),
           drawer: const AppDrawer(),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.shifting,
-            selectedItemColor: Colors.amber,
-            unselectedItemColor: Colors.grey,
-            onTap: (index) {
-              //
-              _pageController.animateToPage(index,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.ease);
-            },
-            currentIndex: selectedIndex,
-            elevation: 10,
-            showUnselectedLabels: false,
-            items: const [
-              BottomNavigationBarItem(
-                backgroundColor: Colors.black87,
-                label: 'Home',
-                icon: Icon(Icons.home),
-              ),
-              BottomNavigationBarItem(
-                label: 'Bar Chart',
-                icon: Icon(Icons.bar_chart),
-              ),
-              BottomNavigationBarItem(
-                label: 'Settings',
-                icon: Icon(Icons.settings),
-              ),
-              BottomNavigationBarItem(
-                label: 'Code',
-                icon: Icon(Icons.code),
-              ),
-            ],
-          ),
+          bottomNavigationBar: ValueListenableBuilder(
+              valueListenable: _selectedIndex,
+              builder: (_, int value, __) {
+                return BottomNavigationBar(
+                  type: BottomNavigationBarType.shifting,
+                  selectedItemColor: Colors.amber,
+                  unselectedItemColor: Colors.grey,
+                  onTap: (index) {
+                    //
+                    _pageController.animateToPage(index,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.ease);
+                  },
+                  currentIndex: value,
+                  elevation: 10,
+                  showUnselectedLabels: false,
+                  items: const [
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.black87,
+                      label: 'Home',
+                      icon: Icon(Icons.home),
+                    ),
+                    BottomNavigationBarItem(
+                      label: 'Bar Chart',
+                      icon: Icon(Icons.bar_chart),
+                    ),
+                    BottomNavigationBarItem(
+                      label: 'Settings',
+                      icon: Icon(Icons.settings),
+                    ),
+                    BottomNavigationBarItem(
+                      label: 'Code',
+                      icon: Icon(Icons.code),
+                    ),
+                  ],
+                );
+              }),
         ),
       ),
     );
