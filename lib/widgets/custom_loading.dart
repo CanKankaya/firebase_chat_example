@@ -6,12 +6,12 @@ class ColorLoader2 extends StatefulWidget {
   final Color color2;
   final Color color3;
 
-  const ColorLoader2(
-      {Key? key,
-      this.color1 = Colors.deepOrangeAccent,
-      this.color2 = Colors.yellow,
-      this.color3 = Colors.lightGreen})
-      : super(key: key);
+  const ColorLoader2({
+    Key? key,
+    this.color1 = Colors.deepOrangeAccent,
+    this.color2 = Colors.yellow,
+    this.color3 = Colors.lightGreen,
+  }) : super(key: key);
 
   @override
   ColorLoader2State createState() => ColorLoader2State();
