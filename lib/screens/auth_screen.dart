@@ -115,6 +115,7 @@ class AuthScreen extends StatelessWidget {
       }
     }
 
+    print('DEBUG: Auth build method ran');
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -141,10 +142,10 @@ class AuthScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               curve: Curves.easeIn,
-                              duration: _isLogin.value
+                              duration: isLoginValue
                                   ? const Duration(milliseconds: 250)
                                   : const Duration(milliseconds: 500),
-                              height: _isLogin.value ? 320 : 500,
+                              height: isLoginValue ? 320 : 500,
                               margin: const EdgeInsets.all(20),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
