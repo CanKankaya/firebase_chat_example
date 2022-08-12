@@ -113,7 +113,7 @@ class AuthScreen extends StatelessWidget {
       }
     }
 
-    print('DEBUG: Auth build method ran');
+    // print('DEBUG: Auth build method ran');
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {

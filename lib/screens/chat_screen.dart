@@ -109,7 +109,7 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('DEBUG: Messages build method ran');
+    // print('DEBUG: Messages build method ran');
 
     return StreamBuilder(
       stream: FirebaseFirestore.instance
@@ -129,18 +129,18 @@ class Messages extends StatelessWidget {
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                print('DEBUG: Messages waiting for participantsData');
+                // print('DEBUG: Messages waiting for participantsData');
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
               final deviceSize = MediaQuery.of(context).size;
               final documents = snapshot.data?.docs;
-              print('DEBUG: set message data');
+              // print('DEBUG: set message data');
               final participantsData = userSnapshot.data?.docs;
-              print('DEBUG: set participantsData');
+              // print('DEBUG: set participantsData');
               final scrollController = ScrollController();
-              print('DEBUG: built the widget');
+              // print('DEBUG: built the widget');
 
               return RefreshIndicator(
                 onRefresh: () async {
