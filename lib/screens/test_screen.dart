@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+// import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
@@ -319,15 +319,16 @@ class TestChart extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 400,
-                  child: InkWell(
-                    onTap: () {},
-                    child: DataChart(
-                      data: data,
-                    ),
-                  ),
-                ),
+                //
+                // SizedBox(
+                //   height: 400,
+                //   child: InkWell(
+                //     onTap: () {},
+                //     child: DataChart(
+                //       data: data,
+                //     ),
+                //   ),
+                // ),
                 Row(
                   children: [
                     const SizedBox(
@@ -471,123 +472,123 @@ class TestCode extends StatelessWidget {
   }
 }
 
-//Chart's data class
-class DataType {
-  final String data1;
-  final int data2;
-  final charts.Color barColor;
+// //Chart's data class
+// class DataType {
+//   final String data1;
+//   final int data2;
+//   final charts.Color barColor;
 
-  DataType({required this.data1, required this.data2, required this.barColor});
-}
+//   DataType({required this.data1, required this.data2, required this.barColor});
+// }
 
-//Chart's dummy data list
-final List<DataType> data = [
-  DataType(
-    data1: "2008",
-    data2: 2000,
-    barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  ),
-  DataType(
-    data1: "2009",
-    data2: 11000,
-    barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  ),
-  DataType(
-    data1: "2010",
-    data2: 12000,
-    barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  ),
-  DataType(
-    data1: "2011",
-    data2: 5000,
-    barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  ),
-  DataType(
-    data1: "2012",
-    data2: 8500,
-    barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  ),
-  // DataType(
-  //   data1: "2013",
-  //   data2: 7700,
-  //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  // ),
-  // DataType(
-  //   data1: "2014",
-  //   data2: 7600,
-  //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  // ),
-  // DataType(
-  //   data1: "2015",
-  //   data2: 9500,
-  //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
-  // ),
-];
+// //Chart's dummy data list
+// final List<DataType> data = [
+//   DataType(
+//     data1: "2008",
+//     data2: 2000,
+//     barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   ),
+//   DataType(
+//     data1: "2009",
+//     data2: 11000,
+//     barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   ),
+//   DataType(
+//     data1: "2010",
+//     data2: 12000,
+//     barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   ),
+//   DataType(
+//     data1: "2011",
+//     data2: 5000,
+//     barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   ),
+//   DataType(
+//     data1: "2012",
+//     data2: 8500,
+//     barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   ),
+//   // DataType(
+//   //   data1: "2013",
+//   //   data2: 7700,
+//   //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   // ),
+//   // DataType(
+//   //   data1: "2014",
+//   //   data2: 7600,
+//   //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   // ),
+//   // DataType(
+//   //   data1: "2015",
+//   //   data2: 9500,
+//   //   barColor: charts.ColorUtil.fromDartColor(Colors.blueAccent),
+//   // ),
+// ];
 
-class DataChart extends StatelessWidget {
-  const DataChart({super.key, required this.data});
-  final List<DataType> data;
+// class DataChart extends StatelessWidget {
+//   const DataChart({super.key, required this.data});
+//   final List<DataType> data;
 
-  @override
-  Widget build(BuildContext context) {
-    List<charts.Series<DataType, String>> series = [
-      charts.Series(
-        id: "developers",
-        data: data,
-        domainFn: (DataType series, _) => series.data1,
-        measureFn: (DataType series, _) => series.data2,
-        colorFn: (DataType series, _) => series.barColor,
-      )
-    ];
-    return Card(
-      elevation: 15,
-      color: Colors.grey[850],
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: charts.BarChart(
-          defaultRenderer:
-              charts.BarRendererConfig(cornerStrategy: const charts.ConstCornerStrategy(5)),
-          selectionModels: [
-            charts.SelectionModelConfig(
-              type: charts.SelectionModelType.info,
-              changedListener: (model) {
-                //what to do when you click a bar
-                final selectedDatum = model.selectedDatum;
-                if (selectedDatum.isNotEmpty) {
-                  errorMessage(
-                    context,
-                    selectedDatum.first.datum.data2.toString(),
-                    selectedDatum.first.datum.data1,
-                    () {},
-                    true,
-                  );
-                }
-              },
-            ),
-          ],
-          series,
-          animate: true,
-          animationDuration: const Duration(milliseconds: 600),
-          primaryMeasureAxis: const charts.NumericAxisSpec(
-            renderSpec: charts.GridlineRendererSpec(
-              labelStyle: charts.TextStyleSpec(
-                fontSize: 12,
-                color: charts.MaterialPalette.white,
-              ),
-            ),
-          ),
-          domainAxis: const charts.OrdinalAxisSpec(
-            renderSpec: charts.SmallTickRendererSpec(
-              labelStyle: charts.TextStyleSpec(
-                fontSize: 11,
-                color: charts.MaterialPalette.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     List<charts.Series<DataType, String>> series = [
+//       charts.Series(
+//         id: "developers",
+//         data: data,
+//         domainFn: (DataType series, _) => series.data1,
+//         measureFn: (DataType series, _) => series.data2,
+//         colorFn: (DataType series, _) => series.barColor,
+//       )
+//     ];
+//     return Card(
+//       elevation: 15,
+//       color: Colors.grey[850],
+//       child: Padding(
+//         padding: const EdgeInsets.all(15.0),
+//         child: charts.BarChart(
+//           defaultRenderer:
+//               charts.BarRendererConfig(cornerStrategy: const charts.ConstCornerStrategy(5)),
+//           selectionModels: [
+//             charts.SelectionModelConfig(
+//               type: charts.SelectionModelType.info,
+//               changedListener: (model) {
+//                 //what to do when you click a bar
+//                 final selectedDatum = model.selectedDatum;
+//                 if (selectedDatum.isNotEmpty) {
+//                   errorMessage(
+//                     context,
+//                     selectedDatum.first.datum.data2.toString(),
+//                     selectedDatum.first.datum.data1,
+//                     () {},
+//                     true,
+//                   );
+//                 }
+//               },
+//             ),
+//           ],
+//           series,
+//           animate: true,
+//           animationDuration: const Duration(milliseconds: 600),
+//           primaryMeasureAxis: const charts.NumericAxisSpec(
+//             renderSpec: charts.GridlineRendererSpec(
+//               labelStyle: charts.TextStyleSpec(
+//                 fontSize: 12,
+//                 color: charts.MaterialPalette.white,
+//               ),
+//             ),
+//           ),
+//           domainAxis: const charts.OrdinalAxisSpec(
+//             renderSpec: charts.SmallTickRendererSpec(
+//               labelStyle: charts.TextStyleSpec(
+//                 fontSize: 11,
+//                 color: charts.MaterialPalette.white,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // // safearea>column>expanded>listview dene bi ara

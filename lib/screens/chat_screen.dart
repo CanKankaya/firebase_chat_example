@@ -25,7 +25,9 @@ class ChatScreen extends StatelessWidget {
           appBar: AppBar(),
           body: Column(
             children: [
-              Expanded(child: Messages()),
+              Expanded(
+                child: Messages(),
+              ),
               NewMessage(),
             ],
           ),
@@ -42,12 +44,11 @@ class NewMessage extends StatelessWidget {
   final _controller = TextEditingController();
 
   void _sendMessage() async {
-    final user = FirebaseAuth.instance.currentUser;
-
+    final auth = FirebaseAuth.instance;
     FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/messages').add({
       'text': _enteredMessage.value,
       'createdAt': Timestamp.now(),
-      'userId': user?.uid,
+      'userId': auth.currentUser?.uid,
     });
     _controller.clear();
     _enteredMessage.value = '';
@@ -76,16 +77,17 @@ class NewMessage extends StatelessWidget {
               ),
             ),
             ValueListenableBuilder(
-                valueListenable: _enteredMessage,
-                builder: (_, String value, __) {
-                  return IconButton(
-                    onPressed: value.isEmpty ? null : _sendMessage,
-                    icon: Icon(
-                      Icons.send,
-                      color: value.isEmpty ? Colors.grey : Colors.amber,
-                    ),
-                  );
-                }),
+              valueListenable: _enteredMessage,
+              builder: (_, String value, __) {
+                return IconButton(
+                  onPressed: value.isEmpty ? null : _sendMessage,
+                  icon: Icon(
+                    Icons.send,
+                    color: value.isEmpty ? Colors.grey : Colors.amber,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -121,27 +123,36 @@ class Messages extends StatelessWidget {
         //   );
         // } else
         {
-          print('got message data');
-          final documents = snapshot.data?.docs;
-          final deviceSize = MediaQuery.of(context).size;
           return StreamBuilder(
             stream: FirebaseFirestore.instance
                 .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                print('Messages waiting for participantsData');
+                print('DEBUG: Messages waiting for participantsData');
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
+              final deviceSize = MediaQuery.of(context).size;
+              final documents = snapshot.data?.docs;
+              print('DEBUG: set message data');
               final participantsData = userSnapshot.data?.docs;
+              print('DEBUG: set participantsData');
               final scrollController = ScrollController();
+              print('DEBUG: built the widget');
 
               return RefreshIndicator(
                 onRefresh: () async {
+                  //TODO scroll up after refresh, doesnt work atm, scroll down works fine
+
                   if ((documents?.length ?? 0) > _itemCount.value) {
                     _itemCount.value += 10;
+                    scrollController.animateTo(
+                      scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 1000),
+                      curve: Curves.linear,
+                    );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -149,17 +160,10 @@ class Messages extends StatelessWidget {
                       ),
                     );
                   }
-                  //TODO scroll up after refresh, doesnt work atm
-
-                  // scrollController.animateTo(
-                  //   scrollController.position.maxScrollExtent,
-                  //   duration: const Duration(milliseconds: 1000),
-                  //   curve: Curves.linear,
-                  // );
                 },
                 child: ValueListenableBuilder(
                   valueListenable: _itemCount,
-                  builder: (_, int itemCountValue, __) {
+                  builder: (_, int itemCountValue, Widget? child) {
                     return ListView.builder(
                       controller: scrollController,
                       reverse: true,
@@ -372,6 +376,7 @@ class Messages extends StatelessWidget {
                       },
                     );
                   },
+                  // child: Messages(),
                 ),
               );
             },
