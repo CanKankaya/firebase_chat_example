@@ -23,8 +23,8 @@ void errorMessage(
           SnackBar(
             duration: const Duration(milliseconds: 1950),
             elevation: 10,
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20))),
+            shape:
+                const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
             action: SnackBarAction(
               onPressed: () {
                 buttonFon?.call();
@@ -57,8 +57,7 @@ void errorMessage(
         SnackBar(
           duration: const Duration(milliseconds: 1950),
           elevation: 10,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
           action: SnackBarAction(
             onPressed: () {
               buttonFon?.call();

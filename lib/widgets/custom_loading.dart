@@ -17,8 +17,7 @@ class ColorLoader2 extends StatefulWidget {
   ColorLoader2State createState() => ColorLoader2State();
 }
 
-class ColorLoader2State extends State<ColorLoader2>
-    with TickerProviderStateMixin {
+class ColorLoader2State extends State<ColorLoader2> with TickerProviderStateMixin {
   late Animation<double> animation1;
   late Animation<double> animation2;
   late Animation<double> animation3;
@@ -30,26 +29,20 @@ class ColorLoader2State extends State<ColorLoader2>
   void initState() {
     super.initState();
 
-    controller1 = AnimationController(
-        duration: const Duration(milliseconds: 1200), vsync: this);
+    controller1 = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
 
-    controller2 = AnimationController(
-        duration: const Duration(milliseconds: 900), vsync: this);
+    controller2 = AnimationController(duration: const Duration(milliseconds: 900), vsync: this);
 
-    controller3 = AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this);
+    controller3 = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
 
     animation1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller1,
-        curve: const Interval(0.0, 1.0, curve: Curves.linear)));
+        parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
     animation2 = Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(
-        parent: controller2,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
+        parent: controller2, curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
 
     animation3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller3,
-        curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
+        parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
 
     controller1.repeat();
     controller2.repeat();
@@ -144,11 +137,8 @@ class Arc2Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect2 = Rect.fromLTWH(
-        0.0 + (0.2 * size.width) / 2,
-        0.0 + (0.2 * size.height) / 2,
-        size.width - 0.2 * size.width,
-        size.height - 0.2 * size.height);
+    Rect rect2 = Rect.fromLTWH(0.0 + (0.2 * size.width) / 2, 0.0 + (0.2 * size.height) / 2,
+        size.width - 0.2 * size.width, size.height - 0.2 * size.height);
 
     canvas.drawArc(rect2, 0.0, 0.5 * pi, false, p2);
     canvas.drawArc(rect2, 0.8 * pi, 0.6 * pi, false, p2);
@@ -174,11 +164,8 @@ class Arc3Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect3 = Rect.fromLTWH(
-        0.0 + (0.4 * size.width) / 2,
-        0.0 + (0.4 * size.height) / 2,
-        size.width - 0.4 * size.width,
-        size.height - 0.4 * size.height);
+    Rect rect3 = Rect.fromLTWH(0.0 + (0.4 * size.width) / 2, 0.0 + (0.4 * size.height) / 2,
+        size.width - 0.4 * size.width, size.height - 0.4 * size.height);
 
     canvas.drawArc(rect3, 0.0, 0.9 * pi, false, p3);
     canvas.drawArc(rect3, 1.1 * pi, 0.8 * pi, false, p3);

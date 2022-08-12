@@ -167,8 +167,7 @@ class AppDrawer extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.account_circle,
-                            size: 32, color: Colors.white),
+                        icon: const Icon(Icons.account_circle, size: 32, color: Colors.white),
                       ),
                     ),
                     const Spacer(),
