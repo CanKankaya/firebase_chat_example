@@ -69,8 +69,7 @@ class TestScreen extends StatelessWidget {
                   onTap: (index) {
                     //
                     _pageController.animateToPage(index,
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.ease);
+                        duration: const Duration(milliseconds: 500), curve: Curves.ease);
                   },
                   currentIndex: value,
                   elevation: 10,
@@ -301,8 +300,7 @@ class TestChart extends StatelessWidget {
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
                           child: Icon(Icons.bar_chart_rounded, size: 40),
                         ),
-                        const Text('Temp Data Text Here',
-                            style: TextStyle(fontSize: 16)),
+                        const Text('Temp Data Text Here', style: TextStyle(fontSize: 16)),
                         const Spacer(),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -526,11 +524,9 @@ final List<DataType> data = [
   // ),
 ];
 
-//Chart itself
 class DataChart extends StatelessWidget {
-  final List<DataType> data;
-
   const DataChart({super.key, required this.data});
+  final List<DataType> data;
 
   @override
   Widget build(BuildContext context) {
@@ -543,15 +539,14 @@ class DataChart extends StatelessWidget {
         colorFn: (DataType series, _) => series.barColor,
       )
     ];
-
     return Card(
       elevation: 15,
       color: Colors.grey[850],
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: charts.BarChart(
-          defaultRenderer: charts.BarRendererConfig(
-              cornerStrategy: const charts.ConstCornerStrategy(5)),
+          defaultRenderer:
+              charts.BarRendererConfig(cornerStrategy: const charts.ConstCornerStrategy(5)),
           selectionModels: [
             charts.SelectionModelConfig(
               type: charts.SelectionModelType.info,

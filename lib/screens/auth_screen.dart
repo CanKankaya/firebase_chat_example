@@ -55,8 +55,7 @@ class AuthScreen extends StatelessWidget {
           if (_isLogin.value) {
             await _auth
                 .signInWithEmailAndPassword(
-                    email: userEmail.toString().trim(),
-                    password: userPassword.toString().trim())
+                    email: userEmail.toString().trim(), password: userPassword.toString().trim())
                 .then((_) {
               Navigator.pushReplacement(
                 context,
@@ -70,8 +69,7 @@ class AuthScreen extends StatelessWidget {
           } else {
             var authResult = await _auth
                 .createUserWithEmailAndPassword(
-                    email: userEmail.toString().trim(),
-                    password: userPassword.toString().trim())
+                    email: userEmail.toString().trim(), password: userPassword.toString().trim())
                 .catchError((error) {
               throw error;
             });
@@ -162,35 +160,26 @@ class AuthScreen extends StatelessWidget {
                                             children: [
                                               if (!isLoginValue)
                                                 ValueListenableBuilder(
-                                                    valueListenable:
-                                                        _pickedImage,
-                                                    builder:
-                                                        (_, XFile? value, __) {
+                                                    valueListenable: _pickedImage,
+                                                    builder: (_, XFile? value, __) {
                                                       return CircleAvatar(
-                                                        backgroundColor:
-                                                            Colors.grey,
+                                                        backgroundColor: Colors.grey,
                                                         radius: 40,
-                                                        backgroundImage:
-                                                            value != null
-                                                                ? FileImage(
-                                                                    File(value
-                                                                        .path))
-                                                                : null,
+                                                        backgroundImage: value != null
+                                                            ? FileImage(File(value.path))
+                                                            : null,
                                                       );
                                                     }),
                                               if (!isLoginValue)
                                                 TextButton.icon(
                                                   onPressed: _selectImage,
-                                                  icon:
-                                                      const Icon(Icons.camera),
-                                                  label:
-                                                      const Text('Add Image'),
+                                                  icon: const Icon(Icons.camera),
+                                                  label: const Text('Add Image'),
                                                 ),
                                               TextFormField(
                                                 key: const ValueKey('email'),
                                                 autocorrect: false,
-                                                textCapitalization:
-                                                    TextCapitalization.none,
+                                                textCapitalization: TextCapitalization.none,
                                                 maxLength: 50,
                                                 onSaved: (newValue) {
                                                   userEmail = newValue;
@@ -204,44 +193,34 @@ class AuthScreen extends StatelessWidget {
                                                     return null;
                                                   }
                                                 },
-                                                keyboardType:
-                                                    TextInputType.emailAddress,
-                                                decoration:
-                                                    const InputDecoration(
-                                                        labelText:
-                                                            'Email address'),
+                                                keyboardType: TextInputType.emailAddress,
+                                                decoration: const InputDecoration(
+                                                    labelText: 'Email address'),
                                               ),
                                               if (!isLoginValue)
                                                 TextFormField(
-                                                  key: const ValueKey(
-                                                      'username'),
+                                                  key: const ValueKey('username'),
                                                   autocorrect: false,
-                                                  textCapitalization:
-                                                      TextCapitalization.none,
+                                                  textCapitalization: TextCapitalization.none,
                                                   onSaved: (newValue) {
                                                     username = newValue;
                                                   },
                                                   maxLength: 30,
                                                   validator: (value) {
-                                                    if (value == null ||
-                                                        value.isEmpty) {
+                                                    if (value == null || value.isEmpty) {
                                                       return 'Username cant be empty';
                                                     } else {
                                                       return null;
                                                     }
                                                   },
                                                   decoration:
-                                                      const InputDecoration(
-                                                          labelText:
-                                                              'Username'),
+                                                      const InputDecoration(labelText: 'Username'),
                                                 ),
                                               TextFormField(
                                                 key: const ValueKey('password'),
-                                                controller:
-                                                    _userPasswordController,
+                                                controller: _userPasswordController,
                                                 autocorrect: false,
-                                                textCapitalization:
-                                                    TextCapitalization.none,
+                                                textCapitalization: TextCapitalization.none,
                                                 maxLength: 30,
                                                 obscureText: true,
                                                 onSaved: (newValue) {
@@ -257,13 +236,11 @@ class AuthScreen extends StatelessWidget {
                                                   }
                                                 },
                                                 decoration:
-                                                    const InputDecoration(
-                                                        labelText: 'Password'),
+                                                    const InputDecoration(labelText: 'Password'),
                                               ),
                                               if (!isLoginValue)
                                                 TextFormField(
-                                                  key: const ValueKey(
-                                                      'confirmPassword'),
+                                                  key: const ValueKey('confirmPassword'),
                                                   enabled: !isLoginValue,
                                                   onSaved: (newValue) {
                                                     userPassword = newValue;
@@ -274,18 +251,14 @@ class AuthScreen extends StatelessWidget {
                                                     if (value == null ||
                                                         value.isEmpty ||
                                                         value.length < 8 ||
-                                                        value !=
-                                                            _userPasswordController
-                                                                .text) {
+                                                        value != _userPasswordController.text) {
                                                       return 'Passwords do not match';
                                                     } else {
                                                       return null;
                                                     }
                                                   },
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText:
-                                                              'Confirm Password'),
+                                                  decoration: const InputDecoration(
+                                                      labelText: 'Confirm Password'),
                                                 ),
                                               const SizedBox(height: 12),
                                               loadingValue
@@ -296,21 +269,17 @@ class AuthScreen extends StatelessWidget {
                                                       },
                                                       child: isLoginValue
                                                           ? const Text('Login')
-                                                          : const Text(
-                                                              'Sign Up'),
+                                                          : const Text('Sign Up'),
                                                     ),
                                               loadingValue
                                                   ? const CircularProgressIndicator()
                                                   : TextButton(
                                                       onPressed: () {
-                                                        _isLogin.value =
-                                                            !_isLogin.value;
+                                                        _isLogin.value = !_isLogin.value;
                                                       },
                                                       child: isLoginValue
-                                                          ? const Text(
-                                                              'Create New Account')
-                                                          : const Text(
-                                                              'I already have an account'),
+                                                          ? const Text('Create New Account')
+                                                          : const Text('I already have an account'),
                                                     ),
                                             ],
                                           );

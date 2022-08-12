@@ -52,8 +52,8 @@ class ProfileScreen extends StatelessWidget {
         await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.updateDisplayName(_usernameController.text);
 
-        final userCollection = FirebaseFirestore.instance
-            .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        final userCollection =
+            FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
         QuerySnapshot userSnapshot = await userCollection.get();
         final whichParticipant = userSnapshot.docs.firstWhere((element) {
           return element['userId'] == auth.currentUser?.uid;
@@ -70,8 +70,8 @@ class ProfileScreen extends StatelessWidget {
         _isLoading.value = true;
 
         await auth.currentUser?.updateDisplayName(_usernameController.text);
-        final userCollection = FirebaseFirestore.instance
-            .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        final userCollection =
+            FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
         QuerySnapshot userSnapshot = await userCollection.get();
         final whichParticipant = userSnapshot.docs.firstWhere((element) {
           return element['userId'] == auth.currentUser?.uid;
@@ -90,8 +90,8 @@ class ProfileScreen extends StatelessWidget {
   Future _getAndSetUserData() async {
     _usernameController.text = auth.currentUser?.displayName ?? '';
     _emailController.text = auth.currentUser?.email ?? '';
-    final userCollection = FirebaseFirestore.instance
-        .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+    final userCollection =
+        FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
     QuerySnapshot userSnapshot = await userCollection.get();
     final whichParticipant = userSnapshot.docs.firstWhere((element) {
       return element['userId'] == auth.currentUser?.uid;
@@ -125,13 +125,12 @@ class ProfileScreen extends StatelessWidget {
                                   value == null
                                       ? CircleAvatar(
                                           radius: 60,
-                                          backgroundImage: NetworkImage(
-                                              auth.currentUser?.photoURL ?? ''),
+                                          backgroundImage:
+                                              NetworkImage(auth.currentUser?.photoURL ?? ''),
                                         )
                                       : CircleAvatar(
                                           radius: 60,
-                                          backgroundImage:
-                                              FileImage(File(value.path)),
+                                          backgroundImage: FileImage(File(value.path)),
                                         ),
                                   Positioned(
                                     top: 75,
@@ -160,8 +159,7 @@ class ProfileScreen extends StatelessWidget {
                               textCapitalization: TextCapitalization.none,
                               controller: _usernameController,
                               maxLength: 30,
-                              decoration:
-                                  const InputDecoration(labelText: 'Username'),
+                              decoration: const InputDecoration(labelText: 'Username'),
                               onSaved: (newValue) {
                                 _usernameController.text = newValue ?? '';
                               },
@@ -182,8 +180,7 @@ class ProfileScreen extends StatelessWidget {
                               textCapitalization: TextCapitalization.sentences,
                               controller: _userDetailController,
                               maxLength: 200,
-                              decoration: const InputDecoration(
-                                  labelText: 'User Detail'),
+                              decoration: const InputDecoration(labelText: 'User Detail'),
                               maxLines: 10,
                               minLines: 1,
                               onSaved: (newValue) {
@@ -208,8 +205,7 @@ class ProfileScreen extends StatelessWidget {
                               onSaved: (newValue) {
                                 _emailController.text = newValue ?? '';
                               },
-                              decoration:
-                                  const InputDecoration(labelText: 'Email'),
+                              decoration: const InputDecoration(labelText: 'Email'),
                             ),
                           ],
                         ),
@@ -241,9 +237,7 @@ class ProfileScreen extends StatelessWidget {
                                     : Text(
                                         'Update',
                                         style: TextStyle(
-                                          color: updateValue
-                                              ? Colors.black
-                                              : Colors.grey,
+                                          color: updateValue ? Colors.black : Colors.grey,
                                         ),
                                       ),
                               );
