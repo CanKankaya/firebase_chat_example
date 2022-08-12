@@ -319,7 +319,8 @@ class TestChart extends StatelessWidget {
                     ),
                   ),
                 ),
-                //
+                // charts_flutter package throws nullcheck warning, disabled for now
+
                 // SizedBox(
                 //   height: 400,
                 //   child: InkWell(
