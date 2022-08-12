@@ -99,6 +99,8 @@ class NewMessage extends StatelessWidget {
 class Messages extends StatelessWidget {
   Messages({Key? key}) : super(key: key);
 
+  final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
+
   _deleteMessage(messageId) async {
     await FirebaseFirestore.instance
         .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
@@ -106,10 +108,10 @@ class Messages extends StatelessWidget {
         .delete();
   }
 
-  final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
-
   @override
   Widget build(BuildContext context) {
+    print('DEBUG: Messages build method ran');
+
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
@@ -122,6 +124,7 @@ class Messages extends StatelessWidget {
         //   );
         // } else
         {
+          print('got message data');
           final documents = snapshot.data?.docs;
           final deviceSize = MediaQuery.of(context).size;
           return StreamBuilder(
@@ -130,6 +133,7 @@ class Messages extends StatelessWidget {
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
+                print('Messages waiting for participantsData');
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
