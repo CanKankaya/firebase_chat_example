@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import 'package:firebase_chat_example/theme/theme_model.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
@@ -25,6 +28,22 @@ class AppDrawer extends StatelessWidget {
             AppBar(
               title: const Text('Drawer\'s title'),
               automaticallyImplyLeading: false,
+              actions: [
+                Consumer<ThemeModel>(
+                  builder: (context, ThemeModel themeNotifier, __) {
+                    return IconButton(
+                      onPressed: () {
+                        themeNotifier.isDark
+                            ? themeNotifier.isDark = false
+                            : themeNotifier.isDark = true;
+                      },
+                      icon: Icon(
+                        themeNotifier.isDark ? Icons.dark_mode : Icons.light_mode,
+                      ),
+                    );
+                  },
+                )
+              ],
             ),
             Expanded(
               flex: 15,
