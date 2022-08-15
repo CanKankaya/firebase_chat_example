@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
@@ -92,7 +93,9 @@ class AuthScreen extends StatelessWidget {
               'username': username,
               'userImageUrl': url,
               'userDetail': '',
-            }).then((_) {
+            });
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              //
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
