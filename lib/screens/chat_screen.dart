@@ -258,6 +258,7 @@ class Messages extends StatelessWidget {
                             switch (dismissDirection) {
                               case DismissDirection.startToEnd:
                                 {
+                                  //TODO: add reply function here
                                   errorMessage(
                                     context,
                                     'Don\'t slide me to the left please',

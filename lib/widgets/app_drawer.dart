@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -76,9 +77,16 @@ class AppDrawer extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    leading: const Icon(Icons.shopping_cart),
+                    leading: const Icon(Icons.map),
                     title: const Text('Temp Listtile'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MapScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
                   ListTile(
