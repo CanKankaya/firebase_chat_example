@@ -59,43 +59,48 @@ class NewMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deviceOrientation = MediaQuery.of(context).orientation;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: Container(
         color: Colors.grey[800],
         padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-        height: 100,
-        child: Row(
+        height: deviceOrientation == Orientation.portrait ? 90 : 65,
+        child: ListView(
           children: [
-            Expanded(
-              child: Theme(
-                data: ThemeData.dark(),
-                child: TextField(
-                  maxLines: 5,
-                  minLines: 1,
-                  maxLength: 100,
-                  autocorrect: true,
-                  enableSuggestions: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  controller: _controller,
-                  decoration: const InputDecoration(labelText: 'Send a message...'),
-                  onChanged: (val) {
-                    _enteredMessage.value = val.trim();
+            Row(
+              children: [
+                Expanded(
+                  child: Theme(
+                    data: ThemeData.dark(),
+                    child: TextField(
+                      maxLines: 5,
+                      minLines: 1,
+                      maxLength: 100,
+                      autocorrect: true,
+                      enableSuggestions: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      controller: _controller,
+                      decoration: const InputDecoration(labelText: 'Send a message...'),
+                      onChanged: (val) {
+                        _enteredMessage.value = val.trim();
+                      },
+                    ),
+                  ),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _enteredMessage,
+                  builder: (_, String value, __) {
+                    return IconButton(
+                      onPressed: value.isEmpty ? null : _sendMessage,
+                      icon: Icon(
+                        Icons.send,
+                        color: value.isEmpty ? Colors.grey : Colors.amber,
+                      ),
+                    );
                   },
                 ),
-              ),
-            ),
-            ValueListenableBuilder(
-              valueListenable: _enteredMessage,
-              builder: (_, String value, __) {
-                return IconButton(
-                  onPressed: value.isEmpty ? null : _sendMessage,
-                  icon: Icon(
-                    Icons.send,
-                    color: value.isEmpty ? Colors.grey : Colors.amber,
-                  ),
-                );
-              },
+              ],
             ),
           ],
         ),
