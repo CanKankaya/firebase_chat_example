@@ -17,6 +17,8 @@ class AuthScreen extends StatelessWidget {
   final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _isLogin = ValueNotifier<bool>(true);
   final ValueNotifier<XFile?> _pickedImage = ValueNotifier<XFile?>(null);
+  final ValueNotifier<bool> _hidePassword = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _hideConfirmPassword = ValueNotifier<bool>(true);
 
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
@@ -126,9 +128,7 @@ class AuthScreen extends StatelessWidget {
               : WillPopScope(
                   onWillPop: () => showExitPopup(context),
                   child: Theme(
-                    data: Theme.of(context).copyWith(
-                      splashColor: Colors.amber,
-                    ),
+                    data: ThemeData.dark(),
                     child: Scaffold(
                       body: Center(
                         child: ValueListenableBuilder(
@@ -216,50 +216,91 @@ class AuthScreen extends StatelessWidget {
                                                   decoration:
                                                       const InputDecoration(labelText: 'Username'),
                                                 ),
-                                              TextFormField(
-                                                key: const ValueKey('password'),
-                                                controller: _userPasswordController,
-                                                autocorrect: false,
-                                                textCapitalization: TextCapitalization.none,
-                                                maxLength: 30,
-                                                obscureText: true,
-                                                onSaved: (newValue) {
-                                                  userPassword = newValue;
-                                                },
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty ||
-                                                      value.length < 8) {
-                                                    return 'Password must be longer than 8 characters';
-                                                  } else {
-                                                    return null;
-                                                  }
-                                                },
-                                                decoration:
-                                                    const InputDecoration(labelText: 'Password'),
-                                              ),
+                                              ValueListenableBuilder(
+                                                  valueListenable: _hidePassword,
+                                                  builder: (_, bool hidePasswordValue, __) {
+                                                    return TextFormField(
+                                                      key: const ValueKey('password'),
+                                                      controller: _userPasswordController,
+                                                      autocorrect: false,
+                                                      textCapitalization: TextCapitalization.none,
+                                                      maxLength: 30,
+                                                      obscureText: hidePasswordValue,
+                                                      onSaved: (newValue) {
+                                                        userPassword = newValue;
+                                                      },
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty ||
+                                                            value.length < 8) {
+                                                          return 'Password must be longer than 8 characters';
+                                                        } else {
+                                                          return null;
+                                                        }
+                                                      },
+                                                      decoration: InputDecoration(
+                                                        labelText: 'Password',
+                                                        suffixIcon: IconButton(
+                                                          onPressed: () {
+                                                            _hidePassword.value =
+                                                                !_hidePassword.value;
+                                                          },
+                                                          icon: hidePasswordValue
+                                                              ? const Icon(
+                                                                  Icons.visibility_off,
+                                                                  color: Colors.grey,
+                                                                )
+                                                              : const Icon(
+                                                                  Icons.visibility,
+                                                                  color: Colors.blue,
+                                                                ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
                                               if (!isLoginValue)
-                                                TextFormField(
-                                                  key: const ValueKey('confirmPassword'),
-                                                  enabled: !isLoginValue,
-                                                  onSaved: (newValue) {
-                                                    userPassword = newValue;
-                                                  },
-                                                  maxLength: 30,
-                                                  obscureText: true,
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.isEmpty ||
-                                                        value.length < 8 ||
-                                                        value != _userPasswordController.text) {
-                                                      return 'Passwords do not match';
-                                                    } else {
-                                                      return null;
-                                                    }
-                                                  },
-                                                  decoration: const InputDecoration(
-                                                      labelText: 'Confirm Password'),
-                                                ),
+                                                ValueListenableBuilder(
+                                                    valueListenable: _hideConfirmPassword,
+                                                    builder: (context, bool confirmPassValue, __) {
+                                                      return TextFormField(
+                                                        key: const ValueKey('confirmPassword'),
+                                                        enabled: !isLoginValue,
+                                                        onSaved: (newValue) {
+                                                          userPassword = newValue;
+                                                        },
+                                                        maxLength: 30,
+                                                        obscureText: confirmPassValue,
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty ||
+                                                              value.length < 8 ||
+                                                              value !=
+                                                                  _userPasswordController.text) {
+                                                            return 'Passwords do not match';
+                                                          } else {
+                                                            return null;
+                                                          }
+                                                        },
+                                                        decoration: InputDecoration(
+                                                          labelText: 'Confirm Password',
+                                                          suffixIcon: IconButton(
+                                                            onPressed: () {
+                                                              _hideConfirmPassword.value =
+                                                                  !_hideConfirmPassword.value;
+                                                            },
+                                                            icon: confirmPassValue
+                                                                ? const Icon(
+                                                                    Icons.visibility_off,
+                                                                    color: Colors.grey,
+                                                                  )
+                                                                : const Icon(
+                                                                    Icons.visibility,
+                                                                    color: Colors.blue,
+                                                                  ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
                                               const SizedBox(height: 12),
                                               loadingValue
                                                   ? const CircularProgressIndicator()
