@@ -106,145 +106,152 @@ class ProfileScreen extends StatelessWidget {
       onWillPop: () => showExitPopup(context),
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Scaffold(
-          appBar: AppBar(),
-          drawer: const AppDrawer(),
-          body: Center(
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      Center(
-                        child: ValueListenableBuilder(
-                            valueListenable: _pickedImage,
-                            builder: (_, XFile? value, __) {
-                              return Stack(
-                                children: [
-                                  value == null
-                                      ? CircleAvatar(
-                                          radius: 60,
-                                          backgroundImage:
-                                              NetworkImage(auth.currentUser?.photoURL ?? ''),
-                                        )
-                                      : CircleAvatar(
-                                          radius: 60,
-                                          backgroundImage: FileImage(File(value.path)),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: Colors.amber,
+          ),
+          child: Scaffold(
+            appBar: AppBar(),
+            drawer: const AppDrawer(),
+            body: Center(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        Center(
+                          child: ValueListenableBuilder(
+                              valueListenable: _pickedImage,
+                              builder: (_, XFile? value, __) {
+                                return Stack(
+                                  children: [
+                                    value == null
+                                        ? CircleAvatar(
+                                            radius: 60,
+                                            backgroundImage:
+                                                NetworkImage(auth.currentUser?.photoURL ?? ''),
+                                          )
+                                        : CircleAvatar(
+                                            radius: 60,
+                                            backgroundImage: FileImage(File(value.path)),
+                                          ),
+                                    Positioned(
+                                      top: 75,
+                                      left: 75,
+                                      child: IconButton(
+                                        iconSize: 40,
+                                        onPressed: _selectImage,
+                                        icon: const Icon(
+                                          Icons.camera,
+                                          color: Colors.amber,
                                         ),
-                                  Positioned(
-                                    top: 75,
-                                    left: 75,
-                                    child: IconButton(
-                                      iconSize: 40,
-                                      onPressed: _selectImage,
-                                      icon: const Icon(
-                                        Icons.camera,
-                                        color: Colors.amber,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            }),
-                      ),
-                      const SizedBox(height: 20),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              key: const ValueKey('username'),
-                              autocorrect: false,
-                              textCapitalization: TextCapitalization.none,
-                              controller: _usernameController,
-                              maxLength: 30,
-                              decoration: const InputDecoration(labelText: 'Username'),
-                              onSaved: (newValue) {
-                                _usernameController.text = newValue ?? '';
-                              },
-                              onChanged: (_) {
-                                _isUpdatable.value = true;
-                              },
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Username cant be empty';
-                                } else {
-                                  return null;
-                                }
-                              },
-                            ),
-                            TextFormField(
-                              key: const ValueKey('userDetail'),
-                              autocorrect: true,
-                              textCapitalization: TextCapitalization.sentences,
-                              controller: _userDetailController,
-                              maxLength: 200,
-                              decoration: const InputDecoration(labelText: 'User Detail'),
-                              maxLines: 10,
-                              minLines: 1,
-                              onSaved: (newValue) {
-                                _userDetailController.text = newValue ?? '';
-                              },
-                              onChanged: (_) {
-                                _isUpdatable.value = true;
-                              },
-                              validator: (value) {
-                                return null;
-                              },
-                            ),
-                            TextFormField(
-                              key: const ValueKey('email'),
-                              style: const TextStyle(color: Colors.grey),
-                              enabled: false,
-                              autocorrect: false,
-                              textCapitalization: TextCapitalization.none,
-                              keyboardType: TextInputType.emailAddress,
-                              controller: _emailController,
-                              // maxLength: 50,
-                              onSaved: (newValue) {
-                                _emailController.text = newValue ?? '';
-                              },
-                              decoration: const InputDecoration(labelText: 'Email'),
-                            ),
-                          ],
+                                  ],
+                                );
+                              }),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                key: const ValueKey('username'),
+                                autocorrect: false,
+                                textCapitalization: TextCapitalization.none,
+                                controller: _usernameController,
+                                maxLength: 30,
+                                decoration: const InputDecoration(labelText: 'Username'),
+                                onSaved: (newValue) {
+                                  _usernameController.text = newValue ?? '';
+                                },
+                                onChanged: (_) {
+                                  _isUpdatable.value = true;
+                                },
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Username cant be empty';
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                              ),
+                              TextFormField(
+                                key: const ValueKey('userDetail'),
+                                autocorrect: true,
+                                textCapitalization: TextCapitalization.sentences,
+                                controller: _userDetailController,
+                                maxLength: 200,
+                                decoration: const InputDecoration(labelText: 'User Detail'),
+                                maxLines: 10,
+                                minLines: 1,
+                                onSaved: (newValue) {
+                                  _userDetailController.text = newValue ?? '';
+                                },
+                                onChanged: (_) {
+                                  _isUpdatable.value = true;
+                                },
+                                validator: (value) {
+                                  return null;
+                                },
+                              ),
+                              TextFormField(
+                                key: const ValueKey('email'),
+                                style: const TextStyle(color: Colors.grey),
+                                enabled: false,
+                                autocorrect: false,
+                                textCapitalization: TextCapitalization.none,
+                                keyboardType: TextInputType.emailAddress,
+                                controller: _emailController,
+                                // maxLength: 50,
+                                onSaved: (newValue) {
+                                  _emailController.text = newValue ?? '';
+                                },
+                                decoration: const InputDecoration(labelText: 'Email'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ValueListenableBuilder(
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ValueListenableBuilder(
                       valueListenable: _isLoading,
                       builder: (_, bool loadingValue, __) {
                         return ValueListenableBuilder(
-                            valueListenable: _isUpdatable,
-                            builder: (_, bool updateValue, __) {
-                              return ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.amber,
-                                ),
-                                onPressed: updateValue
-                                    ? () {
-                                        _tryUpdate();
-                                        _isUpdatable.value = false;
-                                      }
-                                    : null,
-                                child: loadingValue
-                                    ? const CircularProgressIndicator()
-                                    : Text(
-                                        'Update',
-                                        style: TextStyle(
-                                          color: updateValue ? Colors.black : Colors.grey,
-                                        ),
+                          valueListenable: _isUpdatable,
+                          builder: (_, bool updateValue, __) {
+                            return ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.amber,
+                              ),
+                              onPressed: updateValue
+                                  ? () {
+                                      _tryUpdate();
+                                      _isUpdatable.value = false;
+                                    }
+                                  : null,
+                              child: loadingValue
+                                  ? const CircularProgressIndicator()
+                                  : Text(
+                                      'Update',
+                                      style: TextStyle(
+                                        color: updateValue ? Colors.black : Colors.grey,
                                       ),
-                              );
-                            });
-                      }),
-                ),
-              ],
+                                    ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

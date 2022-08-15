@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -65,15 +66,18 @@ class NewMessage extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                autocorrect: true,
-                enableSuggestions: true,
-                textCapitalization: TextCapitalization.sentences,
-                controller: _controller,
-                decoration: const InputDecoration(labelText: 'Send a message...'),
-                onChanged: (val) {
-                  _enteredMessage.value = val.trim();
-                },
+              child: Theme(
+                data: ThemeData.dark(),
+                child: TextField(
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  textCapitalization: TextCapitalization.sentences,
+                  controller: _controller,
+                  decoration: const InputDecoration(labelText: 'Send a message...'),
+                  onChanged: (val) {
+                    _enteredMessage.value = val.trim();
+                  },
+                ),
               ),
             ),
             ValueListenableBuilder(
@@ -107,51 +111,61 @@ class Messages extends StatelessWidget {
         .delete();
   }
 
+  _testFunctionToRunAfterBuild() async {
+    //
+    print('DEBUG: After Scheduler Binding');
+  }
+
   @override
   Widget build(BuildContext context) {
-    // print('DEBUG: Messages build method ran');
+    print('DEBUG: Messages build method ran');
 
+    SchedulerBinding.instance.addPostFrameCallback((_) => _testFunctionToRunAfterBuild());
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
           .orderBy('createdAt', descending: true)
           .snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //   return const Center(
-        //     child: CircularProgressIndicator(),
-        //   );
-        // } else
+      builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
         {
           return StreamBuilder(
             stream: FirebaseFirestore.instance
                 .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                // print('DEBUG: Messages waiting for participantsData');
+              if (userSnapshot.connectionState == ConnectionState.waiting ||
+                  messagesSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
               final deviceSize = MediaQuery.of(context).size;
-              final documents = snapshot.data?.docs;
-              // print('DEBUG: set message data');
+              final documents = messagesSnapshot.data?.docs;
+              print('DEBUG: set message data');
               final participantsData = userSnapshot.data?.docs;
-              // print('DEBUG: set participantsData');
+              print('DEBUG: set participantsData');
               final scrollController = ScrollController();
-              // print('DEBUG: built the widget');
+              print('DEBUG: built the widget');
+
+              refreshFunction() async {
+                _itemCount.value += 10;
+              }
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  //TODO scroll up after refresh, doesnt work atm, scroll down works fine
-
                   if ((documents?.length ?? 0) > _itemCount.value) {
-                    _itemCount.value += 10;
-                    scrollController.animateTo(
-                      scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 1000),
-                      curve: Curves.linear,
+                    await refreshFunction().then(
+                      (_) {
+                        SchedulerBinding.instance.addPostFrameCallback(
+                          (_) {
+                            scrollController.animateTo(
+                              scrollController.position.maxScrollExtent,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.linear,
+                            );
+                          },
+                        );
+                      },
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -165,6 +179,7 @@ class Messages extends StatelessWidget {
                   valueListenable: _itemCount,
                   builder: (_, int itemCountValue, Widget? child) {
                     return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       controller: scrollController,
                       reverse: true,
                       itemCount: (documents?.length ?? 0) > itemCountValue
@@ -271,6 +286,10 @@ class Messages extends StatelessWidget {
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 2,
+                                          color: Colors.amber,
+                                        ),
                                         color: isMe ? Colors.white : Colors.black,
                                         borderRadius: BorderRadius.only(
                                           topLeft: const Radius.circular(15),
@@ -376,7 +395,6 @@ class Messages extends StatelessWidget {
                       },
                     );
                   },
-                  // child: Messages(),
                 ),
               );
             },

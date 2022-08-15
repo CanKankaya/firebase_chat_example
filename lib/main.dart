@@ -19,13 +19,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ThemeModel(),
-      child: Consumer<ThemeModel>(builder: (context, ThemeModel themeNotifier, __) {
-        return MaterialApp(
-          title: 'Flutter Demo',
-          theme: themeNotifier.isDark ? ThemeData.dark() : ThemeData.light(),
-          home: AuthScreen(),
-        );
-      }),
+      child: Consumer<ThemeModel>(
+        builder: (context, ThemeModel themeNotifier, __) {
+          return MaterialApp(
+            title: 'Flutter Demo',
+            theme: themeNotifier.isDark ? ThemeData.dark() : ThemeData.light(),
+            home: AuthScreen(),
+          );
+        },
+      ),
     );
   }
 }
