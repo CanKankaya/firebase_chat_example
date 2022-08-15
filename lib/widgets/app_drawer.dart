@@ -78,7 +78,7 @@ class AppDrawer extends StatelessWidget {
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.map),
-                    title: const Text('Temp Listtile'),
+                    title: const Text('Map Test Page'),
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
