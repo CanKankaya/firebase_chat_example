@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:firebase_chat_example/theme/theme_preference.dart';
+import 'package:firebase_chat_example/providers/theme_preference.dart';
 
 class ThemeModel extends ChangeNotifier {
   bool _isDark = false;
