@@ -1,10 +1,9 @@
-import 'package:firebase_chat_example/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
-import 'package:firebase_chat_example/theme/theme_model.dart';
+import 'package:firebase_chat_example/providers/theme_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
@@ -13,6 +12,7 @@ import 'package:firebase_chat_example/screens/profile_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
+import 'package:firebase_chat_example/screens/map_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
