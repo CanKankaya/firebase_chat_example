@@ -15,7 +15,6 @@ class ReplyProvider with ChangeNotifier {
   }
 
   closeReply() {
-    //
     isReply = false;
     messageId = '';
     username = '';

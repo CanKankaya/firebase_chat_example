@@ -197,6 +197,8 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return Expanded(
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -261,8 +263,7 @@ class Messages extends StatelessWidget {
                         itemBuilder: (context, index) {
                           //**  index dependant logic here;
                           final currentMessage = documents?[index];
-                          bool isMe =
-                              currentMessage?['userId'] == FirebaseAuth.instance.currentUser?.uid;
+                          bool isMe = currentMessage?['userId'] == currentUser?.uid;
                           bool isMeAbove = false;
                           if (index + 1 < (documents?.length ?? 0)) {
                             isMeAbove =
@@ -280,11 +281,12 @@ class Messages extends StatelessWidget {
                           String formattedDate =
                               isToday ? DateFormat.Hm().format(dt) : DateFormat.yMMMMd().format(dt);
                           Offset tapPosition = const Offset(0.0, 0.0);
+                          //**
+
+                          //** Reply dependant logic here;
                           final isReply = currentMessage?['repliedTo'] == '' ? false : true;
                           QueryDocumentSnapshot<Object?>? repliedToMessage;
                           QueryDocumentSnapshot<Object?>? repliedToUser;
-                          //**
-
                           if (isReply) {
                             repliedToMessage = documents?.firstWhere((element) {
                               return element.id == currentMessage?['repliedTo'];
@@ -293,6 +295,9 @@ class Messages extends StatelessWidget {
                               return element['userId'] == repliedToMessage?['userId'];
                             });
                           }
+                          final isReplyToCurrentUser =
+                              currentUser?.displayName == repliedToUser?['username'];
+                          //**
 
                           return Column(
                             children: [
@@ -328,7 +333,9 @@ class Messages extends StatelessWidget {
                                               ),
                                             ),
                                             Text(
-                                              repliedToUser?['username'],
+                                              isReplyToCurrentUser
+                                                  ? 'You'
+                                                  : repliedToUser?['username'],
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.amber,
