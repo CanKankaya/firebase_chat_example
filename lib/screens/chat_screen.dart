@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -10,34 +10,45 @@ import 'package:provider/provider.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
-import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class ChatScreen extends StatelessWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final String chatId;
+
+  const ChatScreen({super.key, required this.chatId});
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => showExitPopup(context),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    if (chatId == '') {
+      return WillPopScope(
+        onWillPop: () => showExitPopup(context),
         child: Scaffold(
-          drawer: const AppDrawer(),
           appBar: AppBar(),
           body: Column(
-            children: [
-              Messages(),
-              const ReplyWidget(),
-              NewMessage(),
+            children: const [
+              Text('Chat Id is empty for some reason'),
             ],
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          appBar: AppBar(),
+          body: Column(
+            children: [
+              Messages(chatId: chatId),
+              const ReplyWidget(),
+              NewMessage(chatId: chatId),
+            ],
+          ),
+        ),
+      );
+    }
   }
 }
 
@@ -107,17 +118,19 @@ class ReplyWidget extends StatelessWidget {
 }
 
 class NewMessage extends StatelessWidget {
-  NewMessage({Key? key}) : super(key: key);
+  final String chatId;
   final ValueNotifier<String> _enteredMessage = ValueNotifier<String>('');
 
   final _controller = TextEditingController();
+
+  NewMessage({super.key, required this.chatId});
 
   @override
   Widget build(BuildContext context) {
     final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
       final auth = FirebaseAuth.instance;
-      await FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/messages').add({
+      await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
         'userId': auth.currentUser?.uid,
@@ -180,15 +193,14 @@ class NewMessage extends StatelessWidget {
 }
 
 class Messages extends StatelessWidget {
-  Messages({Key? key}) : super(key: key);
+  final String chatId;
 
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
 
+  Messages({super.key, required this.chatId});
+
   _deleteMessage(messageId) async {
-    await FirebaseFirestore.instance
-        .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
-        .doc(messageId)
-        .delete();
+    await FirebaseFirestore.instance.collection('chats/$chatId/messages').doc(messageId).delete();
   }
 
   _refreshFunction() async {
@@ -197,32 +209,32 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).size;
+    final scrollController = ScrollController();
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Expanded(
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('chats/dJa1VvWu8w3ECOCV6tUb/messages')
+            .collection('chats/$chatId/messages')
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
           {
             return StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
+                  .collection('chats/$chatId/participantsData')
                   .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting ||
+              builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+                if (usersSnapshot.connectionState == ConnectionState.waiting ||
                     messagesSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
                 //** Firebase dependant logic here;
-                final deviceSize = MediaQuery.of(context).size;
                 final documents = messagesSnapshot.data?.docs;
-                final participantsData = userSnapshot.data?.docs;
-                final scrollController = ScrollController();
+                final participantsData = usersSnapshot.data?.docs;
                 // **
 
                 return RefreshIndicator(
@@ -515,7 +527,7 @@ class Messages extends StatelessWidget {
                                             ),
                                             padding: const EdgeInsets.symmetric(
                                               vertical: 10,
-                                              horizontal: 16,
+                                              horizontal: 12,
                                             ),
                                             margin: EdgeInsets.only(
                                               top: !isMeAbove && !isReply ? 32 : 2,
@@ -544,20 +556,32 @@ class Messages extends StatelessWidget {
                                                     fontSize: 12,
                                                     color: isMe ? Colors.black : Colors.white,
                                                   ),
-                                                  textAlign: isMe ? TextAlign.end : TextAlign.start,
+                                                  textAlign: TextAlign.start,
                                                 ),
-                                                const SizedBox(height: 3),
                                                 Text(
+                                                  // This allocates space for the formattedDate, however the formattedDate is placed later with the Stack, look below
                                                   formattedDate,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 10,
-                                                    color: isMe
-                                                        ? const Color.fromARGB(255, 60, 60, 60)
-                                                        : const Color.fromARGB(255, 195, 195, 195),
+                                                    color: Colors.transparent,
                                                   ),
                                                   textAlign: isMe ? TextAlign.end : TextAlign.start,
                                                 ),
                                               ],
+                                            ),
+                                          ),
+                                          PositionedDirectional(
+                                            bottom: 11,
+                                            end: 18,
+                                            child: Text(
+                                              formattedDate,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: isMe
+                                                    ? const Color.fromARGB(255, 60, 60, 60)
+                                                    : const Color.fromARGB(255, 195, 195, 195),
+                                              ),
+                                              textAlign: isMe ? TextAlign.end : TextAlign.start,
                                             ),
                                           ),
                                           if (!isMeAbove)

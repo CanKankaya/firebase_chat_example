@@ -7,7 +7,7 @@ import 'package:firebase_chat_example/providers/theme_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
-import 'package:firebase_chat_example/screens/chat_screen.dart';
+import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/profile_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
@@ -52,14 +52,27 @@ class AppDrawer extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.chat),
-                    title: const Text('Chat Screen'),
+                    title: const Text('Chats Screen'),
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ChatScreen(),
+                          builder: (context) => const ChatsListScreen(),
                         ),
                       );
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.chat),
+                    title: const Text('Chat Screen (temp)'),
+                    onTap: () {
+                      // Navigator.pushReplacement(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => const ChatScreen(chatId: 'dJa1VvWu8w3ECOCV6tUb'),
+                      //   ),
+                      // );
                     },
                   ),
                   const Divider(),
@@ -87,12 +100,6 @@ class AppDrawer extends StatelessWidget {
                         ),
                       );
                     },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: const Text('Temp Listtile'),
-                    onTap: () {},
                   ),
                   const Divider(),
                   ListTile(

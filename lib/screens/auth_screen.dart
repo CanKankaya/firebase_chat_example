@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/splash_screen.dart';
-import 'package:firebase_chat_example/screens/chat_screen.dart';
+import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 
 class AuthScreen extends StatelessWidget {
   AuthScreen({Key? key}) : super(key: key);
@@ -59,12 +59,12 @@ class AuthScreen extends StatelessWidget {
                 .signInWithEmailAndPassword(
                     email: userEmail.toString().trim(), password: userPassword.toString().trim())
                 .then((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ChatScreen(),
-                ),
-              );
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => const ChatScreen(),
+              //   ),
+              // );
             }).catchError((error) {
               throw error;
             });
@@ -85,6 +85,7 @@ class AuthScreen extends StatelessWidget {
 
             await authResult.user?.updatePhotoURL(url);
             await authResult.user?.updateDisplayName(username);
+            //TODO: problem: When sign up, user is auto added to participants of the first chat
             await FirebaseFirestore.instance
                 .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
                 .add({
@@ -125,7 +126,7 @@ class AuthScreen extends StatelessWidget {
           return const SplashScreen();
         } else {
           return snapshot.hasData
-              ? const ChatScreen()
+              ? const ChatsListScreen()
               : WillPopScope(
                   onWillPop: () => showExitPopup(context),
                   child: Theme(
