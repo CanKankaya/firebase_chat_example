@@ -46,7 +46,6 @@ class ReplyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final deviceOrientation = MediaQuery.of(context).orientation;
     return Consumer<ReplyProvider>(
       builder: (_, providerValue, __) {
         if (providerValue.isReply) {
@@ -55,7 +54,6 @@ class ReplyWidget extends StatelessWidget {
             child: Container(
               color: Colors.black,
               padding: const EdgeInsets.all(8),
-              // height: deviceOrientation == Orientation.portrait ? 90 : 65,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -252,7 +250,7 @@ class Messages extends StatelessWidget {
                   },
                   child: ValueListenableBuilder(
                     valueListenable: _itemCount,
-                    builder: (_, int itemCountValue, Widget? child) {
+                    builder: (_, int itemCountValue, __) {
                       return ListView.builder(
                         physics: const AlwaysScrollableScrollPhysics(),
                         controller: scrollController,
@@ -282,10 +280,10 @@ class Messages extends StatelessWidget {
                           String formattedDate =
                               isToday ? DateFormat.Hm().format(dt) : DateFormat.yMMMMd().format(dt);
                           Offset tapPosition = const Offset(0.0, 0.0);
-                          //**
                           final isReply = currentMessage?['repliedTo'] == '' ? false : true;
                           QueryDocumentSnapshot<Object?>? repliedToMessage;
                           QueryDocumentSnapshot<Object?>? repliedToUser;
+                          //**
 
                           if (isReply) {
                             repliedToMessage = documents?.firstWhere((element) {
