@@ -14,30 +14,37 @@ import 'package:firebase_chat_example/screens/chat_screen.dart';
 class ChatsListScreen extends StatelessWidget {
   const ChatsListScreen({Key? key}) : super(key: key);
 
-//TODO: Add some way to create a new Chat
-
-//TODO: Make users able to join or leave chats
-
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
     final chatNameController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
 
     Future<void> tryAddNewChat() async {
-      //
-      try {
-        await FirebaseFirestore.instance.collection('chats').add({
-          'chatCreatorId': currentUser?.uid,
-          'chatName': chatNameController.text,
-          'createdAt': DateTime.now(),
-        });
-      } catch (error) {
-        //
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong'),
-          ),
-        );
+      if (formKey.currentState!.validate()) {
+        try {
+          Navigator.pop(context);
+
+          await FirebaseFirestore.instance.collection('chats').add({
+            'chatCreatorId': currentUser?.uid,
+            'chatName': chatNameController.text,
+            'createdAt': DateTime.now(),
+          });
+          chatNameController.text = '';
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Yeyy, added a new chat'),
+              ),
+            );
+          });
+        } catch (error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Something went wrong'),
+            ),
+          );
+        }
       }
     }
 
@@ -62,31 +69,40 @@ class ChatsListScreen extends StatelessWidget {
                 builder: (BuildContext context) {
                   return Dialog(
                     child: SizedBox(
-                      height: 150,
+                      height: 210,
                       child: ListView(
                         padding: const EdgeInsets.all(16),
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          TextField(
-                            key: const ValueKey('chatName'),
-                            controller: chatNameController,
+                          const Text(
+                            'Add a New Public Chat',
+                            style: TextStyle(fontSize: 20),
                           ),
-                          const SizedBox(height: 10),
+                          Form(
+                            key: formKey,
+                            child: TextFormField(
+                              key: const ValueKey('chatName'),
+                              controller: chatNameController,
+                              autocorrect: false,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: const InputDecoration(labelText: 'Chat Name'),
+                              maxLength: 30,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Chat Name cant be empty';
+                                } else {
+                                  return null;
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               const Spacer(),
                               ElevatedButton(
                                 onPressed: () {
-                                  tryAddNewChat().then((_) {
-                                    Navigator.pop(context);
-                                    SchedulerBinding.instance.addPostFrameCallback((_) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Yeyy, added a new chat'),
-                                        ),
-                                      );
-                                    });
-                                  });
+                                  tryAddNewChat();
                                 },
                                 child: const Text('button'),
                               ),
