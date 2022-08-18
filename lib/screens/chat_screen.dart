@@ -312,7 +312,7 @@ class Messages extends StatelessWidget {
                           }
                           final isReplyToCurrentUser =
                               currentUser?.displayName == repliedToUser?['username'];
-                          final isReplyToSelf = repliedToMessage?['userId'] == currentUser?.uid;
+                          final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
                           //**
 
                           return Dismissible(
