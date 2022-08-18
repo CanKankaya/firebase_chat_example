@@ -172,9 +172,9 @@ class ChatItem extends StatelessWidget {
           .doc(_currentUser?.uid)
           .set({
         'userId': _currentUser?.uid,
-        'username': _currentUser?.displayName,
-        'userImageUrl': _currentUser?.photoURL,
-        'userDetail': '',
+        // 'username': _currentUser?.displayName,
+        // 'userImageUrl': _currentUser?.photoURL,
+        // 'userDetail': '',
       });
       _isLoading.value = false;
     } catch (error) {
