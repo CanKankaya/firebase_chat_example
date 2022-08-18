@@ -52,8 +52,7 @@ class ProfileScreen extends StatelessWidget {
         await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.updateDisplayName(_usernameController.text);
 
-        final userCollection =
-            FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        final userCollection = FirebaseFirestore.instance.collection('usersData');
         QuerySnapshot userSnapshot = await userCollection.get();
         final whichParticipant = userSnapshot.docs.firstWhere((element) {
           return element['userId'] == auth.currentUser?.uid;
@@ -70,8 +69,7 @@ class ProfileScreen extends StatelessWidget {
         _isLoading.value = true;
 
         await auth.currentUser?.updateDisplayName(_usernameController.text);
-        final userCollection =
-            FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+        final userCollection = FirebaseFirestore.instance.collection('usersData');
         QuerySnapshot userSnapshot = await userCollection.get();
         final whichParticipant = userSnapshot.docs.firstWhere((element) {
           return element['userId'] == auth.currentUser?.uid;
@@ -90,8 +88,7 @@ class ProfileScreen extends StatelessWidget {
   Future _getAndSetUserData() async {
     _usernameController.text = auth.currentUser?.displayName ?? '';
     _emailController.text = auth.currentUser?.email ?? '';
-    final userCollection =
-        FirebaseFirestore.instance.collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData');
+    final userCollection = FirebaseFirestore.instance.collection('usersData');
     QuerySnapshot userSnapshot = await userCollection.get();
     final whichParticipant = userSnapshot.docs.firstWhere((element) {
       return element['userId'] == auth.currentUser?.uid;

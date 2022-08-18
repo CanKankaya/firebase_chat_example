@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +7,7 @@ import 'package:firebase_chat_example/providers/theme_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
+import 'package:firebase_chat_example/screens/profile_screen.dart';
 import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
@@ -193,18 +193,13 @@ class AppDrawer extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: IconButton(
                         onPressed: () {
-                          simplerErrorMessage(
-                              context, 'Profile Screen is broken for now', 'Ok :(', () {}, true);
-
-                          //TODO: Add userData seperate from participantsData
-
-                          // Navigator.of(context).pop();
-                          // Navigator.pushReplacement(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => ProfileScreen(),
-                          //   ),
-                          // );
+                          Navigator.of(context).pop();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.account_circle, size: 32, color: Colors.white),
                       ),

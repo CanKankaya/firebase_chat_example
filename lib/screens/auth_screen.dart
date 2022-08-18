@@ -85,7 +85,6 @@ class AuthScreen extends StatelessWidget {
 
             await authResult.user?.updatePhotoURL(url);
             await authResult.user?.updateDisplayName(username);
-            //TODO: problem: When sign up, user is auto added to participants of the first chat
 
             await FirebaseFirestore.instance.collection('usersData').doc(authResult.user?.uid).set({
               'userId': authResult.user?.uid,
@@ -93,9 +92,6 @@ class AuthScreen extends StatelessWidget {
               'userImageUrl': url,
               'userDetail': '',
             });
-            //     .add({
-
-            // });
             // SchedulerBinding.instance.addPostFrameCallback((_) {
             //   //
             //   Navigator.pushReplacement(
