@@ -57,8 +57,12 @@ class ReplyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return Consumer<ReplyProvider>(
       builder: (_, providerValue, __) {
+        bool isReplyToSelf = providerValue.username == currentUser?.displayName;
+
         if (providerValue.isReply) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(20),
@@ -71,19 +75,18 @@ class ReplyWidget extends StatelessWidget {
                   Row(
                     children: [
                       const Text(
-                        'Replying to \'',
+                        'Replying to ',
                         style: TextStyle(
                           color: Colors.white,
                         ),
                       ),
                       Text(
-                        providerValue.username,
+                        isReplyToSelf ? 'Yourself' : providerValue.username,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.amber,
                         ),
                       ),
-                      const Text('\''),
                       const Spacer(),
                       GestureDetector(
                         onTap: () {
@@ -309,129 +312,130 @@ class Messages extends StatelessWidget {
                           }
                           final isReplyToCurrentUser =
                               currentUser?.displayName == repliedToUser?['username'];
+                          final isReplyToSelf = repliedToMessage?['userId'] == currentUser?.uid;
                           //**
 
-                          return Column(
-                            children: [
-                              if (isReply)
-                                Align(
-                                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                                  child: Container(
-                                    constraints: BoxConstraints(
-                                      maxWidth: deviceSize.width * 0.65,
-                                    ),
-                                    margin: const EdgeInsets.only(
-                                      top: 16,
-                                      right: 8,
-                                      left: 8,
-                                      bottom: 4,
-                                    ),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: isMe ? Colors.grey[500] : Colors.grey[700],
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'Replying to ',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: isMe ? Colors.black : Colors.white,
-                                              ),
-                                            ),
-                                            Text(
-                                              isReplyToCurrentUser
-                                                  ? 'You'
-                                                  : repliedToUser?['username'],
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.amber,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          repliedToMessage?['text'],
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: isMe ? Colors.black : Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                          return Dismissible(
+                            key: ValueKey(currentMessage?.id),
+                            background: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.green,
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              child: const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Reply',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                                 ),
-                              Dismissible(
-                                key: ValueKey(currentMessage?.id),
-                                background: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.green,
+                              ),
+                            ),
+                            secondaryBackground: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.red,
+                              ),
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: const [
+                                  Text(
+                                    'Delete',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                                   ),
-                                  padding: const EdgeInsets.all(8),
-                                  child: const Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'Reply',
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                                secondaryBackground: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.red,
-                                  ),
-                                  padding: const EdgeInsets.all(10),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: const [
-                                      Text(
-                                        'Delete',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                      ),
-                                      Icon(Icons.delete)
-                                    ],
-                                  ),
-                                ),
-                                dismissThresholds: const {
-                                  DismissDirection.startToEnd: 0.6,
-                                  DismissDirection.endToStart: 0.6,
-                                },
-                                direction: isMe
-                                    ? DismissDirection.endToStart
-                                    : DismissDirection.startToEnd,
-                                onDismissed: (direction) {},
-                                confirmDismiss: (DismissDirection dismissDirection) async {
-                                  switch (dismissDirection) {
-                                    case DismissDirection.startToEnd:
-                                      {
-                                        Provider.of<ReplyProvider>(context, listen: false)
-                                            .replyHandler(
-                                          currentMessage?.id ?? '',
-                                          whichParticipant?['username'],
-                                          currentMessage?['text'],
-                                        );
-                                        break;
-                                      }
-                                    case DismissDirection.endToStart:
-                                      {
-                                        _deleteMessage(currentMessage?.id);
-                                        break;
-                                      }
-                                    default:
-                                      break;
+                                  Icon(Icons.delete)
+                                ],
+                              ),
+                            ),
+                            dismissThresholds: const {
+                              DismissDirection.startToEnd: 0.6,
+                              DismissDirection.endToStart: 0.6,
+                            },
+                            direction:
+                                isMe ? DismissDirection.horizontal : DismissDirection.startToEnd,
+                            onDismissed: (direction) {},
+                            confirmDismiss: (DismissDirection dismissDirection) async {
+                              switch (dismissDirection) {
+                                case DismissDirection.startToEnd:
+                                  {
+                                    Provider.of<ReplyProvider>(context, listen: false).replyHandler(
+                                      currentMessage?.id ?? '',
+                                      whichParticipant?['username'],
+                                      currentMessage?['text'],
+                                    );
+                                    break;
                                   }
-                                  return false;
-                                },
-                                child: InkWell(
+                                case DismissDirection.endToStart:
+                                  {
+                                    _deleteMessage(currentMessage?.id);
+                                    break;
+                                  }
+                                default:
+                                  break;
+                              }
+                              return false;
+                            },
+                            child: Column(
+                              children: [
+                                if (isReply)
+                                  Align(
+                                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth: deviceSize.width * 0.65,
+                                      ),
+                                      margin: const EdgeInsets.only(
+                                        top: 16,
+                                        right: 8,
+                                        left: 8,
+                                        bottom: 4,
+                                      ),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: isMe ? Colors.grey[500] : Colors.grey[700],
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'Replying to ',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: isMe ? Colors.black : Colors.white,
+                                                ),
+                                              ),
+                                              Text(
+                                                isReplyToCurrentUser
+                                                    ? isReplyToSelf
+                                                        ? 'Yourself'
+                                                        : 'You'
+                                                    : repliedToUser?['username'],
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.amber,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            repliedToMessage?['text'],
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: isMe ? Colors.black : Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                InkWell(
                                   onTapDown: (details) {
                                     tapPosition = details.globalPosition;
                                   },
@@ -628,8 +632,8 @@ class Messages extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       );

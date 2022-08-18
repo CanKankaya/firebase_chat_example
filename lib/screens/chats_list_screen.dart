@@ -1,9 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
@@ -18,6 +20,27 @@ class ChatsListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final chatNameController = TextEditingController();
+
+    Future<void> tryAddNewChat() async {
+      //
+      try {
+        await FirebaseFirestore.instance.collection('chats').add({
+          'chatCreatorId': currentUser?.uid,
+          'chatName': chatNameController.text,
+          'createdAt': DateTime.now(),
+        });
+      } catch (error) {
+        //
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong'),
+          ),
+        );
+      }
+    }
+
     return WillPopScope(
       onWillPop: () => showExitPopup(context),
       child: GestureDetector(
@@ -30,6 +53,52 @@ class ChatsListScreen extends StatelessWidget {
             children: const [
               ChatsList(),
             ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('Add'),
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    child: SizedBox(
+                      height: 150,
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          TextField(
+                            key: const ValueKey('chatName'),
+                            controller: chatNameController,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              const Spacer(),
+                              ElevatedButton(
+                                onPressed: () {
+                                  tryAddNewChat().then((_) {
+                                    Navigator.pop(context);
+                                    SchedulerBinding.instance.addPostFrameCallback((_) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Yeyy, added a new chat'),
+                                        ),
+                                      );
+                                    });
+                                  });
+                                },
+                                child: const Text('button'),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),
@@ -71,10 +140,32 @@ class ChatsList extends StatelessWidget {
 }
 
 class ChatItem extends StatelessWidget {
-  final QueryDocumentSnapshot<Object?>? individualChatData;
-
   ChatItem({super.key, required this.individualChatData});
-  final currentUser = FirebaseAuth.instance.currentUser;
+
+  final QueryDocumentSnapshot<Object?>? individualChatData;
+  final _currentUser = FirebaseAuth.instance.currentUser;
+  final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
+
+  Future<void> tryAddParticipant() async {
+    //
+    _isLoading.value = true;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('chats/${individualChatData?.id}/participantsData')
+          .doc(_currentUser?.uid)
+          .set({
+        'userId': _currentUser?.uid,
+        'username': _currentUser?.displayName,
+        'userImageUrl': _currentUser?.photoURL,
+        'userDetail': '',
+      });
+      _isLoading.value = false;
+    } catch (error) {
+      //
+      _isLoading.value = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,39 +184,71 @@ class ChatItem extends StatelessWidget {
           );
         }
         final participantsData = usersSnapshot.data?.docs;
-
-        print(participantsData);
-        // final QueryDocumentSnapshot<Object?>? whichParticipant = participantsData?.firstWhere(
-        //   (element) {
-        //     if (element.exists) {
-        //       return element['userId'] == currentUser?.uid;
-        //     } else {
-        //       return false;
-        //     }
-        //   },
-        // );
-        // print(whichParticipant);
-
+        int index =
+            participantsData?.map((e) => e.id).toList().indexOf(_currentUser?.uid ?? '') ?? -1;
+        final bool userBelongs = index != -1;
         return InkWell(
           splashColor: Colors.amber,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  chatId: individualChatData?.id ?? '',
+            if (userBelongs) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    chatId: individualChatData?.id ?? '',
+                  ),
                 ),
-              ),
-            );
+              );
+            } else {
+              simplerErrorMessage(
+                context,
+                'You Shall Not Pass!',
+                '',
+                null,
+                true,
+              );
+            }
           },
           child: Row(
             children: [
               const Icon(Icons.construction),
               Column(
                 children: [
-                  Text(individualChatData?.id ?? ''),
+                  Text(individualChatData?['chatName'] ?? ''),
                   Text(formattedDate),
                 ],
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  if (userBelongs) {
+                    simplerErrorMessage(
+                      context,
+                      'You are already a participant here',
+                      '',
+                      null,
+                      true,
+                    );
+                  } else {
+                    tryAddParticipant();
+
+                    // simplerErrorMessage(
+                    //   context,
+                    //   'Doing nothing yet, this button will add you as a participant later',
+                    //   '',
+                    //   null,
+                    //   true,
+                    // );
+
+                  }
+                },
+                icon: ValueListenableBuilder(
+                    valueListenable: _isLoading,
+                    builder: (_, bool loadingValue, __) {
+                      return loadingValue
+                          ? const CircularProgressIndicator()
+                          : const Icon(Icons.add);
+                    }),
               ),
             ],
           ),

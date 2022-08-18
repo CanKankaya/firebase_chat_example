@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -86,14 +86,16 @@ class AuthScreen extends StatelessWidget {
             await authResult.user?.updatePhotoURL(url);
             await authResult.user?.updateDisplayName(username);
             //TODO: problem: When sign up, user is auto added to participants of the first chat
-            await FirebaseFirestore.instance
-                .collection('chats/dJa1VvWu8w3ECOCV6tUb/participantsData')
-                .add({
+
+            await FirebaseFirestore.instance.collection('usersData').doc(authResult.user?.uid).set({
               'userId': authResult.user?.uid,
               'username': username,
               'userImageUrl': url,
               'userDetail': '',
             });
+            //     .add({
+
+            // });
             // SchedulerBinding.instance.addPostFrameCallback((_) {
             //   //
             //   Navigator.pushReplacement(
