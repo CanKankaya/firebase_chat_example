@@ -22,13 +22,15 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>>? docData;
-    _getParticipants() async {
-      var snapshot =
-          await FirebaseFirestore.instance.collection('chats/$chatId/participantsData').get();
-      docData = snapshot.docs.map((e) => e.data()).toList();
-      return docData;
-    }
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    // List<Map<String, dynamic>>? docData;
+    // _getParticipants() async {
+    //   var snapshot =
+    //       await FirebaseFirestore.instance.collection('chats/$chatId/participantsData').get();
+    //   docData = snapshot.docs.map((e) => e.data()).toList();
+    //   return docData;
+    // }
 
     if (chatId == '') {
       return Scaffold(
@@ -42,49 +44,63 @@ class ChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return FutureBuilder(
-        future: _getParticipants(),
-        builder: (context, AsyncSnapshot<Object?> snapshot) {
-          if (snapshot.hasData) {
-            SchedulerBinding.instance.addPostFrameCallback((_) {});
-            return GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: WillPopScope(
-                onWillPop: () {
-                  Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                  return Future.value(true);
-                },
-                child: Scaffold(
-                  appBar: AppBar(
-                    actions: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatParticipantsScreen(docData: docData),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.manage_accounts),
-                      ),
-                    ],
-                  ),
-                  body: Column(
-                    children: [
-                      Messages(chatId: chatId),
-                      const ReplyWidget(),
-                      NewMessage(chatId: chatId),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          } else {
+      return StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
+          } else {
+            final participantsData = snapshot.data?.docs;
+            final foundUser = participantsData?.firstWhereOrNull(
+              (element) => element.id == currentUser?.uid,
+            );
+            if (foundUser == null) {
+              return Scaffold(
+                appBar: AppBar(),
+                body: const Center(
+                  child: Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                ),
+              );
+            } else {
+              return GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: WillPopScope(
+                  onWillPop: () {
+                    Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                    return Future.value(true);
+                  },
+                  child: Scaffold(
+                    appBar: AppBar(
+                      actions: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatParticipantsScreen(
+                                  participantsData: participantsData,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.manage_accounts),
+                        ),
+                      ],
+                    ),
+                    body: Column(
+                      children: [
+                        Messages(chatId: chatId),
+                        const ReplyWidget(),
+                        NewMessage(chatId: chatId),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
           }
         },
       );

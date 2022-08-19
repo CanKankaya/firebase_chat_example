@@ -5,9 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
-  final List<Map<String, dynamic>>? docData;
+  final List<QueryDocumentSnapshot<Object?>>? participantsData;
 
-  const ChatParticipantsScreen({super.key, required this.docData});
+  const ChatParticipantsScreen({Key? key, this.participantsData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +30,10 @@ class ChatParticipantsScreen extends StatelessWidget {
               appBar: AppBar(),
               body: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: docData?.length,
+                itemCount: participantsData?.length,
                 itemBuilder: (context, index) {
                   final whichUser = usersData?.firstWhere((element) {
-                    return element['userId'] == docData?[index]['userId'];
+                    return element['userId'] == participantsData?[index]['userId'];
                   });
                   return InkWell(
                     onTap: () {},
