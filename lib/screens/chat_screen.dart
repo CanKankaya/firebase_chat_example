@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -232,10 +233,9 @@ class NewMessage extends StatelessWidget {
 class Messages extends StatelessWidget {
   final String chatId;
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
-
   Messages({super.key, required this.chatId});
 
-  _deleteMessage(messageId) async {
+  Future<void> _deleteMessage(messageId) async {
     await FirebaseFirestore.instance.collection('chats/$chatId/messages').doc(messageId).delete();
   }
 
@@ -317,9 +317,9 @@ class Messages extends StatelessWidget {
                           } else {
                             isMeAbove = false;
                           }
-                          final whichUser = usersData?.firstWhere((element) {
-                            return element.id == currentMessage?['userId'];
-                          });
+                          final whichUser = usersData?.firstWhere(
+                            (element) => element.id == currentMessage?['userId'],
+                          );
                           DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
                           final isToday = dt.day == DateTime.now().day;
                           String formattedDate =
@@ -331,13 +331,16 @@ class Messages extends StatelessWidget {
                           final isReply = currentMessage?['repliedTo'] == '' ? false : true;
                           QueryDocumentSnapshot<Object?>? repliedToMessage;
                           QueryDocumentSnapshot<Object?>? repliedToUser;
+
                           if (isReply) {
-                            repliedToMessage = documents?.firstWhere((element) {
-                              return element.id == currentMessage?['repliedTo'];
-                            });
-                            repliedToUser = usersData?.firstWhere((element) {
-                              return element.id == repliedToMessage?['userId'];
-                            });
+                            repliedToMessage = documents?.firstWhereOrNull(
+                              (element) => element.id == currentMessage?['repliedTo'],
+                            );
+                            if (repliedToMessage != null) {
+                              repliedToUser = usersData?.firstWhere(
+                                (element) => element.id == repliedToMessage?['userId'],
+                              );
+                            }
                           }
                           final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
                           final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
@@ -509,7 +512,8 @@ class Messages extends StatelessWidget {
                                                       ? isReplyToSelf
                                                           ? 'Yourself'
                                                           : 'You'
-                                                      : repliedToUser?['username'] ?? '',
+                                                      : repliedToUser?['username'] ??
+                                                          '\'unknown user\'',
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     color: Colors.amber,
@@ -519,7 +523,8 @@ class Messages extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              repliedToMessage?['text'] ?? '',
+                                              repliedToMessage?['text'] ??
+                                                  '\'this message is deleted \'',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: isMe ? Colors.black : Colors.white,
