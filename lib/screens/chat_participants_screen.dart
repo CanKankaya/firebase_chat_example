@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,12 +7,15 @@ import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
   final List<QueryDocumentSnapshot<Object?>>? participantsData;
+  final String creatorId;
 
-  const ChatParticipantsScreen({Key? key, this.participantsData}) : super(key: key);
+  const ChatParticipantsScreen({Key? key, this.participantsData, required this.creatorId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>>? usersData;
+    final currentUser = FirebaseAuth.instance.currentUser;
 
     _getUsers() async {
       var snapshot = await FirebaseFirestore.instance.collection('usersData').get();
@@ -23,6 +27,8 @@ class ChatParticipantsScreen extends StatelessWidget {
       future: _getUsers(),
       builder: (_, snapshot) {
         if (snapshot.hasData) {
+          final isCurrentUserAdmin = creatorId == currentUser?.uid;
+          print(isCurrentUserAdmin);
           return GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -35,6 +41,9 @@ class ChatParticipantsScreen extends StatelessWidget {
                   final whichUser = usersData?.firstWhere((element) {
                     return element['userId'] == participantsData?[index]['userId'];
                   });
+                  final isUserAdmin = whichUser?['userId'] == creatorId;
+                  print(isUserAdmin);
+
                   return InkWell(
                     onTap: () {},
                     splashColor: Colors.amber,
@@ -81,13 +90,28 @@ class ChatParticipantsScreen extends StatelessWidget {
                           Text(
                             whichUser?['username'] ?? '',
                           ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.more_vert,
+                          if (whichUser?['userId'] == currentUser?.uid)
+                            const Text(
+                              '(You)',
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
+                          if (isUserAdmin)
+                            const Text(
+                              '(Admin)',
+                              style: TextStyle(
+                                color: Colors.amber,
+                              ),
+                            ),
+                          const Spacer(),
+                          if (isCurrentUserAdmin)
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.more_vert,
+                              ),
+                            ),
                         ],
                       ),
                     ),

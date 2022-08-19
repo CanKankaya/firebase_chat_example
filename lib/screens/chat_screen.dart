@@ -23,11 +23,13 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
+
 //TODO: get the creatorId of this chat to see who is admin
 
 //TODO: add a way for the admin to remove users
 
 //TODO: add a way for the admin to add users later
+
     if (chatId == '') {
       return Scaffold(
         appBar: AppBar(),
@@ -40,66 +42,82 @@ class ChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          } else {
-            final participantsData = snapshot.data?.docs;
-            final foundUser = participantsData?.firstWhereOrNull(
-              (element) => element.id == currentUser?.uid,
-            );
-            if (foundUser == null) {
-              return Scaffold(
-                appBar: AppBar(),
-                body: const Center(
-                  child: Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
+      return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
+          builder: (context, chatSnapshot) {
+            if (!chatSnapshot.hasData) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
                 ),
               );
             } else {
-              return GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                child: WillPopScope(
-                  onWillPop: () {
-                    Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                    return Future.value(true);
-                  },
-                  child: Scaffold(
-                    appBar: AppBar(
-                      actions: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatParticipantsScreen(
-                                  participantsData: participantsData,
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.manage_accounts),
+              return StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('chats/$chatId/participantsData')
+                    .snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+                  if (participantsSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  } else {
+                    final participantsData = participantsSnapshot.data?.docs;
+                    final foundUser = participantsData?.firstWhereOrNull(
+                      (element) => element.id == currentUser?.uid,
+                    );
+                    if (foundUser == null) {
+                      return Scaffold(
+                        appBar: AppBar(),
+                        body: const Center(
+                          child: Text(
+                              'Something Went Wrong, \n You May Have Been Removed From Chat :('),
                         ),
-                      ],
-                    ),
-                    body: Column(
-                      children: [
-                        Messages(chatId: chatId),
-                        const ReplyWidget(),
-                        NewMessage(chatId: chatId),
-                      ],
-                    ),
-                  ),
-                ),
+                      );
+                    } else {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                        child: WillPopScope(
+                          onWillPop: () {
+                            Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                            return Future.value(true);
+                          },
+                          child: Scaffold(
+                            appBar: AppBar(
+                              actions: [
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatParticipantsScreen(
+                                          creatorId: chatSnapshot.data?['chatCreatorId'],
+                                          participantsData: participantsData,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.manage_accounts),
+                                ),
+                              ],
+                            ),
+                            body: Column(
+                              children: [
+                                Messages(chatId: chatId),
+                                const ReplyWidget(),
+                                NewMessage(chatId: chatId),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
               );
             }
-          }
-        },
-      );
+          });
     }
   }
 }

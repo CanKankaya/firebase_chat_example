@@ -180,10 +180,12 @@ class ChatItem extends StatelessWidget {
       _isLoading.value = false;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You are added as a participant'),
-          ),
+        simplerErrorMessage(
+          context,
+          'You Are Added as a Participant',
+          '',
+          null,
+          true,
         );
       });
     } catch (error) {
@@ -232,13 +234,7 @@ class ChatItem extends StatelessWidget {
                 ),
               );
             } else {
-              simplerErrorMessage(
-                context,
-                'You Shall Not Pass!',
-                '',
-                null,
-                true,
-              );
+              simplerErrorMessage(context, 'You Shall Not Pass!', '', null, true);
             }
           },
           child: Padding(
@@ -281,9 +277,8 @@ class ChatItem extends StatelessWidget {
                     onPressed: () {
                       if (userBelongs) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar;
-
                         simplerErrorMessage(
-                            context, 'You are already a participant here', '', null, false);
+                            context, 'You are already a participant here', '', null, true);
                       } else {
                         tryAddParticipant(context);
                       }
