@@ -170,7 +170,7 @@ class NewMessage extends StatelessWidget {
       await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
-        'userId': auth.currentUser?.uid,
+        'userId': auth.currentUser?.uid ?? '',
         'repliedTo': provData.messageId,
       });
       provData.closeReply();
@@ -390,8 +390,8 @@ class Messages extends StatelessWidget {
                                   {
                                     Provider.of<ReplyProvider>(context, listen: false).replyHandler(
                                       currentMessage?.id ?? '',
-                                      whichUser?['username'],
-                                      currentMessage?['text'],
+                                      whichUser?['username'] ?? '',
+                                      currentMessage?['text'] ?? '',
                                     );
                                     break;
                                   }
@@ -424,7 +424,7 @@ class Messages extends StatelessWidget {
                                       onTap: () {
                                         Clipboard.setData(
                                           ClipboardData(
-                                            text: currentMessage?['text'],
+                                            text: currentMessage?['text'] ?? '',
                                           ),
                                         ).then((_) {
                                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -451,7 +451,7 @@ class Messages extends StatelessWidget {
                                               context,
                                               true,
                                               'Message Detail',
-                                              'Sent by \'${whichUser?['username']}\'',
+                                              'Sent by \'${whichUser?['username'] ?? ''}\'',
                                               formattedDate,
                                               'ok',
                                               Navigator.of(context).pop,
@@ -509,7 +509,7 @@ class Messages extends StatelessWidget {
                                                       ? isReplyToSelf
                                                           ? 'Yourself'
                                                           : 'You'
-                                                      : repliedToUser?['username'],
+                                                      : repliedToUser?['username'] ?? '',
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     color: Colors.amber,
@@ -519,7 +519,7 @@ class Messages extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              repliedToMessage?['text'],
+                                              repliedToMessage?['text'] ?? '',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: isMe ? Colors.black : Colors.white,
