@@ -405,130 +405,131 @@ class Messages extends StatelessWidget {
                               }
                               return false;
                             },
-                            child: Column(
-                              children: [
-                                if (isReply)
-                                  Align(
-                                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                                    child: Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: deviceSize.width * 0.65,
-                                      ),
-                                      margin: const EdgeInsets.only(
-                                        top: 16,
-                                        right: 8,
-                                        left: 8,
-                                        bottom: 4,
-                                      ),
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: isMe ? Colors.grey[500] : Colors.grey[700],
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                'Replying to ',
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: isMe ? Colors.black : Colors.white,
-                                                ),
-                                              ),
-                                              Text(
-                                                isReplyToCurrentUser
-                                                    ? isReplyToSelf
-                                                        ? 'Yourself'
-                                                        : 'You'
-                                                    : repliedToUser?['username'],
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.amber,
-                                                ),
-                                              ),
-                                            ],
+                            child: InkWell(
+                              onTapDown: (details) {
+                                tapPosition = details.globalPosition;
+                              },
+                              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                              splashColor: Colors.amber,
+                              onLongPress: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                showMenu(
+                                  context: context,
+                                  position: RelativeRect.fromRect(
+                                    tapPosition & const Size(40, 40),
+                                    Offset.zero & const Size(40, 40),
+                                  ),
+                                  items: <PopupMenuEntry>[
+                                    PopupMenuItem(
+                                      onTap: () {
+                                        Clipboard.setData(
+                                          ClipboardData(
+                                            text: currentMessage?['text'],
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            repliedToMessage?['text'],
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: isMe ? Colors.black : Colors.white,
+                                        ).then((_) {
+                                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Copied to clipboard'),
                                             ),
-                                          ),
+                                          );
+                                        });
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Text('Copy'),
+                                          SizedBox(width: 10),
+                                          Icon(Icons.copy),
                                         ],
                                       ),
                                     ),
-                                  ),
-                                InkWell(
-                                  onTapDown: (details) {
-                                    tapPosition = details.globalPosition;
-                                  },
-                                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                                  splashColor: Colors.amber,
-                                  onLongPress: () {
-                                    FocusManager.instance.primaryFocus?.unfocus();
-                                    showMenu(
-                                      context: context,
-                                      position: RelativeRect.fromRect(
-                                        tapPosition & const Size(40, 40),
-                                        Offset.zero & const Size(40, 40),
-                                      ),
-                                      items: <PopupMenuEntry>[
-                                        PopupMenuItem(
-                                          onTap: () {
-                                            Clipboard.setData(
-                                              ClipboardData(
-                                                text: currentMessage?['text'],
-                                              ),
-                                            ).then((_) {
-                                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Copied to clipboard'),
-                                                ),
-                                              );
-                                            });
-                                          },
-                                          child: Row(
-                                            children: const [
-                                              Text('Copy'),
-                                              SizedBox(width: 10),
-                                              Icon(Icons.copy),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuItem(
-                                          onTap: () {
-                                            SchedulerBinding.instance.addPostFrameCallback(
-                                              (_) {
-                                                showMyDialog(
-                                                  context,
-                                                  true,
-                                                  'Message Detail',
-                                                  'Sent by \'${whichUser?['username']}\'',
-                                                  formattedDate,
-                                                  'ok',
-                                                  Navigator.of(context).pop,
-                                                );
-                                              },
+                                    PopupMenuItem(
+                                      onTap: () {
+                                        SchedulerBinding.instance.addPostFrameCallback(
+                                          (_) {
+                                            showMyDialog(
+                                              context,
+                                              true,
+                                              'Message Detail',
+                                              'Sent by \'${whichUser?['username']}\'',
+                                              formattedDate,
+                                              'ok',
+                                              Navigator.of(context).pop,
                                             );
                                           },
-                                          child: Row(
-                                            children: const [
-                                              Text('Details'),
-                                              SizedBox(width: 10),
-                                              Icon(Icons.info_outline),
-                                            ],
-                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Text('Details'),
+                                          SizedBox(width: 10),
+                                          Icon(Icons.info_outline),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  if (isReply)
+                                    Align(
+                                      alignment:
+                                          isMe ? Alignment.centerRight : Alignment.centerLeft,
+                                      child: Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: deviceSize.width * 0.65,
                                         ),
-                                      ],
-                                    );
-                                  },
-                                  child: Row(
+                                        margin: const EdgeInsets.only(
+                                          top: 16,
+                                          right: 8,
+                                          left: 8,
+                                          bottom: 4,
+                                        ),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: isMe ? Colors.grey[500] : Colors.grey[700],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'Replying to ',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: isMe ? Colors.black : Colors.white,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  isReplyToCurrentUser
+                                                      ? isReplyToSelf
+                                                          ? 'Yourself'
+                                                          : 'You'
+                                                      : repliedToUser?['username'],
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              repliedToMessage?['text'],
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: isMe ? Colors.black : Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  Row(
                                     key: ValueKey(currentMessage?.id),
                                     mainAxisAlignment:
                                         isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -659,8 +660,8 @@ class Messages extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },

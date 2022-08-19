@@ -236,36 +236,65 @@ class ChatItem extends StatelessWidget {
               );
             }
           },
-          child: Row(
-            children: [
-              const Icon(Icons.construction),
-              Column(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Row(
                 children: [
-                  Text(individualChatData?['chatName'] ?? ''),
-                  Text(formattedDate),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.construction,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        individualChatData?['chatName'] ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        formattedDate,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      if (userBelongs) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar;
+
+                        simplerErrorMessage(
+                            context, 'You are already a participant here', '', null, false);
+                      } else {
+                        tryAddParticipant(context);
+                      }
+                    },
+                    icon: ValueListenableBuilder(
+                      valueListenable: _isLoading,
+                      builder: (_, bool loadingValue, __) {
+                        return loadingValue
+                            ? const CircularProgressIndicator()
+                            : const Icon(Icons.add);
+                      },
+                    ),
+                  ),
                 ],
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: () {
-                  if (userBelongs) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar;
-
-                    simplerErrorMessage(
-                        context, 'You are already a participant here', '', null, false);
-                  } else {
-                    tryAddParticipant(context);
-                  }
-                },
-                icon: ValueListenableBuilder(
-                    valueListenable: _isLoading,
-                    builder: (_, bool loadingValue, __) {
-                      return loadingValue
-                          ? const CircularProgressIndicator()
-                          : const Icon(Icons.add);
-                    }),
-              ),
-            ],
+            ),
           ),
         );
       },
