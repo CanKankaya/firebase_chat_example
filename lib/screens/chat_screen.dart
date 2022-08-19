@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:collection/collection.dart';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
-import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat_participants_screen.dart';
@@ -32,15 +31,14 @@ class ChatScreen extends StatelessWidget {
     }
 
     if (chatId == '') {
-      return WillPopScope(
-        onWillPop: () => showExitPopup(context),
-        child: Scaffold(
-          appBar: AppBar(),
-          body: Column(
-            children: const [
-              Text('Chat Id is empty for some reason'),
-            ],
-          ),
+      return Scaffold(
+        appBar: AppBar(),
+        body: Column(
+          children: const [
+            Center(
+              child: Text('Chat Id is empty for some reason'),
+            ),
+          ],
         ),
       );
     } else {
@@ -48,31 +46,39 @@ class ChatScreen extends StatelessWidget {
         future: _getParticipants(),
         builder: (context, AsyncSnapshot<Object?> snapshot) {
           if (snapshot.hasData) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {});
             return GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: Scaffold(
-                appBar: AppBar(
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatParticipantsScreen(docData: docData),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.manage_accounts),
-                    ),
-                  ],
-                ),
-                body: Column(
-                  children: [
-                    Messages(chatId: chatId),
-                    const ReplyWidget(),
-                    NewMessage(chatId: chatId),
-                  ],
+              child: WillPopScope(
+                onWillPop: () {
+                  print('object');
+                  Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                  return Future.value(true);
+                },
+                child: Scaffold(
+                  appBar: AppBar(
+                    actions: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatParticipantsScreen(docData: docData),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.manage_accounts),
+                      ),
+                    ],
+                  ),
+                  body: Column(
+                    children: [
+                      Messages(chatId: chatId),
+                      const ReplyWidget(),
+                      NewMessage(chatId: chatId),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -328,16 +334,17 @@ class Messages extends StatelessWidget {
                           //**
 
                           //** Reply dependant logic here;
-                          final isReply = currentMessage?['repliedTo'] == '' ? false : true;
+                          final isReply = currentMessage?['repliedTo'] != '';
                           QueryDocumentSnapshot<Object?>? repliedToMessage;
                           QueryDocumentSnapshot<Object?>? repliedToUser;
 
                           if (isReply) {
                             repliedToMessage = documents?.firstWhereOrNull(
-                              (element) => element.id == currentMessage?['repliedTo'],
+                              (QueryDocumentSnapshot<Object?>? element) =>
+                                  element?.id == currentMessage?['repliedTo'],
                             );
                             if (repliedToMessage != null) {
-                              repliedToUser = usersData?.firstWhere(
+                              repliedToUser = usersData?.firstWhereOrNull(
                                 (element) => element.id == repliedToMessage?['userId'],
                               );
                             }

@@ -1,7 +1,8 @@
-import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
   final List<Map<String, dynamic>>? docData;
