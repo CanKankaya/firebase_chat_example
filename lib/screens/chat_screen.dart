@@ -241,19 +241,14 @@ class Messages extends StatelessWidget {
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
   Messages({super.key, required this.chatId});
 
-  Future<void> _deleteMessage(messageId) async {
-    await FirebaseFirestore.instance.collection('chats/$chatId/messages').doc(messageId).delete();
-  }
-
   _refreshFunction() async {
     _itemCount.value += 10;
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
-    final scrollController = ScrollController();
     final currentUser = FirebaseAuth.instance.currentUser;
+    final scrollController = ScrollController();
 
     return Expanded(
       child: StreamBuilder(
@@ -327,10 +322,9 @@ class Messages extends StatelessWidget {
                             (element) => element.id == currentMessage?['userId'],
                           );
                           DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
-                          final isToday = dt.day == DateTime.now().day;
-                          String formattedDate =
-                              isToday ? DateFormat.Hm().format(dt) : DateFormat.yMMMMd().format(dt);
-                          Offset tapPosition = const Offset(0.0, 0.0);
+                          String formattedDate = dt.day == DateTime.now().day
+                              ? DateFormat.Hm().format(dt)
+                              : DateFormat.yMMMMd().format(dt);
                           //**
 
                           //** Reply dependant logic here;
@@ -352,329 +346,18 @@ class Messages extends StatelessWidget {
                           final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
                           final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
                           //**
-
-                          return Dismissible(
-                            key: ValueKey(currentMessage?.id),
-                            background: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.green,
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: const Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Reply',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                ),
-                              ),
-                            ),
-                            secondaryBackground: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.red,
-                              ),
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: const [
-                                  Text(
-                                    'Delete',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                  ),
-                                  Icon(Icons.delete)
-                                ],
-                              ),
-                            ),
-                            dismissThresholds: const {
-                              DismissDirection.startToEnd: 0.6,
-                              DismissDirection.endToStart: 0.6,
-                            },
-                            direction:
-                                isMe ? DismissDirection.horizontal : DismissDirection.startToEnd,
-                            onDismissed: (direction) {},
-                            confirmDismiss: (DismissDirection dismissDirection) async {
-                              switch (dismissDirection) {
-                                case DismissDirection.startToEnd:
-                                  {
-                                    Provider.of<ReplyProvider>(context, listen: false).replyHandler(
-                                      currentMessage?.id ?? '',
-                                      whichUser?['username'] ?? '',
-                                      currentMessage?['text'] ?? '',
-                                    );
-                                    break;
-                                  }
-                                case DismissDirection.endToStart:
-                                  {
-                                    _deleteMessage(currentMessage?.id);
-                                    break;
-                                  }
-                                default:
-                                  break;
-                              }
-                              return false;
-                            },
-                            child: InkWell(
-                              onTapDown: (details) {
-                                tapPosition = details.globalPosition;
-                              },
-                              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                              splashColor: Colors.amber,
-                              onLongPress: () {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                showMenu(
-                                  context: context,
-                                  position: RelativeRect.fromRect(
-                                    tapPosition & const Size(40, 40),
-                                    Offset.zero & const Size(40, 40),
-                                  ),
-                                  items: <PopupMenuEntry>[
-                                    PopupMenuItem(
-                                      onTap: () {
-                                        Clipboard.setData(
-                                          ClipboardData(
-                                            text: currentMessage?['text'] ?? '',
-                                          ),
-                                        ).then((_) {
-                                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Copied to clipboard'),
-                                            ),
-                                          );
-                                        });
-                                      },
-                                      child: Row(
-                                        children: const [
-                                          Text('Copy'),
-                                          SizedBox(width: 10),
-                                          Icon(Icons.copy),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      onTap: () {
-                                        SchedulerBinding.instance.addPostFrameCallback(
-                                          (_) {
-                                            showMyDialog(
-                                              context,
-                                              true,
-                                              'Message Detail',
-                                              'Sent by \'${whichUser?['username'] ?? ''}\'',
-                                              formattedDate,
-                                              'ok',
-                                              Navigator.of(context).pop,
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Row(
-                                        children: const [
-                                          Text('Details'),
-                                          SizedBox(width: 10),
-                                          Icon(Icons.info_outline),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                              child: Column(
-                                children: [
-                                  if (isReply)
-                                    Align(
-                                      alignment:
-                                          isMe ? Alignment.centerRight : Alignment.centerLeft,
-                                      child: Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: deviceSize.width * 0.65,
-                                        ),
-                                        margin: const EdgeInsets.only(
-                                          top: 16,
-                                          right: 8,
-                                          left: 8,
-                                          bottom: 4,
-                                        ),
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: isMe ? Colors.grey[500] : Colors.grey[700],
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  'Replying to ',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: isMe ? Colors.black : Colors.white,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  isReplyToCurrentUser
-                                                      ? isReplyToSelf
-                                                          ? 'Yourself'
-                                                          : 'You'
-                                                      : repliedToUser?['username'] ??
-                                                          '\'unknown user\'',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.amber,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              repliedToMessage?['text'] ??
-                                                  '\'this message is deleted \'',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: isMe ? Colors.black : Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  Row(
-                                    key: ValueKey(currentMessage?.id),
-                                    mainAxisAlignment:
-                                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                                    children: [
-                                      Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: deviceSize.width * 0.65,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                width: 2,
-                                                color: Colors.amber,
-                                              ),
-                                              color: isMe ? Colors.white : Colors.black,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: const Radius.circular(15),
-                                                topRight: const Radius.circular(15),
-                                                bottomLeft: isMe
-                                                    ? const Radius.circular(15)
-                                                    : const Radius.circular(0),
-                                                bottomRight: isMe
-                                                    ? const Radius.circular(0)
-                                                    : const Radius.circular(15),
-                                              ),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 10,
-                                              horizontal: 12,
-                                            ),
-                                            margin: EdgeInsets.only(
-                                              top: !isMeAbove && !isReply ? 32 : 2,
-                                              bottom: 2,
-                                              left: 8,
-                                              right: 8,
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: isMe
-                                                  ? CrossAxisAlignment.end
-                                                  : CrossAxisAlignment.start,
-                                              children: [
-                                                if (!isMe && !isMeAbove)
-                                                  Text(
-                                                    whichUser?['username'] ?? '',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isMe ? Colors.black : Colors.amber,
-                                                    ),
-                                                  ),
-                                                if (!isMe) const SizedBox(height: 5),
-                                                Text(
-                                                  currentMessage?['text'] ?? '',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: isMe ? Colors.black : Colors.white,
-                                                  ),
-                                                  textAlign: TextAlign.start,
-                                                ),
-                                                Text(
-                                                  // This allocates space for the formattedDate, however the formattedDate is placed later with the Stack, look below
-                                                  formattedDate,
-                                                  style: const TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.transparent,
-                                                  ),
-                                                  textAlign: isMe ? TextAlign.end : TextAlign.start,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          PositionedDirectional(
-                                            bottom: 11,
-                                            end: 18,
-                                            child: Text(
-                                              formattedDate,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: isMe
-                                                    ? const Color.fromARGB(255, 60, 60, 60)
-                                                    : const Color.fromARGB(255, 195, 195, 195),
-                                              ),
-                                              textAlign: isMe ? TextAlign.end : TextAlign.start,
-                                            ),
-                                          ),
-                                          if (!isMeAbove)
-                                            PositionedDirectional(
-                                              top: isReply ? -12 : 18,
-                                              start: isMe ? -20 : null,
-                                              end: isMe ? null : -20,
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  FocusManager.instance.primaryFocus?.unfocus();
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => OtherUserDataScreen(
-                                                        whichParticipantData: [
-                                                          whichUser?['userId'] ?? '',
-                                                          whichUser?['userImageUrl'] ?? '',
-                                                          whichUser?['username'] ?? '',
-                                                          whichUser?['userDetail'] ?? '',
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      width: 2,
-                                                      color: Colors.amber,
-                                                    ),
-                                                    borderRadius: BorderRadius.circular(22),
-                                                  ),
-                                                  child: CircleAvatar(
-                                                    radius: 20,
-                                                    backgroundImage: NetworkImage(
-                                                      whichUser?['userImageUrl'] ?? '',
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
+                          return MessageWidget(
+                            chatId: chatId,
+                            isMe: isMe,
+                            isMeAbove: isMeAbove,
+                            whichUser: whichUser,
+                            formattedDate: formattedDate,
+                            currentMessage: currentMessage,
+                            isReply: isReply,
+                            repliedToMessage: repliedToMessage,
+                            repliedToUser: repliedToUser,
+                            isReplyToCurrentUser: isReplyToCurrentUser,
+                            isReplyToSelf: isReplyToSelf,
                           );
                         },
                       );
@@ -685,6 +368,362 @@ class Messages extends StatelessWidget {
             );
           }
         },
+      ),
+    );
+  }
+}
+
+class MessageWidget extends StatelessWidget {
+  const MessageWidget({
+    Key? key,
+    required this.chatId,
+    this.currentMessage,
+    this.whichUser,
+    required this.isMe,
+    required this.isMeAbove,
+    required this.formattedDate,
+    required this.isReply,
+    this.repliedToMessage,
+    this.repliedToUser,
+    required this.isReplyToCurrentUser,
+    required this.isReplyToSelf,
+  }) : super(key: key);
+  final String chatId;
+
+  final QueryDocumentSnapshot<Object?>? currentMessage;
+  final QueryDocumentSnapshot<Object?>? whichUser;
+  final bool isMe;
+  final bool isMeAbove;
+  final String formattedDate;
+
+  //** reply dependant login here */
+  final bool isReply;
+  final QueryDocumentSnapshot<Object?>? repliedToMessage;
+  final QueryDocumentSnapshot<Object?>? repliedToUser;
+  final bool isReplyToCurrentUser;
+  final bool isReplyToSelf;
+  //** */
+
+  Future<void> _deleteMessage(messageId) async {
+    await FirebaseFirestore.instance.collection('chats/$chatId/messages').doc(messageId).delete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).size;
+    Offset tapPosition = const Offset(0.0, 0.0);
+
+    return Dismissible(
+      key: ValueKey(currentMessage?.id),
+      background: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.green,
+        ),
+        padding: const EdgeInsets.all(8),
+        child: const Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Reply',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+        ),
+      ),
+      secondaryBackground: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.red,
+        ),
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Text(
+              'Delete',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            Icon(Icons.delete)
+          ],
+        ),
+      ),
+      dismissThresholds: const {
+        DismissDirection.startToEnd: 0.6,
+        DismissDirection.endToStart: 0.6,
+      },
+      direction: isMe ? DismissDirection.horizontal : DismissDirection.startToEnd,
+      onDismissed: (direction) {},
+      confirmDismiss: (DismissDirection dismissDirection) async {
+        switch (dismissDirection) {
+          case DismissDirection.startToEnd:
+            {
+              Provider.of<ReplyProvider>(context, listen: false).replyHandler(
+                currentMessage?.id ?? '',
+                whichUser?['username'] ?? '',
+                currentMessage?['text'] ?? '',
+              );
+              break;
+            }
+          case DismissDirection.endToStart:
+            {
+              _deleteMessage(currentMessage?.id);
+              break;
+            }
+          default:
+            break;
+        }
+        return false;
+      },
+      child: InkWell(
+        onTapDown: (details) {
+          tapPosition = details.globalPosition;
+        },
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        splashColor: Colors.amber,
+        onLongPress: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+              tapPosition & const Size(40, 40),
+              Offset.zero & const Size(40, 40),
+            ),
+            items: <PopupMenuEntry>[
+              PopupMenuItem(
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(
+                      text: currentMessage?['text'] ?? '',
+                    ),
+                  ).then((_) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Copied to clipboard'),
+                      ),
+                    );
+                  });
+                },
+                child: Row(
+                  children: const [
+                    Text('Copy'),
+                    SizedBox(width: 10),
+                    Icon(Icons.copy),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                onTap: () {
+                  SchedulerBinding.instance.addPostFrameCallback(
+                    (_) {
+                      showMyDialog(
+                        context,
+                        true,
+                        'Message Detail',
+                        'Sent by \'${whichUser?['username'] ?? ''}\'',
+                        formattedDate,
+                        'ok',
+                        Navigator.of(context).pop,
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  children: const [
+                    Text('Details'),
+                    SizedBox(width: 10),
+                    Icon(Icons.info_outline),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+        child: Column(
+          children: [
+            if (isReply)
+              Align(
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: deviceSize.width * 0.65,
+                  ),
+                  margin: const EdgeInsets.only(
+                    top: 16,
+                    right: 8,
+                    left: 8,
+                    bottom: 4,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isMe ? Colors.grey[500] : Colors.grey[700],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Replying to ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isMe ? Colors.black : Colors.white,
+                            ),
+                          ),
+                          Text(
+                            isReplyToCurrentUser
+                                ? isReplyToSelf
+                                    ? 'Yourself'
+                                    : 'You'
+                                : repliedToUser?['username'] ?? '\'unknown user\'',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        repliedToMessage?['text'] ?? '\'this message is deleted \'',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isMe ? Colors.black : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Row(
+              key: ValueKey(currentMessage?.id),
+              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: deviceSize.width * 0.65,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 2,
+                          color: Colors.amber,
+                        ),
+                        color: isMe ? Colors.white : Colors.black,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(15),
+                          topRight: const Radius.circular(15),
+                          bottomLeft: isMe ? const Radius.circular(15) : const Radius.circular(0),
+                          bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(15),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 12,
+                      ),
+                      margin: EdgeInsets.only(
+                        top: !isMeAbove && !isReply ? 32 : 2,
+                        bottom: 2,
+                        left: 8,
+                        right: 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment:
+                            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          if (!isMe && !isMeAbove)
+                            Text(
+                              whichUser?['username'] ?? '',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isMe ? Colors.black : Colors.amber,
+                              ),
+                            ),
+                          if (!isMe) const SizedBox(height: 5),
+                          Text(
+                            currentMessage?['text'] ?? '',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isMe ? Colors.black : Colors.white,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                          Text(
+                            // This allocates space for the formattedDate, however the formattedDate is placed later with the Stack, look below
+                            formattedDate,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.transparent,
+                            ),
+                            textAlign: isMe ? TextAlign.end : TextAlign.start,
+                          ),
+                        ],
+                      ),
+                    ),
+                    PositionedDirectional(
+                      bottom: 11,
+                      end: 18,
+                      child: Text(
+                        formattedDate,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isMe
+                              ? const Color.fromARGB(255, 60, 60, 60)
+                              : const Color.fromARGB(255, 195, 195, 195),
+                        ),
+                        textAlign: isMe ? TextAlign.end : TextAlign.start,
+                      ),
+                    ),
+                    if (!isMeAbove)
+                      PositionedDirectional(
+                        top: isReply ? -12 : 18,
+                        start: isMe ? -20 : null,
+                        end: isMe ? null : -20,
+                        child: GestureDetector(
+                          onTap: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OtherUserDataScreen(
+                                  whichParticipantData: [
+                                    whichUser?['userId'] ?? '',
+                                    whichUser?['userImageUrl'] ?? '',
+                                    whichUser?['username'] ?? '',
+                                    whichUser?['userDetail'] ?? '',
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.amber,
+                              ),
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(
+                                whichUser?['userImageUrl'] ?? '',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
