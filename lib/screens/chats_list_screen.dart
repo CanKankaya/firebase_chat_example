@@ -162,24 +162,35 @@ class ChatItem extends StatelessWidget {
   final _currentUser = FirebaseAuth.instance.currentUser;
   final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
 
-  Future<void> tryAddParticipant() async {
-    //
+  Future<void> tryAddParticipant(BuildContext context) async {
     _isLoading.value = true;
-
     try {
       await FirebaseFirestore.instance
           .collection('chats/${individualChatData?.id}/participantsData')
           .doc(_currentUser?.uid)
           .set({
         'userId': _currentUser?.uid,
-        // 'username': _currentUser?.displayName,
-        // 'userImageUrl': _currentUser?.photoURL,
-        // 'userDetail': '',
       });
+
       _isLoading.value = false;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You are added as a participant'),
+          ),
+        );
+      });
     } catch (error) {
-      //
       _isLoading.value = false;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong'),
+          ),
+        );
+      });
     }
   }
 
@@ -238,24 +249,12 @@ class ChatItem extends StatelessWidget {
               IconButton(
                 onPressed: () {
                   if (userBelongs) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar;
+
                     simplerErrorMessage(
-                      context,
-                      'You are already a participant here',
-                      '',
-                      null,
-                      true,
-                    );
+                        context, 'You are already a participant here', '', null, false);
                   } else {
-                    tryAddParticipant();
-
-                    // simplerErrorMessage(
-                    //   context,
-                    //   'Doing nothing yet, this button will add you as a participant later',
-                    //   '',
-                    //   null,
-                    //   true,
-                    // );
-
+                    tryAddParticipant(context);
                   }
                 },
                 icon: ValueListenableBuilder(

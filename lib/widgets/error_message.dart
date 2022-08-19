@@ -49,33 +49,32 @@ void errorMessage(
     spamCheck = true;
     spamFunction();
   } else {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar
-      ..showSnackBar(
-        SnackBar(
-          duration: const Duration(milliseconds: 1950),
-          elevation: 10,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          action: SnackBarAction(
-            onPressed: () {
-              buttonFon?.call();
-            },
-            label: buttonText ?? 'error',
-          ),
-          behavior: SnackBarBehavior.floating,
-          content: Container(
-            padding: const EdgeInsets.all(10),
-            height: 40,
-            width: double.infinity,
-            child: FittedBox(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                errorText ?? 'error',
-                style: const TextStyle(fontSize: 16),
-              ),
+    ScaffoldMessenger.of(context).hideCurrentSnackBar;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1950),
+        elevation: 10,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+        action: SnackBarAction(
+          onPressed: () {
+            buttonFon?.call();
+          },
+          label: buttonText ?? 'error',
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Container(
+          padding: const EdgeInsets.all(10),
+          height: 40,
+          width: double.infinity,
+          child: FittedBox(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              errorText ?? 'error',
+              style: const TextStyle(fontSize: 16),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }

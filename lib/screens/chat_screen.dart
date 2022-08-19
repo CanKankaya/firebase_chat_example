@@ -13,6 +13,7 @@ import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
+import 'package:firebase_chat_example/screens/chat_participants_screen.dart';
 
 class ChatScreen extends StatelessWidget {
   final String chatId;
@@ -21,6 +22,14 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>>? docData;
+    _getParticipants() async {
+      var snapshot =
+          await FirebaseFirestore.instance.collection('chats/$chatId/participantsData').get();
+      docData = snapshot.docs.map((e) => e.data()).toList();
+      return docData;
+    }
+
     if (chatId == '') {
       return WillPopScope(
         onWillPop: () => showExitPopup(context),
@@ -34,19 +43,44 @@ class ChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Scaffold(
-          appBar: AppBar(),
-          body: Column(
-            children: [
-              Messages(chatId: chatId),
-              const ReplyWidget(),
-              NewMessage(chatId: chatId),
-            ],
-          ),
-        ),
+      return FutureBuilder(
+        future: _getParticipants(),
+        builder: (context, AsyncSnapshot<Object?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              child: Scaffold(
+                appBar: AppBar(
+                  actions: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatParticipantsScreen(docData: docData),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.manage_accounts),
+                    ),
+                  ],
+                ),
+                body: Column(
+                  children: [
+                    Messages(chatId: chatId),
+                    const ReplyWidget(),
+                    NewMessage(chatId: chatId),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+        },
       );
     }
   }
