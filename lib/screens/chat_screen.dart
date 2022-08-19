@@ -23,15 +23,11 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
+//TODO: get the creatorId of this chat to see who is admin
 
-    // List<Map<String, dynamic>>? docData;
-    // _getParticipants() async {
-    //   var snapshot =
-    //       await FirebaseFirestore.instance.collection('chats/$chatId/participantsData').get();
-    //   docData = snapshot.docs.map((e) => e.data()).toList();
-    //   return docData;
-    // }
+//TODO: add a way for the admin to remove users
 
+//TODO: add a way for the admin to add users later
     if (chatId == '') {
       return Scaffold(
         appBar: AppBar(),
