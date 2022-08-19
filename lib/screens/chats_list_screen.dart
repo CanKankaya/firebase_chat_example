@@ -127,6 +127,8 @@ class ChatsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats')
@@ -147,7 +149,10 @@ class ChatsList extends StatelessWidget {
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: chatsData?.length ?? 0,
-            itemBuilder: (context, index) => ChatItem(individualChatData: chatsData?[index]),
+            itemBuilder: (context, index) => ChatItem(
+              currentUser: currentUser,
+              individualChatData: chatsData?[index],
+            ),
           ),
         );
       },
@@ -156,10 +161,10 @@ class ChatsList extends StatelessWidget {
 }
 
 class ChatItem extends StatelessWidget {
-  ChatItem({super.key, required this.individualChatData});
+  ChatItem({super.key, required this.individualChatData, required this.currentUser});
 
   final QueryDocumentSnapshot<Object?>? individualChatData;
-  final _currentUser = FirebaseAuth.instance.currentUser;
+  final User? currentUser;
   final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
 
   Future<void> tryAddParticipant(BuildContext context) async {
@@ -167,9 +172,9 @@ class ChatItem extends StatelessWidget {
     try {
       await FirebaseFirestore.instance
           .collection('chats/${individualChatData?.id}/participantsData')
-          .doc(_currentUser?.uid)
+          .doc(currentUser?.uid)
           .set({
-        'userId': _currentUser?.uid,
+        'userId': currentUser?.uid,
       });
 
       _isLoading.value = false;
@@ -212,7 +217,7 @@ class ChatItem extends StatelessWidget {
         }
         final participantsData = usersSnapshot.data?.docs;
         int index =
-            participantsData?.map((e) => e.id).toList().indexOf(_currentUser?.uid ?? '') ?? -1;
+            participantsData?.map((e) => e.id).toList().indexOf(currentUser?.uid ?? '') ?? -1;
         final bool userBelongs = index != -1;
         return InkWell(
           splashColor: Colors.amber,

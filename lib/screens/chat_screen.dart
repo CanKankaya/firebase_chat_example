@@ -16,9 +16,9 @@ import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat_participants_screen.dart';
 
 class ChatScreen extends StatelessWidget {
-  final String chatId;
-
   const ChatScreen({super.key, required this.chatId});
+
+  final String chatId;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,6 @@ class ChatScreen extends StatelessWidget {
               onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
               child: WillPopScope(
                 onWillPop: () {
-                  print('object');
                   Provider.of<ReplyProvider>(context, listen: false).closeReply();
                   return Future.value(true);
                 },
@@ -90,149 +89,6 @@ class ChatScreen extends StatelessWidget {
         },
       );
     }
-  }
-}
-
-class ReplyWidget extends StatelessWidget {
-  const ReplyWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    return Consumer<ReplyProvider>(
-      builder: (_, providerValue, __) {
-        bool isReplyToSelf = providerValue.username == currentUser?.displayName;
-
-        if (providerValue.isReply) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              color: Colors.black,
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Replying to ',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        isReplyToSelf ? 'Yourself' : providerValue.username,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.amber,
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          providerValue.closeReply();
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    providerValue.message,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
-  }
-}
-
-class NewMessage extends StatelessWidget {
-  final String chatId;
-  final ValueNotifier<String> _enteredMessage = ValueNotifier<String>('');
-
-  final _controller = TextEditingController();
-
-  NewMessage({super.key, required this.chatId});
-
-  @override
-  Widget build(BuildContext context) {
-    final provData = Provider.of<ReplyProvider>(context, listen: true);
-    void _sendMessage() async {
-      final auth = FirebaseAuth.instance;
-      await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
-        'text': _enteredMessage.value,
-        'createdAt': Timestamp.now(),
-        'userId': auth.currentUser?.uid ?? '',
-        'repliedTo': provData.messageId,
-      });
-      provData.closeReply();
-      _controller.clear();
-      _enteredMessage.value = '';
-    }
-
-    final deviceOrientation = MediaQuery.of(context).orientation;
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      child: Container(
-        color: Colors.grey[800],
-        padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-        height: deviceOrientation == Orientation.portrait ? 90 : 65,
-        child: ListView(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Theme(
-                    data: ThemeData.dark(),
-                    child: TextField(
-                      maxLines: 5,
-                      minLines: 1,
-                      maxLength: 200,
-                      autocorrect: true,
-                      enableSuggestions: true,
-                      textCapitalization: TextCapitalization.sentences,
-                      controller: _controller,
-                      decoration: const InputDecoration(labelText: 'Send a message...'),
-                      onChanged: (val) {
-                        _enteredMessage.value = val.trim();
-                      },
-                    ),
-                  ),
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _enteredMessage,
-                  builder: (_, String value, __) {
-                    return IconButton(
-                      onPressed: value.isEmpty ? null : _sendMessage,
-                      icon: Icon(
-                        Icons.send,
-                        color: value.isEmpty ? Colors.grey : Colors.amber,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -308,7 +164,7 @@ class Messages extends StatelessWidget {
                             ? itemCountValue
                             : (documents?.length ?? 0),
                         itemBuilder: (context, index) {
-                          //**  index dependant logic here;
+                          //** Index dependant logic here */
                           final currentMessage = documents?[index];
                           bool isMe = currentMessage?['userId'] == currentUser?.uid;
                           bool isMeAbove = false;
@@ -325,9 +181,9 @@ class Messages extends StatelessWidget {
                           String formattedDate = dt.day == DateTime.now().day
                               ? DateFormat.Hm().format(dt)
                               : DateFormat.yMMMMd().format(dt);
-                          //**
+                          //** */
 
-                          //** Reply dependant logic here;
+                          //** Reply dependant logic here */
                           final isReply = currentMessage?['repliedTo'] != '';
                           QueryDocumentSnapshot<Object?>? repliedToMessage;
                           QueryDocumentSnapshot<Object?>? repliedToUser;
@@ -345,7 +201,7 @@ class Messages extends StatelessWidget {
                           }
                           final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
                           final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
-                          //**
+                          //** */
                           return MessageWidget(
                             chatId: chatId,
                             isMe: isMe,
@@ -719,6 +575,149 @@ class MessageWidget extends StatelessWidget {
                         ),
                       ),
                   ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ReplyWidget extends StatelessWidget {
+  const ReplyWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    return Consumer<ReplyProvider>(
+      builder: (_, providerValue, __) {
+        bool isReplyToSelf = providerValue.username == currentUser?.displayName;
+
+        if (providerValue.isReply) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              color: Colors.black,
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'Replying to ',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        isReplyToSelf ? 'Yourself' : providerValue.username,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.amber,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          providerValue.closeReply();
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    providerValue.message,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+}
+
+class NewMessage extends StatelessWidget {
+  final String chatId;
+  final ValueNotifier<String> _enteredMessage = ValueNotifier<String>('');
+
+  final _controller = TextEditingController();
+
+  NewMessage({super.key, required this.chatId});
+
+  @override
+  Widget build(BuildContext context) {
+    final provData = Provider.of<ReplyProvider>(context, listen: true);
+    void _sendMessage() async {
+      final auth = FirebaseAuth.instance;
+      await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
+        'text': _enteredMessage.value,
+        'createdAt': Timestamp.now(),
+        'userId': auth.currentUser?.uid ?? '',
+        'repliedTo': provData.messageId,
+      });
+      provData.closeReply();
+      _controller.clear();
+      _enteredMessage.value = '';
+    }
+
+    final deviceOrientation = MediaQuery.of(context).orientation;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Container(
+        color: Colors.grey[800],
+        padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
+        height: deviceOrientation == Orientation.portrait ? 90 : 65,
+        child: ListView(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Theme(
+                    data: ThemeData.dark(),
+                    child: TextField(
+                      maxLines: 5,
+                      minLines: 1,
+                      maxLength: 200,
+                      autocorrect: true,
+                      enableSuggestions: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      controller: _controller,
+                      decoration: const InputDecoration(labelText: 'Send a message...'),
+                      onChanged: (val) {
+                        _enteredMessage.value = val.trim();
+                      },
+                    ),
+                  ),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _enteredMessage,
+                  builder: (_, String value, __) {
+                    return IconButton(
+                      onPressed: value.isEmpty ? null : _sendMessage,
+                      icon: Icon(
+                        Icons.send,
+                        color: value.isEmpty ? Colors.grey : Colors.amber,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
