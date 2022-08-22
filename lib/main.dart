@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/providers/add_participant_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -26,6 +27,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => ReplyProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AddListProvider(),
         ),
       ],
       child: Consumer<ThemeModel>(

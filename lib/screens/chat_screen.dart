@@ -24,8 +24,6 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-//TODO: add a way for the admin to add users later
-
     if (chatId == '') {
       return Scaffold(
         appBar: AppBar(),
@@ -90,7 +88,6 @@ class ChatScreen extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) => ChatParticipantsScreen(
                                         creatorId: chatSnapshot.data?['chatCreatorId'],
-                                        participantsData: participantsData,
                                         chatId: chatId,
                                       ),
                                     ),
