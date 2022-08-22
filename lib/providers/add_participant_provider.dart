@@ -16,18 +16,15 @@ class AddListProvider with ChangeNotifier {
 
   clearList() {
     addList = [];
-    print('clearList called');
   }
 
   addToList(String userId) {
     addList.add(userId);
-    print(addList);
     notifyListeners();
   }
 
   removeFromList(String userId) {
     addList.remove(userId);
-    print(addList);
     notifyListeners();
   }
 

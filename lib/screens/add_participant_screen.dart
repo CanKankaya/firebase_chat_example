@@ -1,12 +1,13 @@
-import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:collection/collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import 'package:firebase_chat_example/providers/add_participant_provider.dart';
+
+import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 class AddParticipantScreen extends StatelessWidget {
   const AddParticipantScreen({Key? key, this.participantsData, required this.chatId})
@@ -72,7 +73,12 @@ class AddParticipantScreen extends StatelessWidget {
                                       SchedulerBinding.instance.addPostFrameCallback(
                                         (_) {
                                           simplerErrorMessage(
-                                              context, 'Added Users', '', null, false);
+                                            context,
+                                            'Added Users',
+                                            '',
+                                            null,
+                                            false,
+                                          );
                                         },
                                       );
                                     },

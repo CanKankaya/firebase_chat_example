@@ -25,10 +25,20 @@ class ChatsListScreen extends StatelessWidget {
         try {
           Navigator.pop(context);
 
-          await FirebaseFirestore.instance.collection('chats').add({
+          await FirebaseFirestore.instance
+              .collection('chats')
+              .doc('chatof${currentUser?.uid}')
+              .set({
             'chatCreatorId': currentUser?.uid,
             'chatName': chatNameController.text,
             'createdAt': DateTime.now(),
+          }).then((_) {
+            FirebaseFirestore.instance
+                .collection('chats/chatof${currentUser?.uid}/participantsData')
+                .doc(currentUser?.uid)
+                .set({
+              'userId': currentUser?.uid,
+            });
           });
           chatNameController.text = '';
           SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -161,45 +171,10 @@ class ChatsList extends StatelessWidget {
 }
 
 class ChatItem extends StatelessWidget {
-  ChatItem({super.key, required this.individualChatData, required this.currentUser});
+  const ChatItem({super.key, required this.individualChatData, required this.currentUser});
 
   final QueryDocumentSnapshot<Object?>? individualChatData;
   final User? currentUser;
-  final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
-
-  Future<void> tryAddParticipant(BuildContext context) async {
-    _isLoading.value = true;
-    try {
-      await FirebaseFirestore.instance
-          .collection('chats/${individualChatData?.id}/participantsData')
-          .doc(currentUser?.uid)
-          .set({
-        'userId': currentUser?.uid,
-      });
-
-      _isLoading.value = false;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        simplerErrorMessage(
-          context,
-          'You Are Added as a Participant',
-          '',
-          null,
-          true,
-        );
-      });
-    } catch (error) {
-      _isLoading.value = false;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong'),
-          ),
-        );
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +209,13 @@ class ChatItem extends StatelessWidget {
                 ),
               );
             } else {
-              simplerErrorMessage(context, 'You Shall Not Pass!', '', null, true);
+              simplerErrorMessage(
+                context,
+                'You Shall Not Pass!',
+                '',
+                null,
+                true,
+              );
             }
           },
           child: Padding(
@@ -249,11 +230,12 @@ class ChatItem extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Icon(
-                      Icons.construction,
+                      Icons.chat,
                       color: Colors.white,
                     ),
                   ),
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         individualChatData?['chatName'] ?? '',
@@ -272,26 +254,6 @@ class ChatItem extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  IconButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      if (userBelongs) {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar;
-                        simplerErrorMessage(
-                            context, 'You are already a participant here', '', null, true);
-                      } else {
-                        tryAddParticipant(context);
-                      }
-                    },
-                    icon: ValueListenableBuilder(
-                      valueListenable: _isLoading,
-                      builder: (_, bool loadingValue, __) {
-                        return loadingValue
-                            ? const CircularProgressIndicator()
-                            : const Icon(Icons.add);
-                      },
-                    ),
-                  ),
                 ],
               ),
             ),
