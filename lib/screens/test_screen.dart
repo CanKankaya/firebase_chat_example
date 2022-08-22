@@ -42,8 +42,8 @@ class TestScreen extends StatelessWidget {
                       context,
                       true,
                       'Dont press here',
-                      'This does nothing yet,',
-                      'but click if you want, idc',
+                      'This does nothing yet, but click if you want, idc',
+                      '',
                       'Uhm ok...',
                       () {
                         Navigator.of(context).pop();

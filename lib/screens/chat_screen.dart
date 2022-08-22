@@ -24,10 +24,6 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-//TODO: get the creatorId of this chat to see who is admin
-
-//TODO: add a way for the admin to remove users
-
 //TODO: add a way for the admin to add users later
 
     if (chatId == '') {
@@ -43,89 +39,93 @@ class ChatScreen extends StatelessWidget {
       );
     } else {
       return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
-          builder: (context, chatSnapshot) {
-            if (!chatSnapshot.hasData) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            } else {
-              return StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('chats/$chatId/participantsData')
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-                  if (participantsSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
+        stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
+        builder: (context, chatSnapshot) {
+          if (!chatSnapshot.hasData) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else {
+            return StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('chats/$chatId/participantsData')
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+                if (participantsSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                } else {
+                  final participantsData = participantsSnapshot.data?.docs;
+                  final foundUser = participantsData?.firstWhereOrNull(
+                    (element) => element.id == currentUser?.uid,
+                  );
+                  if (foundUser == null) {
+                    return Scaffold(
+                      appBar: AppBar(),
+                      body: const Center(
+                        child:
+                            Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                      ),
                     );
                   } else {
-                    final participantsData = participantsSnapshot.data?.docs;
-                    final foundUser = participantsData?.firstWhereOrNull(
-                      (element) => element.id == currentUser?.uid,
-                    );
-                    if (foundUser == null) {
-                      return Scaffold(
-                        appBar: AppBar(),
-                        body: const Center(
-                          child: Text(
-                              'Something Went Wrong, \n You May Have Been Removed From Chat :('),
-                        ),
-                      );
-                    } else {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                        child: WillPopScope(
-                          onWillPop: () {
-                            Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                            return Future.value(true);
-                          },
-                          child: Scaffold(
-                            appBar: AppBar(
-                              actions: [
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatParticipantsScreen(
-                                          creatorId: chatSnapshot.data?['chatCreatorId'],
-                                          participantsData: participantsData,
-                                        ),
+                    return GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                      child: WillPopScope(
+                        onWillPop: () {
+                          Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                          return Future.value(true);
+                        },
+                        child: Scaffold(
+                          appBar: AppBar(
+                            actions: [
+                              IconButton(
+                                onPressed: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatParticipantsScreen(
+                                        creatorId: chatSnapshot.data?['chatCreatorId'],
+                                        participantsData: participantsData,
+                                        chatId: chatId,
                                       ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.manage_accounts),
-                                ),
-                              ],
-                            ),
-                            body: Column(
-                              children: [
-                                Messages(chatId: chatId),
-                                const ReplyWidget(),
-                                NewMessage(chatId: chatId),
-                              ],
-                            ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.manage_accounts),
+                              ),
+                            ],
+                          ),
+                          body: Column(
+                            children: [
+                              Messages(chatId: chatId, participantsData: participantsData),
+                              const ReplyWidget(),
+                              NewMessage(chatId: chatId),
+                            ],
                           ),
                         ),
-                      );
-                    }
+                      ),
+                    );
                   }
-                },
-              );
-            }
-          });
+                }
+              },
+            );
+          }
+        },
+      );
     }
   }
 }
 
 class Messages extends StatelessWidget {
   final String chatId;
+  final List<QueryDocumentSnapshot<Object?>>? participantsData;
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
-  Messages({super.key, required this.chatId});
+  Messages({super.key, required this.chatId, this.participantsData});
 
   _refreshFunction() async {
     _itemCount.value += 10;
@@ -207,6 +207,10 @@ class Messages extends StatelessWidget {
                           final whichUser = usersData?.firstWhere(
                             (element) => element.id == currentMessage?['userId'],
                           );
+                          final foundUser = participantsData?.firstWhereOrNull(
+                            (element) => element.id == whichUser?['userId'],
+                          );
+                          bool doesUserBelong = foundUser == null ? false : true;
                           DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
                           String formattedDate = dt.day == DateTime.now().day
                               ? DateFormat.Hm().format(dt)
@@ -239,6 +243,7 @@ class Messages extends StatelessWidget {
                             whichUser: whichUser,
                             formattedDate: formattedDate,
                             currentMessage: currentMessage,
+                            doesUserBelong: doesUserBelong,
                             isReply: isReply,
                             repliedToMessage: repliedToMessage,
                             repliedToUser: repliedToUser,
@@ -273,6 +278,7 @@ class MessageWidget extends StatelessWidget {
     this.repliedToUser,
     required this.isReplyToCurrentUser,
     required this.isReplyToSelf,
+    required this.doesUserBelong,
   }) : super(key: key);
   final String chatId;
 
@@ -280,6 +286,7 @@ class MessageWidget extends StatelessWidget {
   final QueryDocumentSnapshot<Object?>? whichUser;
   final bool isMe;
   final bool isMeAbove;
+  final bool doesUserBelong;
   final String formattedDate;
 
   //** reply dependant login here */
@@ -405,7 +412,7 @@ class MessageWidget extends StatelessWidget {
                       showMyDialog(
                         context,
                         true,
-                        'Message Detail',
+                        'Message Detail \n ',
                         'Sent by \'${whichUser?['username'] ?? ''}\'',
                         formattedDate,
                         'ok',
@@ -522,13 +529,26 @@ class MessageWidget extends StatelessWidget {
                             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           if (!isMe && !isMeAbove)
-                            Text(
-                              whichUser?['username'] ?? '',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: isMe ? Colors.black : Colors.amber,
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  whichUser?['username'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: isMe ? Colors.black : Colors.amber,
+                                  ),
+                                ),
+                                if (!doesUserBelong)
+                                  const Text(
+                                    ('(Removed User)'),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color.fromARGB(255, 195, 195, 195),
+                                    ),
+                                  ),
+                              ],
                             ),
                           if (!isMe) const SizedBox(height: 5),
                           Text(
