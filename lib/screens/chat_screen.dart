@@ -306,16 +306,18 @@ class MessageWidget extends StatelessWidget {
     return Dismissible(
       key: ValueKey(currentMessage?.id),
       background: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.green,
-        ),
         padding: const EdgeInsets.all(8),
-        child: const Align(
+        child: Align(
           alignment: Alignment.centerLeft,
-          child: Text(
-            'Reply',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          child: Row(
+            children: const [
+              Icon(Icons.reply),
+              SizedBox(width: 5),
+              Text(
+                'Reply',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+            ],
           ),
         ),
       ),

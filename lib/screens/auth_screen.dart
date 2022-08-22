@@ -58,14 +58,7 @@ class AuthScreen extends StatelessWidget {
             await _auth
                 .signInWithEmailAndPassword(
                     email: userEmail.toString().trim(), password: userPassword.toString().trim())
-                .then((_) {
-              // Navigator.pushReplacement(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const ChatScreen(),
-              //   ),
-              // );
-            }).catchError((error) {
+                .catchError((error) {
               throw error;
             });
           } else {
@@ -92,15 +85,6 @@ class AuthScreen extends StatelessWidget {
               'userImageUrl': url,
               'userDetail': '',
             });
-            // SchedulerBinding.instance.addPostFrameCallback((_) {
-            //   //
-            //   Navigator.pushReplacement(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (context) => const ChatScreen(),
-            //     ),
-            //   );
-            // });
           }
 
           _isLoading.value = false;
