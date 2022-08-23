@@ -84,8 +84,13 @@ class AuthScreen extends StatelessWidget {
               'username': username,
               'userImageUrl': url,
               'userDetail': '',
+              'followerCount': 0,
+              'followingCount': 0,
+              'followers': [],
+              'following': [],
             });
           }
+          //TODO: check if it works fine with new users
 
           _isLoading.value = false;
         } on FirebaseAuthException catch (error) {

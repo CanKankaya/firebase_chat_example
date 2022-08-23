@@ -64,19 +64,6 @@ class AppDrawer extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    leading: const Icon(Icons.chat),
-                    title: const Text('Chat Screen (temp)'),
-                    onTap: () {
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => const ChatScreen(chatId: 'dJa1VvWu8w3ECOCV6tUb'),
-                      //   ),
-                      // );
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
                     leading: const Icon(Icons.audiotrack),
                     title: const Text('Audio Test Page'),
                     onTap: () {

@@ -27,7 +27,8 @@ class AddParticipantScreen extends StatelessWidget {
         body: StreamBuilder(
           stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
-            if (usersSnapshot.connectionState == ConnectionState.waiting) {
+            if (usersSnapshot.connectionState == ConnectionState.waiting ||
+                usersSnapshot.connectionState == ConnectionState.none) {
               return const Center(
                 child: CircularProgressIndicator(),
               );

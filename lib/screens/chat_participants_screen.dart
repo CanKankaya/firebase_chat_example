@@ -55,15 +55,17 @@ class ChatParticipantsScreen extends StatelessWidget {
                         onPressed: () async {
                           if (whichUserId == '') {
                             Navigator.of(context).pop();
-                            SchedulerBinding.instance.addPostFrameCallback((_) {
-                              simplerErrorMessage(
-                                context,
-                                'Couldnt find user',
-                                '',
-                                null,
-                                false,
-                              );
-                            });
+                            SchedulerBinding.instance.addPostFrameCallback(
+                              (_) {
+                                simplerErrorMessage(
+                                  context,
+                                  'Couldnt find user',
+                                  '',
+                                  null,
+                                  false,
+                                );
+                              },
+                            );
                             return;
                           } else {
                             isLoading.value = true;
@@ -71,19 +73,23 @@ class ChatParticipantsScreen extends StatelessWidget {
                                 .collection('chats/$chatId/participantsData')
                                 .doc(whichUserId)
                                 .delete()
-                                .then((_) {
-                              isLoading.value = false;
-                              Navigator.of(context).pop();
-                              SchedulerBinding.instance.addPostFrameCallback((_) {
-                                simplerErrorMessage(
-                                  context,
-                                  'Removed User',
-                                  '',
-                                  null,
-                                  false,
+                                .then(
+                              (_) {
+                                isLoading.value = false;
+                                Navigator.of(context).pop();
+                                SchedulerBinding.instance.addPostFrameCallback(
+                                  (_) {
+                                    simplerErrorMessage(
+                                      context,
+                                      'Removed User',
+                                      '',
+                                      null,
+                                      false,
+                                    );
+                                  },
                                 );
-                              });
-                            });
+                              },
+                            );
                           }
                         },
                         child: value
