@@ -1,9 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_chat_example/providers/following_provider.dart';
 import 'package:flutter/material.dart';
+
 import 'package:collection/collection.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:firebase_chat_example/providers/following_provider.dart';
 
 class FollowingScreen extends StatelessWidget {
   const FollowingScreen({Key? key}) : super(key: key);
