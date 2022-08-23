@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -17,8 +18,9 @@ class TestScreen extends StatelessWidget {
   static List<Widget> pages = [
     const TestHome(),
     const TestChart(),
-    TestSettings(),
+    const TestSettings(),
     const TestCode(),
+    const TestClick(),
   ];
 
   void onSelect(int index) {
@@ -91,6 +93,10 @@ class TestScreen extends StatelessWidget {
                     BottomNavigationBarItem(
                       label: 'Code',
                       icon: Icon(Icons.code),
+                    ),
+                    BottomNavigationBarItem(
+                      label: 'ClickTest',
+                      icon: Icon(Icons.mouse),
                     ),
                   ],
                 );
@@ -361,16 +367,16 @@ class TestChart extends StatelessWidget {
 }
 
 class TestSettings extends StatelessWidget {
-  TestSettings({Key? key}) : super(key: key);
-
-  final ValueNotifier<double> _turns = ValueNotifier<double>(0.0);
-
-  void _changeRotation() {
-    _turns.value += 4.0 / 8.0;
-  }
+  const TestSettings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final ValueNotifier<double> turns = ValueNotifier<double>(0.0);
+
+    void _changeRotation() {
+      turns.value += 4.0 / 8.0;
+    }
+
     return ListView(
       children: [
         Center(
@@ -384,31 +390,48 @@ class TestSettings extends StatelessWidget {
                 style: TextStyle(fontSize: 30),
               ),
               ValueListenableBuilder(
-                  valueListenable: _turns,
-                  builder: (_, double value, __) {
-                    return AnimatedRotation(
-                      alignment: Alignment.center,
-                      duration: const Duration(milliseconds: 2000),
-                      curve: Curves.easeInOut,
-                      turns: value,
-                      child: IconButton(
-                        iconSize: 150,
-                        onPressed: () {
-                          _changeRotation();
-                          errorMessage(
-                            context,
-                            'Dont press on me ffs -_-',
-                            'Ok, sorry',
-                            () {},
-                            true,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.construction,
-                        ),
+                valueListenable: turns,
+                builder: (_, double value, __) {
+                  return AnimatedRotation(
+                    alignment: Alignment.center,
+                    duration: const Duration(milliseconds: 2000),
+                    curve: Curves.easeInOut,
+                    turns: value,
+                    child: IconButton(
+                      iconSize: 150,
+                      onPressed: () {
+                        _changeRotation();
+                        errorMessage(
+                          context,
+                          'Dont press on me ffs -_-',
+                          'Ok, sorry',
+                          () {},
+                          true,
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.construction,
                       ),
-                    );
-                  }),
+                    ),
+                  );
+                },
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(150),
+                ),
+                width: 150,
+                height: 150,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150),
+                  child: const ColorLoader2(
+                    color1: Colors.amber,
+                    color2: Colors.black,
+                    color3: Colors.blue,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -449,22 +472,6 @@ class TestCode extends StatelessWidget {
                   Icons.construction,
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(150),
-                ),
-                width: 150,
-                height: 150,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(150),
-                  child: const ColorLoader2(
-                    color1: Colors.amber,
-                    color2: Colors.black,
-                    color3: Colors.blue,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -472,6 +479,65 @@ class TestCode extends StatelessWidget {
     );
   }
 }
+
+class TestClick extends StatelessWidget {
+  const TestClick({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    bool spamFlag = true;
+
+    Future<void> spamCheckFunction({
+      required Duration duration,
+      required Offset clickPosition,
+    }) async {
+      if (spamFlag) {
+        spamFlag = false;
+        GestureBinding.instance.handlePointerEvent(PointerDownEvent(
+          position: clickPosition,
+        ));
+        Future.delayed(duration).then((_) {
+          GestureBinding.instance.handlePointerEvent(PointerUpEvent(
+            position: clickPosition,
+          ));
+          spamFlag = true;
+        });
+      }
+    }
+
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            'Tap screen simulate test with GestureBinding',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            primary: Colors.black,
+          ),
+          child: const SizedBox(
+            width: 300,
+            height: 300,
+            child: Center(child: Text("Big button.")),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => spamCheckFunction(
+            duration: const Duration(milliseconds: 500),
+            clickPosition: const Offset(200, 300),
+          ),
+          child: const Text('Simulate Click'),
+        ),
+      ],
+    );
+  }
+}
+
+
 
 // //Chart's data class
 // class DataType {

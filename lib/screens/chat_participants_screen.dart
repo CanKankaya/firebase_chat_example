@@ -49,51 +49,52 @@ class ChatParticipantsScreen extends StatelessWidget {
                 ),
                 actions: [
                   ValueListenableBuilder(
-                      valueListenable: isLoading,
-                      builder: (context, bool value, __) {
-                        return TextButton(
-                          onPressed: () async {
-                            if (whichUserId == '') {
+                    valueListenable: isLoading,
+                    builder: (context, bool value, __) {
+                      return TextButton(
+                        onPressed: () async {
+                          if (whichUserId == '') {
+                            Navigator.of(context).pop();
+                            SchedulerBinding.instance.addPostFrameCallback((_) {
+                              simplerErrorMessage(
+                                context,
+                                'Couldnt find user',
+                                '',
+                                null,
+                                false,
+                              );
+                            });
+                            return;
+                          } else {
+                            isLoading.value = true;
+                            await FirebaseFirestore.instance
+                                .collection('chats/$chatId/participantsData')
+                                .doc(whichUserId)
+                                .delete()
+                                .then((_) {
+                              isLoading.value = false;
                               Navigator.of(context).pop();
                               SchedulerBinding.instance.addPostFrameCallback((_) {
                                 simplerErrorMessage(
                                   context,
-                                  'Couldnt find user',
+                                  'Removed User',
                                   '',
                                   null,
                                   false,
                                 );
                               });
-                              return;
-                            } else {
-                              isLoading.value = true;
-                              await FirebaseFirestore.instance
-                                  .collection('chats/$chatId/participantsData')
-                                  .doc(whichUserId)
-                                  .delete()
-                                  .then((_) {
-                                isLoading.value = false;
-                                Navigator.of(context).pop();
-                                SchedulerBinding.instance.addPostFrameCallback((_) {
-                                  simplerErrorMessage(
-                                    context,
-                                    'Removed User',
-                                    '',
-                                    null,
-                                    false,
-                                  );
-                                });
-                              });
-                            }
-                          },
-                          child: value
-                              ? const CircularProgressIndicator()
-                              : const Text(
-                                  'Yes',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                        );
-                      }),
+                            });
+                          }
+                        },
+                        child: value
+                            ? const CircularProgressIndicator()
+                            : const Text(
+                                'Yes',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                      );
+                    },
+                  ),
                 ],
               );
             },

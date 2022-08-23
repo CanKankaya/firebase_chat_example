@@ -1,9 +1,9 @@
-import 'package:firebase_chat_example/providers/add_participant_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
+import 'package:firebase_chat_example/providers/add_participant_provider.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
 import 'package:firebase_chat_example/providers/theme_provider.dart';
 
