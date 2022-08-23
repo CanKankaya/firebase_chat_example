@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:firebase_chat_example/providers/following_provider.dart';
+import 'package:firebase_chat_example/services/following_service.dart';
 
 class FollowingScreen extends StatelessWidget {
   const FollowingScreen({Key? key}) : super(key: key);
@@ -130,9 +129,7 @@ class FollowingUserItem extends StatelessWidget {
               onPressed: !value
                   ? () {
                       isLoading.value = true;
-                      Provider.of<FollowingProvider>(context, listen: false)
-                          .unfollow(user?['userId'])
-                          .then((_) => isLoading.value = true);
+                      followService.unfollow(user?['userId']).then((_) => isLoading.value = false);
                     }
                   : null,
             );
@@ -175,9 +172,7 @@ class OtherUserItem extends StatelessWidget {
               onPressed: !value
                   ? () {
                       isLoading.value = true;
-                      Provider.of<FollowingProvider>(context, listen: false)
-                          .follow(user?['userId'])
-                          .then((_) => isLoading.value = true);
+                      followService.follow(user?['userId']).then((_) => isLoading.value = false);
                     }
                   : null,
             );

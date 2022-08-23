@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class FollowingProvider with ChangeNotifier {
+final followService = FollowingService();
+
+class FollowingService {
   final currentUserId = FirebaseAuth.instance.currentUser?.uid;
   final usersData = FirebaseFirestore.instance.collection('usersData');
 
