@@ -533,10 +533,10 @@ class MessageWidget extends StatelessWidget {
                               children: [
                                 Text(
                                   whichUser?['username'] ?? '',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: isMe ? Colors.black : Colors.amber,
+                                    color: Colors.amber,
                                   ),
                                 ),
                                 if (!doesUserBelong)
@@ -549,7 +549,7 @@ class MessageWidget extends StatelessWidget {
                                   ),
                               ],
                             ),
-                          if (!isMe) const SizedBox(height: 5),
+                          if (!isMe && !isMeAbove) const SizedBox(height: 5),
                           Text(
                             currentMessage?['text'] ?? '',
                             style: TextStyle(

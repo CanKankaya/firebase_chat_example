@@ -496,12 +496,15 @@ class TestClick extends StatelessWidget {
         GestureBinding.instance.handlePointerEvent(PointerDownEvent(
           position: clickPosition,
         ));
-        Future.delayed(duration).then((_) {
-          GestureBinding.instance.handlePointerEvent(PointerUpEvent(
-            position: clickPosition,
-          ));
-          spamFlag = true;
-        });
+        Future.delayed(
+          duration,
+          () {
+            GestureBinding.instance.handlePointerEvent(PointerUpEvent(
+              position: clickPosition,
+            ));
+            spamFlag = true;
+          },
+        );
       }
     }
 
@@ -515,7 +518,9 @@ class TestClick extends StatelessWidget {
           ),
         ),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            // print('Click simulate triggers this');
+          },
           style: ElevatedButton.styleFrom(
             primary: Colors.black,
           ),

@@ -119,35 +119,36 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         Center(
                           child: ValueListenableBuilder(
-                              valueListenable: _pickedImage,
-                              builder: (_, XFile? value, __) {
-                                return Stack(
-                                  children: [
-                                    value == null
-                                        ? CircleAvatar(
-                                            radius: 60,
-                                            backgroundImage:
-                                                NetworkImage(auth.currentUser?.photoURL ?? ''),
-                                          )
-                                        : CircleAvatar(
-                                            radius: 60,
-                                            backgroundImage: FileImage(File(value.path)),
-                                          ),
-                                    Positioned(
-                                      top: 75,
-                                      left: 75,
-                                      child: IconButton(
-                                        iconSize: 40,
-                                        onPressed: _selectImage,
-                                        icon: const Icon(
-                                          Icons.camera,
-                                          color: Colors.amber,
+                            valueListenable: _pickedImage,
+                            builder: (_, XFile? value, __) {
+                              return Stack(
+                                children: [
+                                  value == null
+                                      ? CircleAvatar(
+                                          radius: 60,
+                                          backgroundImage:
+                                              NetworkImage(auth.currentUser?.photoURL ?? ''),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 60,
+                                          backgroundImage: FileImage(File(value.path)),
                                         ),
+                                  Positioned(
+                                    top: 75,
+                                    left: 75,
+                                    child: IconButton(
+                                      iconSize: 40,
+                                      onPressed: _selectImage,
+                                      icon: const Icon(
+                                        Icons.camera,
+                                        color: Colors.amber,
                                       ),
                                     ),
-                                  ],
-                                );
-                              }),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(height: 20),
                         Form(

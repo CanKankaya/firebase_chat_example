@@ -178,24 +178,26 @@ class ChatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime dt = (individualChatData?['createdAt'] as Timestamp).toDate();
-    String formattedDate = DateFormat.yMMMMd().format(dt);
-
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats/${individualChatData?.id}/participantsData')
           .snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
-        if (usersSnapshot.connectionState == ConnectionState.waiting ||
-            usersSnapshot.connectionState == ConnectionState.none) {
+      builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+        if (participantsSnapshot.connectionState == ConnectionState.waiting ||
+            participantsSnapshot.connectionState == ConnectionState.none) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        final participantsData = usersSnapshot.data?.docs;
+        //**index dependant logic here */
+        DateTime dt = (individualChatData?['createdAt'] as Timestamp).toDate();
+        String formattedDate = DateFormat.yMMMMd().format(dt);
+        final participantsData = participantsSnapshot.data?.docs;
         int index =
             participantsData?.map((e) => e.id).toList().indexOf(currentUser?.uid ?? '') ?? -1;
         final bool userBelongs = index != -1;
+        //** */
+
         return InkWell(
           splashColor: Colors.amber,
           onTap: () {
