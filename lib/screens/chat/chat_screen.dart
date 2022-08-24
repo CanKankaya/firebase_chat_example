@@ -13,7 +13,7 @@ import 'package:firebase_chat_example/providers/reply_provider.dart';
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
-import 'package:firebase_chat_example/screens/chat_participants_screen.dart';
+import 'package:firebase_chat_example/screens/chat/chat_participants_screen.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key, required this.chatId});
@@ -596,12 +596,7 @@ class MessageWidget extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => OtherUserDataScreen(user: {
-                                    'userId': whichUser?['userId'] ?? '',
-                                    'userImageUrl': whichUser?['userImageUrl'] ?? '',
-                                    'username': whichUser?['username'] ?? '',
-                                    'userDetail': whichUser?['userDetail'] ?? '',
-                                  }),
+                                  builder: (context) => OtherUserDataScreen(user: whichUser),
                                 ),
                               );
                             }

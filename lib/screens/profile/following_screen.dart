@@ -48,9 +48,11 @@ class FollowingScreen extends StatelessWidget {
                       child: ListView.builder(
                         itemCount: followingList.length,
                         itemBuilder: (context, index) {
-                          final user = usersData?.firstWhere((element) {
-                            return element.id == followingList[index];
-                          });
+                          final user = usersData?.firstWhere(
+                            (element) {
+                              return element.id == followingList[index];
+                            },
+                          );
 
                           return FollowingUserItem(user: user);
                         },
@@ -116,12 +118,7 @@ class FollowingUserItem extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => OtherUserDataScreen(
-                user: {
-                  'userId': user?['userId'] ?? '',
-                  'userImageUrl': user?['userImageUrl'] ?? '',
-                  'username': user?['username'] ?? '',
-                  'userDetail': user?['userDetail'] ?? '',
-                },
+                user: user,
               ),
             ),
           ),
@@ -183,12 +180,7 @@ class OtherUserItem extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => OtherUserDataScreen(
-                user: {
-                  'userId': user?['userId'] ?? '',
-                  'userImageUrl': user?['userImageUrl'] ?? '',
-                  'username': user?['username'] ?? '',
-                  'userDetail': user?['userDetail'] ?? '',
-                },
+                user: user,
               ),
             ),
           ),

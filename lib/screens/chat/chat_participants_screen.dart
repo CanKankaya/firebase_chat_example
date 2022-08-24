@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
-import 'package:firebase_chat_example/screens/add_participant_screen.dart';
+import 'package:firebase_chat_example/screens/chat/add_participant_screen.dart';
 import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
@@ -22,15 +22,8 @@ class ChatParticipantsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>>? usersData;
     final currentUser = FirebaseAuth.instance.currentUser;
     final isCurrentUserAdmin = creatorId == currentUser?.uid;
-
-    _getUsers() async {
-      var snapshot = await FirebaseFirestore.instance.collection('usersData').get();
-      usersData = snapshot.docs.map((e) => e.data()).toList();
-      return usersData;
-    }
 
     void _handleClick(int item, String whichUserId) {
       switch (item) {
@@ -186,15 +179,16 @@ class ChatParticipantsScreen extends StatelessWidget {
       );
     }
 
-    return FutureBuilder(
-      future: _getUsers(),
-      builder: (_, snapshot) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
+      builder: (_, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
         return StreamBuilder(
           stream:
               FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-            if (snapshot.hasData && participantsSnapshot.hasData) {
+          builder: (_, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+            if (usersSnapshot.hasData && participantsSnapshot.hasData) {
               final participantsData = participantsSnapshot.data?.docs;
+              final usersData = usersSnapshot.data?.docs;
 
               return GestureDetector(
                 behavior: HitTestBehavior.translucent,

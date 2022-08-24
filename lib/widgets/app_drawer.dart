@@ -7,7 +7,7 @@ import 'package:firebase_chat_example/providers/theme_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
-import 'package:firebase_chat_example/screens/profile_screen.dart';
+import 'package:firebase_chat_example/screens/profile/profile_screen.dart';
 import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';

@@ -9,8 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
-import 'package:firebase_chat_example/screens/followers_screen.dart';
-import 'package:firebase_chat_example/screens/following_screen.dart';
+import 'package:firebase_chat_example/screens/profile/followers_screen.dart';
+import 'package:firebase_chat_example/screens/profile/following_screen.dart';
 
 //TODO: when coming back from following page, followingCount doesnt update, because this page is FutureBuilder, switch to Stream
 

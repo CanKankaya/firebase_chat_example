@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class OtherUserDataScreen extends StatelessWidget {
-  final Map<String, dynamic>? user;
+  final QueryDocumentSnapshot<Object?>? user;
 
   const OtherUserDataScreen({super.key, required this.user});
 
