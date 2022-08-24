@@ -46,10 +46,6 @@ class FollowersScreen extends StatelessWidget {
                     child: Material(
                       color: Colors.black,
                       child: ListView.separated(
-                        separatorBuilder: (context, index) => const Divider(
-                          color: Colors.amber,
-                          thickness: 1,
-                        ),
                         padding: const EdgeInsets.all(8),
                         itemCount: followersList.length,
                         itemBuilder: (context, index) {
@@ -60,6 +56,10 @@ class FollowersScreen extends StatelessWidget {
                           );
                           return FollowerUserItem(user: user);
                         },
+                        separatorBuilder: (context, index) => const Divider(
+                          color: Colors.amber,
+                          thickness: 1,
+                        ),
                       ),
                     ),
                   ),
