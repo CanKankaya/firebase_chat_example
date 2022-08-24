@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_chat_example/services/following_service.dart';
+
+import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_user/otheruser_followers_screen.dart';
 import 'package:firebase_chat_example/screens/other_user/otheruser_following_screen.dart';
@@ -9,9 +15,11 @@ class OtherUserDataScreen extends StatelessWidget {
   final QueryDocumentSnapshot<Object?>? user;
 
   const OtherUserDataScreen({super.key, required this.user});
-//TODO: add a follow/unfollow button here
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
+
     return Scaffold(
       appBar: AppBar(),
       body: Center(
@@ -73,7 +81,69 @@ class OtherUserDataScreen extends StatelessWidget {
                       )
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StreamBuilder(
+                      stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
+                      builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+                        if (usersSnapshot.hasData) {
+                          final usersData = usersSnapshot.data?.docs;
+                          final currentUserData =
+                              usersData?.firstWhere((element) => element.id == currentUser?.uid);
+                          final List<dynamic> followingList = currentUserData?['following'];
+                          final foundUser = followingList
+                              .firstWhereOrNull((element) => element == user?['userId']);
+                          final bool amIFollowing = foundUser == null ? false : true;
+
+                          return ValueListenableBuilder(
+                            valueListenable: isLoading,
+                            builder: (_, bool loading, __) {
+                              return ElevatedButton(
+                                onPressed: loading
+                                    ? null
+                                    : () async {
+                                        isLoading.value = true;
+                                        amIFollowing
+                                            ? await followService
+                                                .unfollow(user?['userId'])
+                                                .then((_) {
+                                                isLoading.value = false;
+                                                simplerErrorMessage(
+                                                  context,
+                                                  'UnFollowed \'${user?['username'] ?? ''}\' :(',
+                                                  '',
+                                                  null,
+                                                  false,
+                                                );
+                                              })
+                                            : await followService.follow(user?['userId']).then(
+                                                (_) {
+                                                  isLoading.value = false;
+                                                  simplerErrorMessage(
+                                                    context,
+                                                    'Following \'${user?['username'] ?? ''}\'!',
+                                                    '',
+                                                    null,
+                                                    false,
+                                                  );
+                                                },
+                                              );
+                                      },
+                                child: loading
+                                    ? const CircularProgressIndicator()
+                                    : Text(amIFollowing ? 'UnFollow' : 'Follow'),
+                              );
+                            },
+                          );
+                        } else {
+                          return ElevatedButton(
+                            onPressed: () {},
+                            child: const Text('Follow'),
+                          );
+                        }
+                      },
+                    ),
+                  ),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child: Container(

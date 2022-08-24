@@ -8,7 +8,6 @@ class FollowingService {
 
   Future follow(String id) async {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
     await usersData.doc(currentUserId).update({
       'following': FieldValue.arrayUnion([id]),
       'followingCount': FieldValue.increment(1),
@@ -22,7 +21,6 @@ class FollowingService {
 
   Future unfollow(String id) async {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
     await usersData.doc(currentUserId).update({
       'following': FieldValue.arrayRemove([id]),
       'followingCount': FieldValue.increment(-1),
