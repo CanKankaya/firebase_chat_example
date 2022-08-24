@@ -9,9 +9,7 @@ class OtherUserDataScreen extends StatelessWidget {
   final QueryDocumentSnapshot<Object?>? user;
 
   const OtherUserDataScreen({super.key, required this.user});
-
-  //TODO: Fill this page aswell, with new data
-
+//TODO: add a follow/unfollow button here
   @override
   Widget build(BuildContext context) {
     return Scaffold(

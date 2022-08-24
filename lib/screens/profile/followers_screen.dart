@@ -4,8 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 
-//TODO: fill this page basically
-
 class FollowersScreen extends StatelessWidget {
   const FollowersScreen({Key? key, required this.thisUser}) : super(key: key);
   final QueryDocumentSnapshot<Object?>? thisUser;

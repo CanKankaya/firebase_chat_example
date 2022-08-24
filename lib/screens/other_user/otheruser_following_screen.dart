@@ -40,9 +40,10 @@ class OtherUserFollowingScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
-                    child: Container(
+                    child: Material(
                       color: Colors.black,
-                      child: ListView.builder(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(8),
                         itemCount: followingList.length,
                         itemBuilder: (context, index) {
                           final user = usersData?.firstWhere(
@@ -50,9 +51,12 @@ class OtherUserFollowingScreen extends StatelessWidget {
                               return element.id == followingList[index];
                             },
                           );
-
                           return FollowingUserItem(user: user);
                         },
+                        separatorBuilder: (context, index) => const Divider(
+                          color: Colors.amber,
+                          thickness: 1,
+                        ),
                       ),
                     ),
                   ),
@@ -74,27 +78,32 @@ class FollowingUserItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData.dark(),
-      child: ListTile(
-        leading: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 2,
-              color: Colors.amber,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: Colors.amber,
+        onTap: () {},
+        child: ListTile(
+          leading: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 2,
+                color: Colors.amber,
+              ),
+              borderRadius: BorderRadius.circular(25),
             ),
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: CircleAvatar(
-            radius: 23,
-            backgroundImage: NetworkImage(
-              user?['userImageUrl'] ?? '',
+            child: CircleAvatar(
+              radius: 23,
+              backgroundImage: NetworkImage(
+                user?['userImageUrl'] ?? '',
+              ),
             ),
           ),
-        ),
-        title: Text(user?['username'] ?? ''),
-        subtitle: Text(
-          user?['userDetail'] ?? '',
-          maxLines: 1,
-          overflow: TextOverflow.clip,
+          title: Text(user?['username'] ?? ''),
+          subtitle: Text(
+            user?['userDetail'] ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+          ),
         ),
       ),
     );
