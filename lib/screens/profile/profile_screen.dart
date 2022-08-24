@@ -185,7 +185,8 @@ class ProfileScreen extends StatelessWidget {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => const FollowersScreen(),
+                                                builder: (context) =>
+                                                    FollowersScreen(thisUser: whichParticipant),
                                               ),
                                             );
                                           },

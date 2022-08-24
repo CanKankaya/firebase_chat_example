@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-//TODO: fill this page basically
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OtherUserFollowersScreen extends StatelessWidget {
   const OtherUserFollowersScreen({Key? key, required this.thisUser}) : super(key: key);
@@ -50,7 +50,7 @@ class OtherUserFollowersScreen extends StatelessWidget {
                             },
                           );
 
-                          return FollowingUserItem(user: user);
+                          return FollowerUserItem(user: user);
                         },
                       ),
                     ),
@@ -65,8 +65,8 @@ class OtherUserFollowersScreen extends StatelessWidget {
   }
 }
 
-class FollowingUserItem extends StatelessWidget {
-  const FollowingUserItem({Key? key, this.user}) : super(key: key);
+class FollowerUserItem extends StatelessWidget {
+  const FollowerUserItem({Key? key, this.user}) : super(key: key);
 
   final QueryDocumentSnapshot<Object?>? user;
   @override
