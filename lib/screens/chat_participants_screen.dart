@@ -8,6 +8,7 @@ import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/add_participant_screen.dart';
+import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
   final String creatorId;
@@ -111,6 +112,80 @@ class ChatParticipantsScreen extends StatelessWidget {
       }
     }
 
+    _deleteCurrentChat(String chatId) async {
+      final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
+
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Remove Chat'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: const [
+                  Text('Are you sure you want to delete this chat?'),
+                ],
+              ),
+            ),
+            actions: [
+              ValueListenableBuilder(
+                valueListenable: isLoading,
+                builder: (context, bool value, __) {
+                  return TextButton(
+                    onPressed: () async {
+                      if (chatId == '') {
+                        Navigator.of(context).pop();
+                        SchedulerBinding.instance.addPostFrameCallback(
+                          (_) {
+                            simplerErrorMessage(
+                              context,
+                              'Couldnt find the chat',
+                              '',
+                              null,
+                              false,
+                            );
+                          },
+                        );
+                        return;
+                      } else {
+                        isLoading.value = true;
+                        await FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+
+                        SchedulerBinding.instance.addPostFrameCallback(
+                          (_) {
+                            isLoading.value = false;
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) => const ChatsListScreen(),
+                                ),
+                                (route) => false);
+                            simplerErrorMessage(
+                              context,
+                              'Chat Deleted',
+                              '',
+                              null,
+                              false,
+                            );
+                          },
+                        );
+                      }
+                    },
+                    child: value
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            'Yes',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return FutureBuilder(
       future: _getUsers(),
       builder: (_, snapshot) {
@@ -125,7 +200,15 @@ class ChatParticipantsScreen extends StatelessWidget {
                 behavior: HitTestBehavior.translucent,
                 onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                 child: Scaffold(
-                  appBar: AppBar(),
+                  appBar: AppBar(
+                    actions: [
+                      if (isCurrentUserAdmin)
+                        IconButton(
+                          onPressed: () => _deleteCurrentChat(chatId),
+                          icon: const Icon(Icons.delete_forever),
+                        ),
+                    ],
+                  ),
                   body: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: participantsData?.length,
@@ -145,20 +228,17 @@ class ChatParticipantsScreen extends StatelessWidget {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtherUserDataScreen(
-                                        whichParticipantData: [
-                                          whichUser?['userId'] ?? '',
-                                          whichUser?['userImageUrl'] ?? '',
-                                          whichUser?['username'] ?? '',
-                                          whichUser?['userDetail'] ?? '',
-                                        ],
+                                  if (!isMe) {
+                                    FocusManager.instance.primaryFocus?.unfocus();
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OtherUserDataScreen(
+                                          user: whichUser,
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  }
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
