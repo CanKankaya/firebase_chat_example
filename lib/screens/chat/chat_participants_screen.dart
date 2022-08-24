@@ -214,39 +214,36 @@ class ChatParticipantsScreen extends StatelessWidget {
                       final isMe = currentUser?.uid == whichUser?['userId'];
 
                       return InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          if (!isMe) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OtherUserDataScreen(
+                                  user: whichUser,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                         splashColor: Colors.amber,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  if (!isMe) {
-                                    FocusManager.instance.primaryFocus?.unfocus();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => OtherUserDataScreen(
-                                          user: whichUser,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      width: 2,
-                                      color: Colors.amber,
-                                    ),
-                                    borderRadius: BorderRadius.circular(25),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 2,
+                                    color: Colors.amber,
                                   ),
-                                  child: CircleAvatar(
-                                    radius: 23,
-                                    backgroundImage: NetworkImage(
-                                      whichUser?['userImageUrl'] ?? '',
-                                    ),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 23,
+                                  backgroundImage: NetworkImage(
+                                    whichUser?['userImageUrl'] ?? '',
                                   ),
                                 ),
                               ),

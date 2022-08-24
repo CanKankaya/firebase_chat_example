@@ -172,7 +172,7 @@ class Messages extends StatelessWidget {
                         },
                       );
                     } else {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('You are already seeing all messages'),
@@ -388,7 +388,7 @@ class MessageWidget extends StatelessWidget {
                       text: currentMessage?['text'] ?? '',
                     ),
                   ).then((_) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Copied to clipboard'),

@@ -20,6 +20,8 @@ class OtherUserDataScreen extends StatelessWidget {
     final currentUser = FirebaseAuth.instance.currentUser;
     final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
 
+    //TODO: follower count doesnt update here when you follow/unfollow
+
     return Scaffold(
       appBar: AppBar(),
       body: Center(
@@ -108,6 +110,7 @@ class OtherUserDataScreen extends StatelessWidget {
                                                 .unfollow(user?['userId'])
                                                 .then((_) {
                                                 isLoading.value = false;
+                                                ScaffoldMessenger.of(context).clearSnackBars();
                                                 simplerErrorMessage(
                                                   context,
                                                   'UnFollowed \'${user?['username'] ?? ''}\' :(',
@@ -119,6 +122,7 @@ class OtherUserDataScreen extends StatelessWidget {
                                             : await followService.follow(user?['userId']).then(
                                                 (_) {
                                                   isLoading.value = false;
+                                                  ScaffoldMessenger.of(context).clearSnackBars();
                                                   simplerErrorMessage(
                                                     context,
                                                     'Following \'${user?['username'] ?? ''}\'!',

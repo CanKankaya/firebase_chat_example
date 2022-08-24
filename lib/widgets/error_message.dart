@@ -17,7 +17,6 @@ void errorMessage(
 ) {
   if (spamCheckOn) {
     if (spamCheck == false) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(milliseconds: 1950),
@@ -49,7 +48,6 @@ void errorMessage(
     spamCheck = true;
     spamFunction();
   } else {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(milliseconds: 1950),
