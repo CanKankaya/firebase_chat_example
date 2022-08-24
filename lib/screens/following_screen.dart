@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -6,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_chat_example/services/following_service.dart';
+
+import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 
 class FollowingScreen extends StatelessWidget {
   const FollowingScreen({Key? key}) : super(key: key);

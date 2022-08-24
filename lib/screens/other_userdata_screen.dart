@@ -5,6 +5,8 @@ class OtherUserDataScreen extends StatelessWidget {
 
   const OtherUserDataScreen({super.key, required this.user});
 
+  //TODO: Fill this page aswell, with new data
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
