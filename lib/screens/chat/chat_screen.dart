@@ -12,7 +12,7 @@ import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
-import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
+import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat/chat_participants_screen.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -496,83 +496,94 @@ class MessageWidget extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: deviceSize.width * 0.65,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.amber,
-                        ),
-                        color: isMe ? Colors.white : Colors.black,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(15),
-                          topRight: const Radius.circular(15),
-                          bottomLeft: isMe ? const Radius.circular(15) : const Radius.circular(0),
-                          bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(15),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 12,
-                      ),
-                      margin: EdgeInsets.only(
-                        top: !isMeAbove && !isReply ? 32 : 2,
-                        bottom: 2,
-                        left: 8,
-                        right: 8,
-                      ),
-                      child: Column(
-                        crossAxisAlignment:
-                            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                        children: [
-                          if (!isMe && !isMeAbove)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  whichUser?['username'] ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                                if (!doesUserBelong)
-                                  const Text(
-                                    ('(Removed User)'),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color.fromARGB(255, 195, 195, 195),
+                    Row(
+                      children: [
+                        if (isMe) const SizedBox(width: 20),
+                        //**Added invisible boxes for Stack hittest bug*/
+                        //**See:https://github.com/flutter/flutter/issues/19445 */
+                        Container(
+                          constraints: BoxConstraints(
+                            maxWidth: deviceSize.width * 0.65,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 2,
+                              color: Colors.amber,
+                            ),
+                            color: isMe ? Colors.white : Colors.black,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(15),
+                              topRight: const Radius.circular(15),
+                              bottomLeft:
+                                  isMe ? const Radius.circular(15) : const Radius.circular(0),
+                              bottomRight:
+                                  isMe ? const Radius.circular(0) : const Radius.circular(15),
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 12,
+                          ),
+                          margin: EdgeInsets.only(
+                            top: !isMeAbove && !isReply ? 32 : 2,
+                            bottom: 2,
+                            left: 8,
+                            right: 8,
+                          ),
+                          child: Column(
+                            crossAxisAlignment:
+                                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                            children: [
+                              if (!isMe && !isMeAbove)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      whichUser?['username'] ?? '',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amber,
+                                      ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                          if (!isMe && !isMeAbove) const SizedBox(height: 5),
-                          Text(
-                            currentMessage?['text'] ?? '',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isMe ? Colors.black : Colors.white,
-                            ),
-                            textAlign: TextAlign.start,
+                                    if (!doesUserBelong)
+                                      const Text(
+                                        ('(Removed User)'),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Color.fromARGB(255, 195, 195, 195),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              if (!isMe && !isMeAbove) const SizedBox(height: 5),
+                              Text(
+                                currentMessage?['text'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isMe ? Colors.black : Colors.white,
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              Text(
+                                // This allocates space for the formattedDate, however the formattedDate is placed later with the Stack, look below
+                                formattedDate,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.transparent,
+                                ),
+                                textAlign: isMe ? TextAlign.end : TextAlign.start,
+                              ),
+                            ],
                           ),
-                          Text(
-                            // This allocates space for the formattedDate, however the formattedDate is placed later with the Stack, look below
-                            formattedDate,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.transparent,
-                            ),
-                            textAlign: isMe ? TextAlign.end : TextAlign.start,
-                          ),
-                        ],
-                      ),
+                        ),
+                        //**Other invisible sizedbox for hittest bug */
+                        if (!isMe) const SizedBox(width: 20),
+                      ],
                     ),
                     PositionedDirectional(
                       bottom: 11,
-                      end: 18,
+                      end: isMe ? 18 : 38,
                       child: Text(
                         formattedDate,
                         style: TextStyle(
@@ -587,9 +598,10 @@ class MessageWidget extends StatelessWidget {
                     if (!isMeAbove)
                       PositionedDirectional(
                         top: isReply ? -12 : 18,
-                        start: isMe ? -20 : null,
-                        end: isMe ? null : -20,
+                        start: isMe ? 0 : null,
+                        end: isMe ? null : 0,
                         child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: () {
                             if (!isMe) {
                               FocusManager.instance.primaryFocus?.unfocus();

@@ -24,17 +24,15 @@ class ChatsListScreen extends StatelessWidget {
       if (formKey.currentState!.validate()) {
         try {
           Navigator.pop(context);
+          final String generatedId = DateTime.now().microsecondsSinceEpoch.toString();
 
-          await FirebaseFirestore.instance
-              .collection('chats')
-              .doc('chatof${currentUser?.uid}')
-              .set({
+          await FirebaseFirestore.instance.collection('chats').doc(generatedId).set({
             'chatCreatorId': currentUser?.uid,
             'chatName': chatNameController.text,
             'createdAt': DateTime.now(),
           }).then((_) {
             FirebaseFirestore.instance
-                .collection('chats/chatof${currentUser?.uid}/participantsData')
+                .collection('chats/$generatedId/participantsData')
                 .doc(currentUser?.uid)
                 .set({
               'userId': currentUser?.uid,

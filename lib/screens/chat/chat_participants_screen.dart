@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
-import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
+import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat/add_participant_screen.dart';
 import 'package:firebase_chat_example/screens/chats_list_screen.dart';
 

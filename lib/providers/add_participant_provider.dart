@@ -16,7 +16,6 @@ class AddListProvider with ChangeNotifier {
 
   clearList() {
     addList = [];
-    print('clearList ran');
   }
 
   addToList(String userId) {
@@ -37,8 +36,6 @@ class AddListProvider with ChangeNotifier {
         });
       }
       notifyListeners();
-      //
-
     } catch (e) {
       //
     }
