@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
-
 class OtherUserFollowingScreen extends StatelessWidget {
   const OtherUserFollowingScreen({Key? key, required this.thisUser}) : super(key: key);
 

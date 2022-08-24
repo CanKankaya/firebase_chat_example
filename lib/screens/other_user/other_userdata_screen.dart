@@ -1,8 +1,9 @@
-import 'package:firebase_chat_example/screens/other_user/otheruser_followers_screen.dart';
-import 'package:firebase_chat_example/screens/other_user/otheruser_following_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_chat_example/screens/other_user/otheruser_followers_screen.dart';
+import 'package:firebase_chat_example/screens/other_user/otheruser_following_screen.dart';
 
 class OtherUserDataScreen extends StatelessWidget {
   final QueryDocumentSnapshot<Object?>? user;
@@ -61,7 +62,7 @@ class OtherUserDataScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const OtherUserFollowersScreen(),
+                                  builder: (context) => OtherUserFollowersScreen(thisUser: user),
                                 ),
                               );
                             },
@@ -75,15 +76,30 @@ class OtherUserDataScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Card(
-                        child: Text(
-                          user?['userDetail'] ?? '',
-                        ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        color: Colors.black,
                       ),
-                    ],
+                      width: double.infinity,
+                      height: 200,
+                      child: ListView(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 16.0,
+                            ),
+                            child: Text(
+                              user?['userDetail'] ?? '',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
