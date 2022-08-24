@@ -114,7 +114,7 @@ class ChatsListScreen extends StatelessWidget {
                                 onPressed: () {
                                   tryAddNewChat();
                                 },
-                                child: const Text('button'),
+                                child: const Text('Add New Public Chat'),
                               ),
                             ],
                           )

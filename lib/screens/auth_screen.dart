@@ -90,7 +90,6 @@ class AuthScreen extends StatelessWidget {
               'following': [],
             });
           }
-          //TODO: check if it works fine with new users
 
           _isLoading.value = false;
         } on FirebaseAuthException catch (error) {

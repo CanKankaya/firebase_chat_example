@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OtherUserDataScreen extends StatelessWidget {
-  final List<String> whichParticipantData;
+  final Map<String, dynamic>? user;
 
-  const OtherUserDataScreen({super.key, required this.whichParticipantData});
+  const OtherUserDataScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class OtherUserDataScreen extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 60,
                       backgroundImage: NetworkImage(
-                        whichParticipantData[1],
+                        user?['userImageUrl'] ?? '',
                       ),
                     ),
                   ),
@@ -29,12 +29,12 @@ class OtherUserDataScreen extends StatelessWidget {
                     children: [
                       Card(
                         child: Text(
-                          whichParticipantData[2],
+                          user?['username'] ?? '',
                         ),
                       ),
                       Card(
                         child: Text(
-                          whichParticipantData[3],
+                          user?['userDetail'] ?? '',
                         ),
                       ),
                     ],

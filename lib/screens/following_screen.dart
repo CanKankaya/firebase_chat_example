@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/other_userdata_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -109,10 +110,34 @@ class FollowingUserItem extends StatelessWidget {
     return Theme(
       data: ThemeData.dark(),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 23,
-          backgroundImage: NetworkImage(
-            user?['userImageUrl'] ?? '',
+        leading: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtherUserDataScreen(
+                user: {
+                  'userId': user?['userId'] ?? '',
+                  'userImageUrl': user?['userImageUrl'] ?? '',
+                  'username': user?['username'] ?? '',
+                  'userDetail': user?['userDetail'] ?? '',
+                },
+              ),
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 2,
+                color: Colors.amber,
+              ),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: CircleAvatar(
+              radius: 23,
+              backgroundImage: NetworkImage(
+                user?['userImageUrl'] ?? '',
+              ),
+            ),
           ),
         ),
         title: Text(user?['username'] ?? ''),
@@ -152,10 +177,34 @@ class OtherUserItem extends StatelessWidget {
     return Theme(
       data: ThemeData.dark(),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 23,
-          backgroundImage: NetworkImage(
-            user?['userImageUrl'] ?? '',
+        leading: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtherUserDataScreen(
+                user: {
+                  'userId': user?['userId'] ?? '',
+                  'userImageUrl': user?['userImageUrl'] ?? '',
+                  'username': user?['username'] ?? '',
+                  'userDetail': user?['userDetail'] ?? '',
+                },
+              ),
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 2,
+                color: Colors.amber,
+              ),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: CircleAvatar(
+              radius: 23,
+              backgroundImage: NetworkImage(
+                user?['userImageUrl'] ?? '',
+              ),
+            ),
           ),
         ),
         title: Text(user?['username'] ?? ''),

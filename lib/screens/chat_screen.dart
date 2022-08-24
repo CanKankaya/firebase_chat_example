@@ -591,20 +591,20 @@ class MessageWidget extends StatelessWidget {
                         end: isMe ? null : -20,
                         child: GestureDetector(
                           onTap: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => OtherUserDataScreen(
-                                  whichParticipantData: [
-                                    whichUser?['userId'] ?? '',
-                                    whichUser?['userImageUrl'] ?? '',
-                                    whichUser?['username'] ?? '',
-                                    whichUser?['userDetail'] ?? '',
-                                  ],
+                            if (!isMe) {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OtherUserDataScreen(user: {
+                                    'userId': whichUser?['userId'] ?? '',
+                                    'userImageUrl': whichUser?['userImageUrl'] ?? '',
+                                    'username': whichUser?['username'] ?? '',
+                                    'userDetail': whichUser?['userDetail'] ?? '',
+                                  }),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Container(
                             decoration: BoxDecoration(
