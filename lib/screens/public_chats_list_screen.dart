@@ -143,7 +143,7 @@ class ChatsList extends StatelessWidget {
           .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> chatsSnapshot) {
-        if (chatsSnapshot.connectionState == ConnectionState.waiting ||
+        if (chatsSnapshot.connectionState == ConnectionState.none ||
             chatsSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),

@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 import 'package:firebase_chat_example/services/message_service.dart';
 import 'package:flutter/material.dart';
 
@@ -167,6 +168,15 @@ class OtherUserDataScreen extends StatelessWidget {
                                                   .then(
                                                 (privChatId) {
                                                   mIsLoading.value = false;
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (BuildContext context) =>
+                                                            PrivateChatScreen(
+                                                                chatId: privChatId,
+                                                                otherUser: user),
+                                                      ),
+                                                      (route) => false);
 
                                                   //TODO: Navigate to message screen
                                                 },

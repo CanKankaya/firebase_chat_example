@@ -10,11 +10,11 @@ import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.d
 import 'package:firebase_chat_example/screens/chat/add_participant_screen.dart';
 import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
 
-class ChatParticipantsScreen extends StatelessWidget {
+class PublicChatParticipantsScreen extends StatelessWidget {
   final String creatorId;
   final String chatId;
 
-  const ChatParticipantsScreen({
+  const PublicChatParticipantsScreen({
     Key? key,
     required this.creatorId,
     required this.chatId,

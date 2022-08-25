@@ -12,18 +12,18 @@ import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
-import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
-import 'package:firebase_chat_example/screens/chat/public_chat_participants_screen.dart';
+import 'package:firebase_chat_example/screens/chat/private_chat_participants.dart';
+import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
 
-class PublicChatScreen extends StatelessWidget {
-  const PublicChatScreen({super.key, required this.chatId});
+class PrivateChatScreen extends StatelessWidget {
+  PrivateChatScreen({super.key, required this.chatId, required this.otherUser});
 
   final String chatId;
+  final QueryDocumentSnapshot<Object?>? otherUser;
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
     if (chatId == '') {
       return Scaffold(
         appBar: AppBar(),
@@ -37,11 +37,12 @@ class PublicChatScreen extends StatelessWidget {
       );
     } else {
       return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
+        stream: FirebaseFirestore.instance.collection('privateChats').doc(chatId).snapshots(),
         builder: (context, chatSnapshot) {
           return StreamBuilder(
-            stream:
-                FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('privateChats/$chatId/participantsData')
+                .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
               if (chatSnapshot.connectionState == ConnectionState.waiting ||
                   chatSnapshot.connectionState == ConnectionState.none ||
@@ -72,10 +73,29 @@ class PublicChatScreen extends StatelessWidget {
                     child: WillPopScope(
                       onWillPop: () {
                         Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrivateChatsListScreen(),
+                          ),
+                        );
                         return Future.value(true);
                       },
                       child: Scaffold(
                         appBar: AppBar(
+                          leading: IconButton(
+                            onPressed: () {
+                              Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const PrivateChatsListScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_back),
+                          ),
+                          title: Text(otherUser?['username'] ?? ''),
                           actions: [
                             IconButton(
                               onPressed: () {
@@ -83,8 +103,7 @@ class PublicChatScreen extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => PublicChatParticipantsScreen(
-                                      creatorId: chatSnapshot.data?['chatCreatorId'],
+                                    builder: (context) => PrivateChatParticipantsScreen(
                                       chatId: chatId,
                                     ),
                                   ),
@@ -142,7 +161,7 @@ class Messages extends StatelessWidget {
           {
             return StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection('chats/$chatId/messages')
+                  .collection('privateChats/$chatId/messages')
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
@@ -296,7 +315,10 @@ class MessageWidget extends StatelessWidget {
   //** */
 
   Future<void> _deleteMessage(messageId) async {
-    await FirebaseFirestore.instance.collection('chats/$chatId/messages').doc(messageId).delete();
+    await FirebaseFirestore.instance
+        .collection('privateChats/$chatId/messages')
+        .doc(messageId)
+        .delete();
   }
 
   @override
@@ -604,15 +626,15 @@ class MessageWidget extends StatelessWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            if (!isMe) {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => OtherUserDataScreen(user: whichUser),
-                                ),
-                              );
-                            }
+                            // if (!isMe) {
+                            //   FocusManager.instance.primaryFocus?.unfocus();
+                            //   Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (context) => OtherUserDataScreen(user: whichUser),
+                            //     ),
+                            //   );
+                            // }
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -723,11 +745,15 @@ class NewMessage extends StatelessWidget {
     final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
       final auth = FirebaseAuth.instance;
-      await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
+      await FirebaseFirestore.instance.collection('privateChats/$chatId/messages').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
         'userId': auth.currentUser?.uid ?? '',
         'repliedTo': provData.messageId,
+      });
+      await FirebaseFirestore.instance.collection('privateChats').doc(chatId).update({
+        'lastUpdated': DateTime.now(),
+        'lastMessage': _enteredMessage.value,
       });
       provData.closeReply();
       _controller.clear();

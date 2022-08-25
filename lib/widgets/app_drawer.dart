@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -58,6 +59,19 @@ class AppDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const PublicChatsListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.chat_bubble_outline),
+                    title: const Text('Private Chats'),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivateChatsListScreen(),
                         ),
                       );
                     },

@@ -10,8 +10,6 @@ class MessageService {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     try {
-      //TODO: also check if a message already exists
-
       final String generatedId = '$currentUserId$id';
       final String potentialId = '$id$currentUserId';
 
@@ -29,6 +27,8 @@ class MessageService {
         'chatCreatorId': currentUserId,
         'chatName': 'Private chat',
         'createdAt': DateTime.now(),
+        'lastUpdated': DateTime.now(),
+        'lastMessage': '',
       });
       await FirebaseFirestore.instance
           .collection('privateChats/$generatedId/participantsData')
