@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -461,6 +462,11 @@ class TestCode extends StatelessWidget {
                   Icons.construction,
                 ),
               ),
+              const SimplerCustomLoader(),
+              const SizedBox(
+                height: 10,
+              ),
+              const CircularProgressIndicator(),
             ],
           ),
         ),

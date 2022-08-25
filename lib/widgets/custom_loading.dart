@@ -34,25 +34,25 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
   void initState() {
     super.initState();
 
-    controller1 = AnimationController(duration: const Duration(milliseconds: 4000), vsync: this);
+    controller1 = AnimationController(duration: const Duration(milliseconds: 5000), vsync: this);
 
-    controller2 = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    controller2 = AnimationController(duration: const Duration(milliseconds: 5000), vsync: this);
 
-    controller3 = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
+    controller3 = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);
 
-    controller4 = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
+    controller4 = AnimationController(duration: const Duration(milliseconds: 1250), vsync: this);
 
     animation1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.bounceIn)));
+        parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.elasticInOut)));
 
-    animation2 = Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(
+    animation2 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
         parent: controller2, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
     animation3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
         parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
     animation4 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
+        parent: controller4, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
     controller1.repeat();
     controller2.repeat();
