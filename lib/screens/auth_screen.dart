@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/splash_screen.dart';
-import 'package:firebase_chat_example/screens/chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
 
 class AuthScreen extends StatelessWidget {
   AuthScreen({Key? key}) : super(key: key);
@@ -112,7 +112,7 @@ class AuthScreen extends StatelessWidget {
           return const SplashScreen();
         } else {
           return snapshot.hasData
-              ? const ChatsListScreen()
+              ? const PublicChatsListScreen()
               : WillPopScope(
                   onWillPop: () => showExitPopup(context),
                   child: Theme(

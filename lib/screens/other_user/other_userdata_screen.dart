@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/services/message_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -18,7 +19,8 @@ class OtherUserDataScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
+    final ValueNotifier<bool> fIsLoading = ValueNotifier<bool>(false);
+    final ValueNotifier<bool> mIsLoading = ValueNotifier<bool>(false);
 
     //TODO: follower count doesnt update here when you follow/unfollow
 
@@ -97,52 +99,103 @@ class OtherUserDataScreen extends StatelessWidget {
                               .firstWhereOrNull((element) => element == user?['userId']);
                           final bool amIFollowing = foundUser == null ? false : true;
 
-                          return ValueListenableBuilder(
-                            valueListenable: isLoading,
-                            builder: (_, bool loading, __) {
-                              return ElevatedButton(
-                                onPressed: loading
-                                    ? null
-                                    : () async {
-                                        isLoading.value = true;
-                                        amIFollowing
-                                            ? await followService
-                                                .unfollow(user?['userId'])
-                                                .then((_) {
-                                                isLoading.value = false;
-                                                ScaffoldMessenger.of(context).clearSnackBars();
-                                                simplerErrorMessage(
-                                                  context,
-                                                  'UnFollowed \'${user?['username'] ?? ''}\' :(',
-                                                  '',
-                                                  null,
-                                                  false,
-                                                );
-                                              })
-                                            : await followService.follow(user?['userId']).then(
-                                                (_) {
-                                                  isLoading.value = false;
-                                                  ScaffoldMessenger.of(context).clearSnackBars();
-                                                  simplerErrorMessage(
-                                                    context,
-                                                    'Following \'${user?['username'] ?? ''}\'!',
-                                                    '',
-                                                    null,
-                                                    false,
-                                                  );
-                                                },
-                                              );
-                                      },
-                                child: loading
-                                    ? const CircularProgressIndicator()
-                                    : Text(amIFollowing ? 'UnFollow' : 'Follow'),
-                              );
-                            },
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ValueListenableBuilder(
+                                valueListenable: fIsLoading,
+                                builder: (_, bool loading, __) {
+                                  return SizedBox(
+                                    width: 90,
+                                    child: ElevatedButton(
+                                      onPressed: loading
+                                          ? null
+                                          : () async {
+                                              fIsLoading.value = true;
+                                              amIFollowing
+                                                  ? await followService
+                                                      .unfollow(user?['userId'])
+                                                      .then((_) {
+                                                      fIsLoading.value = false;
+                                                      ScaffoldMessenger.of(context)
+                                                          .clearSnackBars();
+                                                      simplerErrorMessage(
+                                                        context,
+                                                        'UnFollowed \'${user?['username'] ?? ''}\' :(',
+                                                        '',
+                                                        null,
+                                                        false,
+                                                      );
+                                                    })
+                                                  : await followService
+                                                      .follow(user?['userId'])
+                                                      .then(
+                                                      (_) {
+                                                        fIsLoading.value = false;
+                                                        ScaffoldMessenger.of(context)
+                                                            .clearSnackBars();
+                                                        simplerErrorMessage(
+                                                          context,
+                                                          'Following \'${user?['username'] ?? ''}\'!',
+                                                          '',
+                                                          null,
+                                                          false,
+                                                        );
+                                                      },
+                                                    );
+                                            },
+                                      child: loading
+                                          ? const CircularProgressIndicator()
+                                          : Text(amIFollowing ? 'UnFollow' : 'Follow'),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ValueListenableBuilder(
+                                  valueListenable: mIsLoading,
+                                  builder: (context, bool loading, __) {
+                                    return SizedBox(
+                                      width: 130,
+                                      child: ElevatedButton(
+                                        onPressed: loading
+                                            ? null
+                                            : () async {
+                                                //TODO: message thing here
+                                                mIsLoading.value = true;
+                                                messageService
+                                                    .createPrivateChat(user?['userId'])
+                                                    .then((value) {
+                                                  print(value);
+                                                  mIsLoading.value = false;
+                                                });
+                                              },
+                                        child: loading
+                                            ? const CircularProgressIndicator()
+                                            : const Text('Send Message'),
+                                      ),
+                                    );
+                                  }),
+                            ],
                           );
                         } else {
-                          return ElevatedButton(
-                            onPressed: () {},
-                            child: const Text('Follow'),
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 90,
+                                child: ElevatedButton(
+                                  onPressed: () {},
+                                  child: const Text('Follow'),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 130,
+                                child: ElevatedButton(
+                                  onPressed: () {},
+                                  child: const Text('Send Message'),
+                                ),
+                              ),
+                            ],
                           );
                         }
                       },

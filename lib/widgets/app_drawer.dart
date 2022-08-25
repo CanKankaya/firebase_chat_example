@@ -8,7 +8,7 @@ import 'package:firebase_chat_example/providers/theme_provider.dart';
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/profile/profile_screen.dart';
-import 'package:firebase_chat_example/screens/chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
@@ -52,12 +52,12 @@ class AppDrawer extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.chat),
-                    title: const Text('Chats Screen'),
+                    title: const Text('Public Chats'),
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ChatsListScreen(),
+                          builder: (context) => const PublicChatsListScreen(),
                         ),
                       );
                     },

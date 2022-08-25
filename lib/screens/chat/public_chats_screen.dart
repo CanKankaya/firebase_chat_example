@@ -15,8 +15,8 @@ import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat/chat_participants_screen.dart';
 
-class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key, required this.chatId});
+class PublicChatsScreen extends StatelessWidget {
+  const PublicChatsScreen({super.key, required this.chatId});
 
   final String chatId;
 

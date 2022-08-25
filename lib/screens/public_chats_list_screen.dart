@@ -9,10 +9,10 @@ import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
-import 'package:firebase_chat_example/screens/chat/chat_screen.dart';
+import 'package:firebase_chat_example/screens/chat/public_chats_screen.dart';
 
-class ChatsListScreen extends StatelessWidget {
-  const ChatsListScreen({Key? key}) : super(key: key);
+class PublicChatsListScreen extends StatelessWidget {
+  const PublicChatsListScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +203,7 @@ class ChatItem extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatScreen(
+                  builder: (context) => PublicChatsScreen(
                     chatId: individualChatData?.id ?? '',
                   ),
                 ),

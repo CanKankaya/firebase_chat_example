@@ -8,7 +8,7 @@ import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat/add_participant_screen.dart';
-import 'package:firebase_chat_example/screens/chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
 
 class ChatParticipantsScreen extends StatelessWidget {
   final String creatorId;
@@ -150,7 +150,7 @@ class ChatParticipantsScreen extends StatelessWidget {
                             Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (BuildContext context) => const ChatsListScreen(),
+                                  builder: (BuildContext context) => const PublicChatsListScreen(),
                                 ),
                                 (route) => false);
                             simplerErrorMessage(
