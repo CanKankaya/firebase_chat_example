@@ -30,6 +30,9 @@ class PublicChatsListScreen extends StatelessWidget {
             'chatCreatorId': currentUser?.uid,
             'chatName': chatNameController.text,
             'createdAt': DateTime.now(),
+            'lastUpdated': DateTime.now(),
+            'lastMessage': '',
+            'lastSender': '',
           }).then((_) {
             FirebaseFirestore.instance
                 .collection('chats/$generatedId/participantsData')
@@ -140,7 +143,7 @@ class ChatsList extends StatelessWidget {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats')
-          .orderBy('createdAt', descending: true)
+          .orderBy('lastUpdated', descending: true)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> chatsSnapshot) {
         if (chatsSnapshot.connectionState == ConnectionState.none ||
@@ -188,12 +191,18 @@ class ChatItem extends StatelessWidget {
           );
         }
         //**index dependant logic here */
-        DateTime dt = (individualChatData?['createdAt'] as Timestamp).toDate();
+        DateTime dt = (individualChatData?['lastUpdated'] as Timestamp).toDate();
         String formattedDate = DateFormat.yMMMMd().format(dt);
         final participantsData = participantsSnapshot.data?.docs;
         int index =
             participantsData?.map((e) => e.id).toList().indexOf(currentUser?.uid ?? '') ?? -1;
         final bool userBelongs = index != -1;
+        String lastMessage = individualChatData?['lastMessage'] == ''
+            ? '"This Chat is Empty"'
+            : individualChatData?['lastMessage'];
+        bool chatEmpty = individualChatData?['lastMessage'] == '';
+        bool isLastSenderYou = individualChatData?['lastSender'] == currentUser?.uid;
+
         //** */
 
         return InkWell(
@@ -221,39 +230,66 @@ class ChatItem extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
+              height: 70,
               decoration: BoxDecoration(
                 color: Colors.grey[800],
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(
-                      Icons.chat,
-                      color: Colors.white,
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Icon(
+                        Icons.people,
+                        size: 40,
+                      ),
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        individualChatData?['chatName'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          individualChatData?['chatName'] ?? '',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      Text(
-                        formattedDate,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            if (!chatEmpty)
+                              Text(isLastSenderYou
+                                  ? 'You: '
+                                  : '${individualChatData?['lastSender']}: '),
+                            Text(
+                              lastMessage,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

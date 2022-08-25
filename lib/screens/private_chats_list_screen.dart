@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
@@ -84,7 +85,7 @@ class ChatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<QueryDocumentSnapshot<Object?>>? participantsData;
-    DocumentSnapshot<Map<String, dynamic>>? otherUserData;
+    // DocumentSnapshot<Object?>? otherUserData;
 
     Future _getParticipants() async {
       QuerySnapshot participantsSnapshot = await FirebaseFirestore.instance
@@ -108,34 +109,38 @@ class ChatItem extends StatelessWidget {
         String lastMessage = individualChatData?['lastMessage'] == ''
             ? '"This Chat is Empty"'
             : individualChatData?['lastMessage'];
+        bool chatEmpty = individualChatData?['lastMessage'] == '';
+        bool isLastSenderYou = individualChatData?['lastSender'] == currentUser?.uid;
         final otherUserId =
             participantsData?.firstWhere((element) => element.id != currentUser?.uid).id;
 
-        Future _getOtherUserData() async {
-          otherUserData =
-              await FirebaseFirestore.instance.collection('usersData').doc(otherUserId).get();
-        }
+        // Future _getOtherUserData() async {
+        //   otherUserData =
+        //       await FirebaseFirestore.instance.collection('usersData').doc(otherUserId).get();
+        // }
         //** */
 
-        return FutureBuilder(
-          future: _getOtherUserData(),
-          builder: (context, otherUserDataSnapshot) {
+        return StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('usersData').doc(otherUserId).snapshots(),
+          builder: (context, AsyncSnapshot<DocumentSnapshot> otherUserDataSnapshot) {
             if (otherUserDataSnapshot.connectionState == ConnectionState.waiting ||
                 otherUserDataSnapshot.connectionState == ConnectionState.none) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
+            final DocumentSnapshot<Object?>? otherUserData = otherUserDataSnapshot.data;
+
             return InkWell(
               splashColor: Colors.amber,
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (BuildContext context) => PrivateChatScreen(
-                //         chatId: individualChatData?.id ?? '', otherUser: otherUserData),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => PrivateChatScreen(
+                        chatId: individualChatData?.id ?? '', otherUser: otherUserData),
+                  ),
+                );
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -175,16 +180,25 @@ class ChatItem extends StatelessWidget {
                             otherUserData?['username'] ?? '',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 5),
-                          Text(
-                            lastMessage,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                          Row(
+                            children: [
+                              if (!chatEmpty)
+                                Text(isLastSenderYou
+                                    ? 'You: '
+                                    : '${otherUserData?['username'] ?? ''}: '),
+                              Text(
+                                lastMessage,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

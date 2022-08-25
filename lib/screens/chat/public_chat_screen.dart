@@ -722,12 +722,17 @@ class NewMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
-      final auth = FirebaseAuth.instance;
+      final currentUser = FirebaseAuth.instance.currentUser;
       await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
-        'userId': auth.currentUser?.uid ?? '',
+        'userId': currentUser?.uid ?? '',
         'repliedTo': provData.messageId,
+      });
+      await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+        'lastUpdated': DateTime.now(),
+        'lastMessage': _enteredMessage.value,
+        'lastSender': currentUser?.displayName,
       });
       provData.closeReply();
       _controller.clear();

@@ -19,7 +19,7 @@ class PrivateChatScreen extends StatelessWidget {
   PrivateChatScreen({super.key, required this.chatId, required this.otherUser});
 
   final String chatId;
-  final QueryDocumentSnapshot<Object?>? otherUser;
+  final DocumentSnapshot<Object?>? otherUser;
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
@@ -95,7 +95,27 @@ class PrivateChatScreen extends StatelessWidget {
                             },
                             icon: const Icon(Icons.arrow_back),
                           ),
-                          title: Text(otherUser?['username'] ?? ''),
+                          title: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 2,
+                                    color: Colors.amber,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: NetworkImage(
+                                    otherUser?['userImageUrl'] ?? '',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(otherUser?['username'] ?? ''),
+                            ],
+                          ),
                           actions: [
                             IconButton(
                               onPressed: () {
@@ -214,20 +234,10 @@ class Messages extends StatelessWidget {
                           //** Index dependant logic here */
                           final currentMessage = documents?[index];
                           bool isMe = currentMessage?['userId'] == currentUser?.uid;
-                          bool isMeAbove = false;
-                          if (index + 1 < (documents?.length ?? 0)) {
-                            isMeAbove =
-                                currentMessage?['userId'] == documents?[index + 1]['userId'];
-                          } else {
-                            isMeAbove = false;
-                          }
                           final whichUser = usersData?.firstWhere(
                             (element) => element.id == currentMessage?['userId'],
                           );
-                          final foundUser = participantsData?.firstWhereOrNull(
-                            (element) => element.id == whichUser?['userId'],
-                          );
-                          bool doesUserBelong = foundUser == null ? false : true;
+
                           DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
                           String formattedDate = dt.day == DateTime.now().day
                               ? DateFormat.Hm().format(dt)
@@ -256,11 +266,9 @@ class Messages extends StatelessWidget {
                           return MessageWidget(
                             chatId: chatId,
                             isMe: isMe,
-                            isMeAbove: isMeAbove,
                             whichUser: whichUser,
                             formattedDate: formattedDate,
                             currentMessage: currentMessage,
-                            doesUserBelong: doesUserBelong,
                             isReply: isReply,
                             repliedToMessage: repliedToMessage,
                             repliedToUser: repliedToUser,
@@ -288,22 +296,18 @@ class MessageWidget extends StatelessWidget {
     this.currentMessage,
     this.whichUser,
     required this.isMe,
-    required this.isMeAbove,
     required this.formattedDate,
     required this.isReply,
     this.repliedToMessage,
     this.repliedToUser,
     required this.isReplyToCurrentUser,
     required this.isReplyToSelf,
-    required this.doesUserBelong,
   }) : super(key: key);
   final String chatId;
 
   final QueryDocumentSnapshot<Object?>? currentMessage;
   final QueryDocumentSnapshot<Object?>? whichUser;
   final bool isMe;
-  final bool isMeAbove;
-  final bool doesUserBelong;
   final String formattedDate;
 
   //** reply dependant login here */
@@ -547,8 +551,8 @@ class MessageWidget extends StatelessWidget {
                             vertical: 10,
                             horizontal: 12,
                           ),
-                          margin: EdgeInsets.only(
-                            top: !isMeAbove && !isReply ? 32 : 2,
+                          margin: const EdgeInsets.only(
+                            top: 2,
                             bottom: 2,
                             left: 8,
                             right: 8,
@@ -557,29 +561,6 @@ class MessageWidget extends StatelessWidget {
                             crossAxisAlignment:
                                 isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                             children: [
-                              if (!isMe && !isMeAbove)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      whichUser?['username'] ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.amber,
-                                      ),
-                                    ),
-                                    if (!doesUserBelong)
-                                      const Text(
-                                        ('(Removed User)'),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color.fromARGB(255, 195, 195, 195),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              if (!isMe && !isMeAbove) const SizedBox(height: 5),
                               Text(
                                 currentMessage?['text'] ?? '',
                                 style: TextStyle(
@@ -618,41 +599,6 @@ class MessageWidget extends StatelessWidget {
                         textAlign: isMe ? TextAlign.end : TextAlign.start,
                       ),
                     ),
-                    if (!isMeAbove)
-                      PositionedDirectional(
-                        top: isReply ? -12 : 18,
-                        start: isMe ? 0 : null,
-                        end: isMe ? null : 0,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            // if (!isMe) {
-                            //   FocusManager.instance.primaryFocus?.unfocus();
-                            //   Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //       builder: (context) => OtherUserDataScreen(user: whichUser),
-                            //     ),
-                            //   );
-                            // }
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: Colors.amber,
-                              ),
-                              borderRadius: BorderRadius.circular(22),
-                            ),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundImage: NetworkImage(
-                                whichUser?['userImageUrl'] ?? '',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ],
@@ -744,16 +690,17 @@ class NewMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
-      final auth = FirebaseAuth.instance;
+      final currentUser = FirebaseAuth.instance.currentUser;
       await FirebaseFirestore.instance.collection('privateChats/$chatId/messages').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
-        'userId': auth.currentUser?.uid ?? '',
+        'userId': currentUser?.uid ?? '',
         'repliedTo': provData.messageId,
       });
       await FirebaseFirestore.instance.collection('privateChats').doc(chatId).update({
         'lastUpdated': DateTime.now(),
         'lastMessage': _enteredMessage.value,
+        'lastSender': currentUser?.displayName,
       });
       provData.closeReply();
       _controller.clear();

@@ -29,6 +29,7 @@ class MessageService {
         'createdAt': DateTime.now(),
         'lastUpdated': DateTime.now(),
         'lastMessage': '',
+        'lastSender': '',
       });
       await FirebaseFirestore.instance
           .collection('privateChats/$generatedId/participantsData')

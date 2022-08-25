@@ -161,7 +161,6 @@ class OtherUserDataScreen extends StatelessWidget {
                                       onPressed: loading
                                           ? null
                                           : () async {
-                                              //TODO: message thing here
                                               mIsLoading.value = true;
                                               messageService
                                                   .createPrivateChat(user?['userId'])
@@ -177,8 +176,6 @@ class OtherUserDataScreen extends StatelessWidget {
                                                                 otherUser: user),
                                                       ),
                                                       (route) => false);
-
-                                                  //TODO: Navigate to message screen
                                                 },
                                               );
                                             },
