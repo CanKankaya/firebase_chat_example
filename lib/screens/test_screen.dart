@@ -416,21 +416,10 @@ class TestSettings extends StatelessWidget {
                   );
                 },
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(150),
-                ),
-                width: 150,
-                height: 150,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(150),
-                  child: const ColorLoader2(
-                    color1: Colors.amber,
-                    color2: Colors.black,
-                    color3: Colors.blue,
-                  ),
-                ),
+              const CustomLoader(
+                color1: Colors.amber,
+                color2: Colors.teal,
+                color3: Colors.blue,
               ),
             ],
           ),

@@ -15,8 +15,8 @@ import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 import 'package:firebase_chat_example/screens/chat/chat_participants_screen.dart';
 
-class PublicChatsScreen extends StatelessWidget {
-  const PublicChatsScreen({super.key, required this.chatId});
+class PublicChatScreen extends StatelessWidget {
+  const PublicChatScreen({super.key, required this.chatId});
 
   final String chatId;
 
@@ -39,79 +39,75 @@ class PublicChatsScreen extends StatelessWidget {
       return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
         builder: (context, chatSnapshot) {
-          if (!chatSnapshot.hasData) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          } else {
-            return StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('chats/$chatId/participantsData')
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-                if (participantsSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
+          return StreamBuilder(
+            stream:
+                FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+              if (chatSnapshot.connectionState == ConnectionState.waiting ||
+                  chatSnapshot.connectionState == ConnectionState.none ||
+                  participantsSnapshot.connectionState == ConnectionState.waiting ||
+                  participantsSnapshot.connectionState == ConnectionState.none) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              } else {
+                final participantsData = participantsSnapshot.data?.docs;
+                final foundUser = participantsData?.firstWhereOrNull(
+                  (element) => element.id == currentUser?.uid,
+                );
+                if (foundUser == null) {
+                  return Scaffold(
+                    appBar: AppBar(),
+                    body: const Center(
+                      child:
+                          Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                    ),
                   );
                 } else {
-                  final participantsData = participantsSnapshot.data?.docs;
-                  final foundUser = participantsData?.firstWhereOrNull(
-                    (element) => element.id == currentUser?.uid,
-                  );
-                  if (foundUser == null) {
-                    return Scaffold(
-                      appBar: AppBar(),
-                      body: const Center(
-                        child:
-                            Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
-                      ),
-                    );
-                  } else {
-                    return GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                      child: WillPopScope(
-                        onWillPop: () {
-                          Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                          return Future.value(true);
-                        },
-                        child: Scaffold(
-                          appBar: AppBar(
-                            actions: [
-                              IconButton(
-                                onPressed: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatParticipantsScreen(
-                                        creatorId: chatSnapshot.data?['chatCreatorId'],
-                                        chatId: chatId,
-                                      ),
+                  return GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                    child: WillPopScope(
+                      onWillPop: () {
+                        Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                        return Future.value(true);
+                      },
+                      child: Scaffold(
+                        appBar: AppBar(
+                          actions: [
+                            IconButton(
+                              onPressed: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatParticipantsScreen(
+                                      creatorId: chatSnapshot.data?['chatCreatorId'],
+                                      chatId: chatId,
                                     ),
-                                  );
-                                },
-                                icon: const Icon(Icons.manage_accounts),
-                              ),
-                            ],
-                          ),
-                          body: Column(
-                            children: [
-                              Messages(chatId: chatId, participantsData: participantsData),
-                              const ReplyWidget(),
-                              NewMessage(chatId: chatId),
-                            ],
-                          ),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.manage_accounts),
+                            ),
+                          ],
+                        ),
+                        body: Column(
+                          children: [
+                            Messages(chatId: chatId, participantsData: participantsData),
+                            const ReplyWidget(),
+                            NewMessage(chatId: chatId),
+                          ],
                         ),
                       ),
-                    );
-                  }
+                    ),
+                  );
                 }
-              },
-            );
-          }
+              }
+            },
+          );
         },
       );
     }
@@ -131,19 +127,25 @@ class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
+    List<QueryDocumentSnapshot<Object?>>? usersData;
+
     final scrollController = ScrollController();
+    Future _getAndSetUserData() async {
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance.collection('usersData').get();
+      usersData = userSnapshot.docs;
+    }
 
     return Expanded(
-      child: StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('chats/$chatId/messages')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
+      child: FutureBuilder(
+        future: _getAndSetUserData(),
+        builder: (context, usersSnapshot) {
           {
             return StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+              stream: FirebaseFirestore.instance
+                  .collection('chats/$chatId/messages')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
                 if (messagesSnapshot.connectionState == ConnectionState.waiting ||
                     usersSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -152,7 +154,6 @@ class Messages extends StatelessWidget {
                 }
                 //** Firebase dependant logic here;
                 final documents = messagesSnapshot.data?.docs;
-                final usersData = usersSnapshot.data?.docs;
                 //**
 
                 return RefreshIndicator(
