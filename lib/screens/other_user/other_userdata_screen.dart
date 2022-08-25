@@ -152,29 +152,33 @@ class OtherUserDataScreen extends StatelessWidget {
                                 },
                               ),
                               ValueListenableBuilder(
-                                  valueListenable: mIsLoading,
-                                  builder: (context, bool loading, __) {
-                                    return SizedBox(
-                                      width: 130,
-                                      child: ElevatedButton(
-                                        onPressed: loading
-                                            ? null
-                                            : () async {
-                                                //TODO: message thing here
-                                                mIsLoading.value = true;
-                                                messageService
-                                                    .createPrivateChat(user?['userId'])
-                                                    .then((value) {
-                                                  print(value);
+                                valueListenable: mIsLoading,
+                                builder: (context, bool loading, __) {
+                                  return SizedBox(
+                                    width: 130,
+                                    child: ElevatedButton(
+                                      onPressed: loading
+                                          ? null
+                                          : () async {
+                                              //TODO: message thing here
+                                              mIsLoading.value = true;
+                                              messageService
+                                                  .createPrivateChat(user?['userId'])
+                                                  .then(
+                                                (privChatId) {
                                                   mIsLoading.value = false;
-                                                });
-                                              },
-                                        child: loading
-                                            ? const CircularProgressIndicator()
-                                            : const Text('Send Message'),
-                                      ),
-                                    );
-                                  }),
+
+                                                  //TODO: Navigate to message screen
+                                                },
+                                              );
+                                            },
+                                      child: loading
+                                          ? const CircularProgressIndicator()
+                                          : const Text('Send Message'),
+                                    ),
+                                  );
+                                },
+                              ),
                             ],
                           );
                         } else {

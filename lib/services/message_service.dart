@@ -47,8 +47,4 @@ class MessageService {
       rethrow;
     }
   }
-
-  Future navigateToPrivateChat(String id) async {
-    //TODO: navigate to a new priv chat screen, send the chat id
-  }
 }
