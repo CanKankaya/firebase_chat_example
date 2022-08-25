@@ -5,12 +5,14 @@ class CustomLoader extends StatefulWidget {
   final Color color1;
   final Color color2;
   final Color color3;
+  final Color color4;
 
   const CustomLoader({
     Key? key,
-    this.color1 = Colors.deepOrangeAccent,
-    this.color2 = Colors.yellow,
-    this.color3 = Colors.lightGreen,
+    this.color1 = Colors.amber,
+    this.color2 = Colors.teal,
+    this.color3 = Colors.blue,
+    this.color4 = Colors.brown,
   }) : super(key: key);
 
   @override
@@ -21,9 +23,12 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
   late Animation<double> animation1;
   late Animation<double> animation2;
   late Animation<double> animation3;
+  late Animation<double> animation4;
+
   late AnimationController controller1;
   late AnimationController controller2;
   late AnimationController controller3;
+  late AnimationController controller4;
 
   @override
   void initState() {
@@ -35,6 +40,8 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
 
     controller3 = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
 
+    controller4 = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
+
     animation1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
         parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.bounceIn)));
 
@@ -44,9 +51,13 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
     animation3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
         parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
+    animation4 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
+
     controller1.repeat();
     controller2.repeat();
     controller3.repeat();
+    controller4.repeat();
   }
 
   @override
@@ -83,6 +94,16 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
                 height: 150.0,
               ),
             ),
+          ),
+          RotationTransition(
+            turns: animation4,
+            child: CustomPaint(
+              painter: Arc4Painter(widget.color4),
+              child: const SizedBox(
+                width: 150.0,
+                height: 150.0,
+              ),
+            ),
           )
         ],
       ),
@@ -94,6 +115,7 @@ class CustomLoaderState extends State<CustomLoader> with TickerProviderStateMixi
     controller1.dispose();
     controller2.dispose();
     controller3.dispose();
+    controller4.dispose();
     super.dispose();
   }
 }
@@ -170,6 +192,33 @@ class Arc3Painter extends CustomPainter {
 
     canvas.drawArc(rect3, 0.0, 0.8 * pi, false, p3);
     canvas.drawArc(rect3, 1.0 * pi, 0.8 * pi, false, p3);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class Arc4Painter extends CustomPainter {
+  final Color color;
+
+  Arc4Painter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint p4 = Paint()
+      ..color = color
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    Rect rect4 = Rect.fromLTWH(0.0 + (0.6 * size.width) / 2, 0.0 + (0.6 * size.height) / 2,
+        size.width - 0.6 * size.width, size.height - 0.6 * size.height);
+
+    canvas.drawArc(rect4, 0.0, 0.4 * pi, false, p4);
+    canvas.drawArc(rect4, 0.66 * pi, 0.4 * pi, false, p4);
+    canvas.drawArc(rect4, 1.33 * pi, 0.4 * pi, false, p4);
   }
 
   @override
