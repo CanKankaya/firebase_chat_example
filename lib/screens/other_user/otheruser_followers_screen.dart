@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OtherUserFollowersScreen extends StatelessWidget {
   const OtherUserFollowersScreen({Key? key, required this.thisUser}) : super(key: key);
-  final QueryDocumentSnapshot<Object?>? thisUser;
+  final DocumentSnapshot<Object?>? thisUser;
 
   @override
   Widget build(BuildContext context) {

@@ -501,34 +501,40 @@ class TestClick extends StatelessWidget {
       }
     }
 
-    return Column(
+    return ListView(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            'Tap screen simulate test with GestureBinding',
-            style: TextStyle(fontSize: 16),
+        Center(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Tap screen simulate test with GestureBinding',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // print('Click simulate triggers this');
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.black,
+                ),
+                child: const SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Center(child: Text("Big button.")),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => spamCheckFunction(
+                  duration: const Duration(milliseconds: 500),
+                  clickPosition: const Offset(200, 300),
+                ),
+                child: const Text('Simulate Click'),
+              ),
+            ],
           ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // print('Click simulate triggers this');
-          },
-          style: ElevatedButton.styleFrom(
-            primary: Colors.black,
-          ),
-          child: const SizedBox(
-            width: 300,
-            height: 300,
-            child: Center(child: Text("Big button.")),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () => spamCheckFunction(
-            duration: const Duration(milliseconds: 500),
-            clickPosition: const Offset(200, 300),
-          ),
-          child: const Text('Simulate Click'),
         ),
       ],
     );

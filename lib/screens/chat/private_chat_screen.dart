@@ -14,6 +14,7 @@ import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/chat/private_chat_participants.dart';
 import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 
 class PrivateChatScreen extends StatelessWidget {
   PrivateChatScreen({super.key, required this.chatId, required this.otherUser});
@@ -36,14 +37,39 @@ class PrivateChatScreen extends StatelessWidget {
     }
 
     if (chatId == '') {
-      return Scaffold(
-        appBar: AppBar(),
-        body: Column(
-          children: const [
-            Center(
-              child: Text('Chat Id is empty for some reason'),
+      return WillPopScope(
+        onWillPop: () {
+          Provider.of<ReplyProvider>(context, listen: false).closeReply();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PrivateChatsListScreen(),
             ),
-          ],
+          );
+          return Future.value(true);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivateChatsListScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
+          body: Column(
+            children: const [
+              Center(
+                child: Text('Chat Id is empty for some reason'),
+              ),
+            ],
+          ),
         ),
       );
     } else {
@@ -78,11 +104,36 @@ class PrivateChatScreen extends StatelessWidget {
                       (element) => element.id == currentUser?.uid,
                     );
                     if (foundUser == null) {
-                      return Scaffold(
-                        appBar: AppBar(),
-                        body: const Center(
-                          child: Text(
-                              'Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                      return WillPopScope(
+                        onWillPop: () {
+                          Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PrivateChatsListScreen(),
+                            ),
+                          );
+                          return Future.value(true);
+                        },
+                        child: Scaffold(
+                          appBar: AppBar(
+                            leading: IconButton(
+                              onPressed: () {
+                                Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const PrivateChatsListScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_back),
+                            ),
+                          ),
+                          body: const Center(
+                            child: Text(
+                                'Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                          ),
                         ),
                       );
                     } else {
@@ -114,26 +165,45 @@ class PrivateChatScreen extends StatelessWidget {
                                 },
                                 icon: const Icon(Icons.arrow_back),
                               ),
-                              title: Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 2,
-                                        color: Colors.amber,
-                                      ),
-                                      borderRadius: BorderRadius.circular(22),
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 20,
-                                      backgroundImage: NetworkImage(
-                                        otherUser?['userImageUrl'] ?? '',
+                              title: InkWell(
+                                borderRadius: BorderRadius.circular(25),
+                                splashColor: Colors.amber,
+                                onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => OtherUserDataScreen(
+                                        user: otherUser,
                                       ),
                                     ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            width: 2,
+                                            color: Colors.amber,
+                                          ),
+                                          borderRadius: BorderRadius.circular(22),
+                                        ),
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundImage: NetworkImage(
+                                            otherUser?['userImageUrl'] ?? '',
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(otherUser?['username'] ?? ''),
+                                    ],
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(otherUser?['username'] ?? ''),
-                                ],
+                                ),
                               ),
                               actions: [
                                 IconButton(

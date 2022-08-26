@@ -502,9 +502,9 @@ class MessageWidget extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        if (isMe) const SizedBox(width: 20),
                         //**Added invisible boxes for Stack hittest bug*/
                         //**See:https://github.com/flutter/flutter/issues/19445 */
+                        if (isMe) const SizedBox(width: 20),
                         Container(
                           constraints: BoxConstraints(
                             maxWidth: deviceSize.width * 0.65,
@@ -581,7 +581,7 @@ class MessageWidget extends StatelessWidget {
                             ],
                           ),
                         ),
-                        //**Other invisible sizedbox for hittest bug */
+                        //**Other invisible box for hittest bug */
                         if (!isMe) const SizedBox(width: 20),
                       ],
                     ),

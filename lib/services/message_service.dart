@@ -37,7 +37,7 @@ class MessageService {
           .set({
         'userId': currentUserId,
       });
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('privateChats/$generatedId/participantsData')
           .doc(id)
           .set({

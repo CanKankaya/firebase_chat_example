@@ -1,6 +1,7 @@
 import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -112,7 +113,10 @@ class ChatItem extends StatelessWidget {
         bool chatEmpty = individualChatData?['lastMessage'] == '';
         bool isLastSenderYou = individualChatData?['lastSender'] == currentUser?.uid;
         final otherUserId =
-            participantsData?.firstWhere((element) => element.id != currentUser?.uid).id;
+            participantsData?.firstWhereOrNull((element) => element.id != currentUser?.uid)?.id;
+        if (otherUserId == null) {
+          return const Center(child: Text('Something went wrong here'));
+        }
 
         // Future _getOtherUserData() async {
         //   otherUserData =

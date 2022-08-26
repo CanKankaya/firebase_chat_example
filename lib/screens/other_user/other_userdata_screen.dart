@@ -14,7 +14,7 @@ import 'package:firebase_chat_example/screens/other_user/otheruser_following_scr
 import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 
 class OtherUserDataScreen extends StatelessWidget {
-  final QueryDocumentSnapshot<Object?>? user;
+  final DocumentSnapshot<Object?>? user;
 
   const OtherUserDataScreen({super.key, required this.user});
   @override
@@ -89,12 +89,13 @@ class OtherUserDataScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: StreamBuilder(
-                      stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
-                        if (usersSnapshot.hasData) {
-                          final usersData = usersSnapshot.data?.docs;
-                          final currentUserData =
-                              usersData?.firstWhere((element) => element.id == currentUser?.uid);
+                      stream: FirebaseFirestore.instance
+                          .collection('usersData')
+                          .doc(currentUser?.uid)
+                          .snapshots(),
+                      builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+                        if (userSnapshot.hasData) {
+                          final currentUserData = userSnapshot.data;
                           final List<dynamic> followingList = currentUserData?['following'];
                           final foundUser = followingList
                               .firstWhereOrNull((element) => element == user?['userId']);
