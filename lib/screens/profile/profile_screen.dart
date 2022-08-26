@@ -94,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
         final DocumentSnapshot<Object?>? userData = userSnapshot.data;
         _usernameController.text = currentUser?.displayName ?? '';
         _emailController.text = currentUser?.email ?? '';
-        _userDetailController.text = userData?['userDetail'];
+        _userDetailController.text = userData?['userDetail'] ?? '';
 
         return WillPopScope(
           onWillPop: () => showExitPopup(context),

@@ -114,15 +114,6 @@ class ChatItem extends StatelessWidget {
         bool isLastSenderYou = individualChatData?['lastSender'] == currentUser?.uid;
         final otherUserId =
             participantsData?.firstWhereOrNull((element) => element.id != currentUser?.uid)?.id;
-        if (otherUserId == null) {
-          return const Center(child: Text('Something went wrong here'));
-        }
-
-        // Future _getOtherUserData() async {
-        //   otherUserData =
-        //       await FirebaseFirestore.instance.collection('usersData').doc(otherUserId).get();
-        // }
-        //** */
 
         return StreamBuilder(
           stream: FirebaseFirestore.instance.collection('usersData').doc(otherUserId).snapshots(),
