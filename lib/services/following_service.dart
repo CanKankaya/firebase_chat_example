@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 final followService = FollowingService();
 
 class FollowingService {
-  final usersData = FirebaseFirestore.instance.collection('usersData');
-
   Future follow(String id) async {
+    final usersData = FirebaseFirestore.instance.collection('usersData');
+
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     await usersData.doc(currentUserId).update({
       'following': FieldValue.arrayUnion([id]),
@@ -20,6 +20,8 @@ class FollowingService {
   }
 
   Future unfollow(String id) async {
+    final usersData = FirebaseFirestore.instance.collection('usersData');
+
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     await usersData.doc(currentUserId).update({
       'following': FieldValue.arrayRemove([id]),

@@ -92,7 +92,7 @@ class ProfileScreen extends StatelessWidget {
           );
         }
         final DocumentSnapshot<Object?>? userData = userSnapshot.data;
-        _usernameController.text = currentUser?.displayName ?? '';
+        _usernameController.text = userData?['username'] ?? '';
         _emailController.text = currentUser?.email ?? '';
         _userDetailController.text = userData?['userDetail'] ?? '';
 

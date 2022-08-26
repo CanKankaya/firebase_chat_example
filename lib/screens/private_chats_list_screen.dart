@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -8,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
+
+import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 
 class PrivateChatsListScreen extends StatelessWidget {
   const PrivateChatsListScreen({Key? key}) : super(key: key);
@@ -80,13 +81,12 @@ class ChatsList extends StatelessWidget {
 class ChatItem extends StatelessWidget {
   const ChatItem({super.key, required this.individualChatData, required this.currentUser});
 
-  final QueryDocumentSnapshot<Object?>? individualChatData;
+  final DocumentSnapshot<Object?>? individualChatData;
   final User? currentUser;
 
   @override
   Widget build(BuildContext context) {
-    List<QueryDocumentSnapshot<Object?>>? participantsData;
-    // DocumentSnapshot<Object?>? otherUserData;
+    List<DocumentSnapshot<Object?>>? participantsData;
 
     Future _getParticipants() async {
       QuerySnapshot participantsSnapshot = await FirebaseFirestore.instance
