@@ -50,8 +50,8 @@ class SimplerCustomLoaderState extends State<SimplerCustomLoader> with TickerPro
             child: CustomPaint(
               painter: Arc1Painter(widget.color1),
               child: const SizedBox(
-                width: 40.0,
-                height: 40.0,
+                width: 35.0,
+                height: 35.0,
               ),
             ),
           ),
@@ -60,8 +60,8 @@ class SimplerCustomLoaderState extends State<SimplerCustomLoader> with TickerPro
             child: CustomPaint(
               painter: Arc2Painter(widget.color2),
               child: const SizedBox(
-                width: 40.0,
-                height: 40.0,
+                width: 35.0,
+                height: 35.0,
               ),
             ),
           ),

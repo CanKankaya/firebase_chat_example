@@ -1,5 +1,3 @@
-import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
-import 'package:firebase_chat_example/services/message_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -7,11 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_chat_example/services/following_service.dart';
+import 'package:firebase_chat_example/services/message_service.dart';
 
 import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_user/otheruser_followers_screen.dart';
 import 'package:firebase_chat_example/screens/other_user/otheruser_following_screen.dart';
+import 'package:firebase_chat_example/screens/chat/private_chat_screen.dart';
 
 class OtherUserDataScreen extends StatelessWidget {
   final QueryDocumentSnapshot<Object?>? user;

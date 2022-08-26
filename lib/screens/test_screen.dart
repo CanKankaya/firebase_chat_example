@@ -463,9 +463,7 @@ class TestCode extends StatelessWidget {
                 ),
               ),
               const SimplerCustomLoader(),
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 10),
               const CircularProgressIndicator(),
             ],
           ),

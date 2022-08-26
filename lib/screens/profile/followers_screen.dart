@@ -6,7 +6,7 @@ import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.d
 
 class FollowersScreen extends StatelessWidget {
   const FollowersScreen({Key? key, required this.thisUser}) : super(key: key);
-  final QueryDocumentSnapshot<Object?>? thisUser;
+  final DocumentSnapshot<Object?>? thisUser;
 
   @override
   Widget build(BuildContext context) {

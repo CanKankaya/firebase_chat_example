@@ -12,8 +12,6 @@ import 'package:firebase_chat_example/widgets/exit_popup.dart';
 import 'package:firebase_chat_example/screens/profile/followers_screen.dart';
 import 'package:firebase_chat_example/screens/profile/following_screen.dart';
 
-//TODO: when coming back from following page, followingCount doesnt update, because this page is FutureBuilder, switch to Stream
-
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({Key? key}) : super(key: key);
 
@@ -53,15 +51,10 @@ class ProfileScreen extends StatelessWidget {
         await ref.putFile(File(_pickedImage.value!.path));
         final url = await ref.getDownloadURL();
         await currentUser?.updatePhotoURL(url);
+
         await currentUser?.updateDisplayName(_usernameController.text);
 
-        final userCollection = FirebaseFirestore.instance.collection('usersData');
-        QuerySnapshot userSnapshot = await userCollection.get();
-        final whichParticipant = userSnapshot.docs.firstWhere((element) {
-          return element['userId'] == currentUser?.uid;
-        });
-
-        await userCollection.doc(whichParticipant.id).update({
+        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
           'username': _usernameController.text,
           'userImageUrl': url,
           'userDetail': _userDetailController.text,
@@ -72,13 +65,8 @@ class ProfileScreen extends StatelessWidget {
         _isLoading.value = true;
 
         await currentUser?.updateDisplayName(_usernameController.text);
-        final userCollection = FirebaseFirestore.instance.collection('usersData');
-        QuerySnapshot userSnapshot = await userCollection.get();
-        final whichParticipant = userSnapshot.docs.firstWhere((element) {
-          return element['userId'] == currentUser?.uid;
-        });
 
-        await userCollection.doc(whichParticipant.id).update({
+        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
           'username': _usernameController.text,
           'userDetail': _userDetailController.text,
         }).then((value) {
@@ -88,25 +76,13 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
-//TODO: only get the current user's doc here, not usersData
   @override
   Widget build(BuildContext context) {
-    QueryDocumentSnapshot<Object?>? whichParticipant;
-    Future _getAndSetUserData() async {
-      _usernameController.text = currentUser?.displayName ?? '';
-      _emailController.text = currentUser?.email ?? '';
-      final userCollection = FirebaseFirestore.instance.collection('usersData');
-      QuerySnapshot userSnapshot = await userCollection.get();
-      whichParticipant = userSnapshot.docs.firstWhere((element) {
-        return element['userId'] == currentUser?.uid;
-      });
-      _userDetailController.text = whichParticipant?['userDetail'];
-    }
-
-    return FutureBuilder(
-      future: _getAndSetUserData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).snapshots(),
+      builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting ||
+            userSnapshot.connectionState == ConnectionState.none) {
           return Scaffold(
             appBar: AppBar(),
             drawer: const AppDrawer(),
@@ -115,6 +91,11 @@ class ProfileScreen extends StatelessWidget {
             ),
           );
         }
+        final DocumentSnapshot<Object?>? userData = userSnapshot.data;
+        _usernameController.text = currentUser?.displayName ?? '';
+        _emailController.text = currentUser?.email ?? '';
+        _userDetailController.text = userData?['userDetail'];
+
         return WillPopScope(
           onWillPop: () => showExitPopup(context),
           child: GestureDetector(
@@ -177,7 +158,7 @@ class ProfileScreen extends StatelessWidget {
                                             );
                                           },
                                           child: Text(
-                                            '${(whichParticipant?['followingCount'] ?? 0).toString()}\nFollowing',
+                                            '${(userData?['followingCount'] ?? 0).toString()}\nFollowing',
                                             textAlign: TextAlign.center,
                                           ),
                                         ),
@@ -187,12 +168,12 @@ class ProfileScreen extends StatelessWidget {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    FollowersScreen(thisUser: whichParticipant),
+                                                    FollowersScreen(thisUser: userData),
                                               ),
                                             );
                                           },
                                           child: Text(
-                                            '${(whichParticipant?['followerCount'] ?? 0).toString()}\nFollowers',
+                                            '${(userData?['followerCount'] ?? 0).toString()}\nFollowers',
                                             textAlign: TextAlign.center,
                                           ),
                                         ),
