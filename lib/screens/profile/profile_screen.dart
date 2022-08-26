@@ -88,6 +88,7 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
+//TODO: only get the current user's doc here, not usersData
   @override
   Widget build(BuildContext context) {
     QueryDocumentSnapshot<Object?>? whichParticipant;

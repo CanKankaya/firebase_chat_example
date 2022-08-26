@@ -246,6 +246,7 @@ class ChatItem extends StatelessWidget {
                       child: Icon(
                         Icons.people,
                         size: 40,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -264,9 +265,12 @@ class ChatItem extends StatelessWidget {
                         Row(
                           children: [
                             if (!chatEmpty)
-                              Text(isLastSenderYou
-                                  ? 'You: '
-                                  : '${individualChatData?['lastSender']}: '),
+                              Text(
+                                isLastSenderYou
+                                    ? 'You: '
+                                    : '${individualChatData?['lastSender']}: ',
+                                style: const TextStyle(color: Colors.white),
+                              ),
                             Text(
                               lastMessage,
                               style: const TextStyle(

@@ -188,9 +188,12 @@ class ChatItem extends StatelessWidget {
                           Row(
                             children: [
                               if (!chatEmpty)
-                                Text(isLastSenderYou
-                                    ? 'You: '
-                                    : '${otherUserData?['username'] ?? ''}: '),
+                                Text(
+                                  isLastSenderYou
+                                      ? 'You: '
+                                      : '${otherUserData?['username'] ?? ''}: ',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               Text(
                                 lastMessage,
                                 style: const TextStyle(

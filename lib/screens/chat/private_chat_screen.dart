@@ -24,6 +24,17 @@ class PrivateChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<QueryDocumentSnapshot<Object?>>? usersData;
+
+    Future _getAndSetUserData() async {
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance.collection('usersData').get();
+      usersData = userSnapshot.docs;
+    }
+
+    Future _getAndSetChatData() async {
+      await FirebaseFirestore.instance.collection('privateChats').doc(chatId).get();
+    }
+
     if (chatId == '') {
       return Scaffold(
         appBar: AppBar(),
@@ -36,115 +47,128 @@ class PrivateChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance.collection('privateChats').doc(chatId).snapshots(),
-        builder: (context, chatSnapshot) {
-          return StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('privateChats/$chatId/participantsData')
-                .snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-              if (chatSnapshot.connectionState == ConnectionState.waiting ||
-                  chatSnapshot.connectionState == ConnectionState.none ||
-                  participantsSnapshot.connectionState == ConnectionState.waiting ||
-                  participantsSnapshot.connectionState == ConnectionState.none) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else {
-                final participantsData = participantsSnapshot.data?.docs;
-                final foundUser = participantsData?.firstWhereOrNull(
-                  (element) => element.id == currentUser?.uid,
-                );
-                if (foundUser == null) {
-                  return Scaffold(
-                    appBar: AppBar(),
-                    body: const Center(
-                      child:
-                          Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
-                    ),
-                  );
-                } else {
-                  return GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                    child: WillPopScope(
-                      onWillPop: () {
-                        Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PrivateChatsListScreen(),
-                          ),
-                        );
-                        return Future.value(true);
-                      },
-                      child: Scaffold(
-                        appBar: AppBar(
-                          leading: IconButton(
-                            onPressed: () {
-                              Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PrivateChatsListScreen(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_back),
-                          ),
-                          title: Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 2,
-                                    color: Colors.amber,
-                                  ),
-                                  borderRadius: BorderRadius.circular(22),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 20,
-                                  backgroundImage: NetworkImage(
-                                    otherUser?['userImageUrl'] ?? '',
-                                  ),
-                                ),
+      return FutureBuilder(
+        future: _getAndSetUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return FutureBuilder(
+            future: _getAndSetChatData(),
+            builder: (context, chatSnapshot) {
+              return StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('privateChats/$chatId/participantsData')
+                    .snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+                  if (chatSnapshot.connectionState == ConnectionState.waiting ||
+                      chatSnapshot.connectionState == ConnectionState.none ||
+                      participantsSnapshot.connectionState == ConnectionState.waiting ||
+                      participantsSnapshot.connectionState == ConnectionState.none) {
+                    return const Scaffold(
+                      body: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  } else {
+                    final participantsData = participantsSnapshot.data?.docs;
+                    final foundUser = participantsData?.firstWhereOrNull(
+                      (element) => element.id == currentUser?.uid,
+                    );
+                    if (foundUser == null) {
+                      return Scaffold(
+                        appBar: AppBar(),
+                        body: const Center(
+                          child: Text(
+                              'Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                        ),
+                      );
+                    } else {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                        child: WillPopScope(
+                          onWillPop: () {
+                            Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PrivateChatsListScreen(),
                               ),
-                              const SizedBox(width: 10),
-                              Text(otherUser?['username'] ?? ''),
-                            ],
-                          ),
-                          actions: [
-                            IconButton(
-                              onPressed: () {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PrivateChatParticipantsScreen(
-                                      chatId: chatId,
+                            );
+                            return Future.value(true);
+                          },
+                          child: Scaffold(
+                            appBar: AppBar(
+                              leading: IconButton(
+                                onPressed: () {
+                                  Provider.of<ReplyProvider>(context, listen: false).closeReply();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const PrivateChatsListScreen(),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                              title: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 2,
+                                        color: Colors.amber,
+                                      ),
+                                      borderRadius: BorderRadius.circular(22),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 20,
+                                      backgroundImage: NetworkImage(
+                                        otherUser?['userImageUrl'] ?? '',
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                              icon: const Icon(Icons.manage_accounts),
+                                  const SizedBox(width: 10),
+                                  Text(otherUser?['username'] ?? ''),
+                                ],
+                              ),
+                              actions: [
+                                IconButton(
+                                  onPressed: () {
+                                    FocusManager.instance.primaryFocus?.unfocus();
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PrivateChatParticipantsScreen(
+                                          chatId: chatId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.manage_accounts),
+                                ),
+                              ],
                             ),
-                          ],
+                            body: Column(
+                              children: [
+                                Messages(
+                                    chatId: chatId,
+                                    participantsData: participantsData,
+                                    usersData: usersData),
+                                const ReplyWidget(),
+                                NewMessage(chatId: chatId),
+                              ],
+                            ),
+                          ),
                         ),
-                        body: Column(
-                          children: [
-                            Messages(chatId: chatId, participantsData: participantsData),
-                            const ReplyWidget(),
-                            NewMessage(chatId: chatId),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-              }
+                      );
+                    }
+                  }
+                },
+              );
             },
           );
         },
@@ -156,8 +180,10 @@ class PrivateChatScreen extends StatelessWidget {
 class Messages extends StatelessWidget {
   final String chatId;
   final List<QueryDocumentSnapshot<Object?>>? participantsData;
+  final List<QueryDocumentSnapshot<Object?>>? usersData;
+
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
-  Messages({super.key, required this.chatId, this.participantsData});
+  Messages({super.key, required this.chatId, this.participantsData, required this.usersData});
 
   _refreshFunction() async {
     _itemCount.value += 10;
@@ -166,126 +192,112 @@ class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    List<QueryDocumentSnapshot<Object?>>? usersData;
 
     final scrollController = ScrollController();
-    Future _getAndSetUserData() async {
-      QuerySnapshot userSnapshot = await FirebaseFirestore.instance.collection('usersData').get();
-      usersData = userSnapshot.docs;
-    }
 
     return Expanded(
-      child: FutureBuilder(
-        future: _getAndSetUserData(),
-        builder: (context, usersSnapshot) {
-          {
-            return StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('privateChats/$chatId/messages')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
-                if (messagesSnapshot.connectionState == ConnectionState.waiting ||
-                    usersSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                //** Firebase dependant logic here;
-                final documents = messagesSnapshot.data?.docs;
-                //**
+        child: StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('privateChats/$chatId/messages')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> messagesSnapshot) {
+        if (messagesSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        //** Firebase dependant logic here;
+        final documents = messagesSnapshot.data?.docs;
+        //**
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    if ((documents?.length ?? 0) > _itemCount.value) {
-                      await _refreshFunction().then(
-                        (_) {
-                          SchedulerBinding.instance.addPostFrameCallback(
-                            (_) {
-                              scrollController.animateTo(
-                                scrollController.position.maxScrollExtent,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.linear,
-                              );
-                            },
-                          );
-                        },
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('You are already seeing all messages'),
-                        ),
-                      );
-                    }
-                  },
-                  child: ValueListenableBuilder(
-                    valueListenable: _itemCount,
-                    builder: (_, int itemCountValue, __) {
-                      return ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        controller: scrollController,
-                        reverse: true,
-                        itemCount: (documents?.length ?? 0) > itemCountValue
-                            ? itemCountValue
-                            : (documents?.length ?? 0),
-                        itemBuilder: (context, index) {
-                          //** Index dependant logic here */
-                          final currentMessage = documents?[index];
-                          bool isMe = currentMessage?['userId'] == currentUser?.uid;
-                          final whichUser = usersData?.firstWhere(
-                            (element) => element.id == currentMessage?['userId'],
-                          );
-
-                          DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
-                          String formattedDate = dt.day == DateTime.now().day
-                              ? DateFormat.Hm().format(dt)
-                              : DateFormat.yMMMMd().format(dt);
-                          //** */
-
-                          //** Reply dependant logic here */
-                          final isReply = currentMessage?['repliedTo'] != '';
-                          QueryDocumentSnapshot<Object?>? repliedToMessage;
-                          QueryDocumentSnapshot<Object?>? repliedToUser;
-
-                          if (isReply) {
-                            repliedToMessage = documents?.firstWhereOrNull(
-                              (QueryDocumentSnapshot<Object?>? element) =>
-                                  element?.id == currentMessage?['repliedTo'],
-                            );
-                            if (repliedToMessage != null) {
-                              repliedToUser = usersData?.firstWhereOrNull(
-                                (element) => element.id == repliedToMessage?['userId'],
-                              );
-                            }
-                          }
-                          final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
-                          final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
-                          //** */
-                          return MessageWidget(
-                            chatId: chatId,
-                            isMe: isMe,
-                            whichUser: whichUser,
-                            formattedDate: formattedDate,
-                            currentMessage: currentMessage,
-                            isReply: isReply,
-                            repliedToMessage: repliedToMessage,
-                            repliedToUser: repliedToUser,
-                            isReplyToCurrentUser: isReplyToCurrentUser,
-                            isReplyToSelf: isReplyToSelf,
-                          );
-                        },
+        return RefreshIndicator(
+          onRefresh: () async {
+            if ((documents?.length ?? 0) > _itemCount.value) {
+              await _refreshFunction().then(
+                (_) {
+                  SchedulerBinding.instance.addPostFrameCallback(
+                    (_) {
+                      scrollController.animateTo(
+                        scrollController.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.linear,
                       );
                     },
-                  ),
-                );
-              },
-            );
-          }
-        },
-      ),
-    );
+                  );
+                },
+              );
+            } else {
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('You are already seeing all messages'),
+                ),
+              );
+            }
+          },
+          child: ValueListenableBuilder(
+            valueListenable: _itemCount,
+            builder: (_, int itemCountValue, __) {
+              return ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
+                reverse: true,
+                itemCount: (documents?.length ?? 0) > itemCountValue
+                    ? itemCountValue
+                    : (documents?.length ?? 0),
+                itemBuilder: (context, index) {
+                  //** Index dependant logic here */
+                  final currentMessage = documents?[index];
+                  bool isMe = currentMessage?['userId'] == currentUser?.uid;
+                  final whichUser = usersData?.firstWhere(
+                    (element) => element.id == currentMessage?['userId'],
+                  );
+
+                  DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
+                  String formattedDate = dt.day == DateTime.now().day
+                      ? DateFormat.Hm().format(dt)
+                      : DateFormat.yMMMMd().format(dt);
+                  //** */
+
+                  //** Reply dependant logic here */
+                  final isReply = currentMessage?['repliedTo'] != '';
+                  QueryDocumentSnapshot<Object?>? repliedToMessage;
+                  QueryDocumentSnapshot<Object?>? repliedToUser;
+
+                  if (isReply) {
+                    repliedToMessage = documents?.firstWhereOrNull(
+                      (QueryDocumentSnapshot<Object?>? element) =>
+                          element?.id == currentMessage?['repliedTo'],
+                    );
+                    if (repliedToMessage != null) {
+                      repliedToUser = usersData?.firstWhereOrNull(
+                        (element) => element.id == repliedToMessage?['userId'],
+                      );
+                    }
+                  }
+                  final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
+                  final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
+                  //** */
+                  return MessageWidget(
+                    chatId: chatId,
+                    isMe: isMe,
+                    whichUser: whichUser,
+                    formattedDate: formattedDate,
+                    currentMessage: currentMessage,
+                    isReply: isReply,
+                    repliedToMessage: repliedToMessage,
+                    repliedToUser: repliedToUser,
+                    isReplyToCurrentUser: isReplyToCurrentUser,
+                    isReplyToSelf: isReplyToSelf,
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    ));
   }
 }
 
@@ -688,23 +700,25 @@ class NewMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
+      final textToSendId = Provider.of<ReplyProvider>(context, listen: false).messageId;
+      final textToSend = _enteredMessage.value;
+      _enteredMessage.value = '';
+      _controller.clear();
       final currentUser = FirebaseAuth.instance.currentUser;
+      Provider.of<ReplyProvider>(context, listen: false).closeReply();
+
       await FirebaseFirestore.instance.collection('privateChats/$chatId/messages').add({
-        'text': _enteredMessage.value,
+        'text': textToSend,
         'createdAt': Timestamp.now(),
         'userId': currentUser?.uid ?? '',
-        'repliedTo': provData.messageId,
+        'repliedTo': textToSendId,
       });
       await FirebaseFirestore.instance.collection('privateChats').doc(chatId).update({
         'lastUpdated': DateTime.now(),
-        'lastMessage': _enteredMessage.value,
+        'lastMessage': textToSend,
         'lastSender': currentUser?.displayName,
       });
-      provData.closeReply();
-      _controller.clear();
-      _enteredMessage.value = '';
     }
 
     final deviceOrientation = MediaQuery.of(context).orientation;

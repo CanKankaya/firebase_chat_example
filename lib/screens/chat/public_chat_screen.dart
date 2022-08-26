@@ -16,13 +16,18 @@ import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.d
 import 'package:firebase_chat_example/screens/chat/public_chat_participants_screen.dart';
 
 class PublicChatScreen extends StatelessWidget {
-  const PublicChatScreen({super.key, required this.chatId});
+  PublicChatScreen({super.key, required this.chatId});
 
   final String chatId;
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot<Object?>? chatData;
+
+    Future _getAndSetChatData() async {
+      chatData = await FirebaseFirestore.instance.collection('chats').doc(chatId).get();
+    }
 
     if (chatId == '') {
       return Scaffold(
@@ -36,16 +41,14 @@ class PublicChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance.collection('chats').doc(chatId).snapshots(),
+      return FutureBuilder(
+        future: _getAndSetChatData(),
         builder: (context, chatSnapshot) {
           return StreamBuilder(
             stream:
                 FirebaseFirestore.instance.collection('chats/$chatId/participantsData').snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-              if (chatSnapshot.connectionState == ConnectionState.waiting ||
-                  chatSnapshot.connectionState == ConnectionState.none ||
-                  participantsSnapshot.connectionState == ConnectionState.waiting ||
+              if (participantsSnapshot.connectionState == ConnectionState.waiting ||
                   participantsSnapshot.connectionState == ConnectionState.none) {
                 return const Scaffold(
                   body: Center(
@@ -84,7 +87,7 @@ class PublicChatScreen extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PublicChatParticipantsScreen(
-                                      creatorId: chatSnapshot.data?['chatCreatorId'],
+                                      creatorId: chatData?['chatCreatorId'],
                                       chatId: chatId,
                                     ),
                                   ),
@@ -720,23 +723,25 @@ class NewMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provData = Provider.of<ReplyProvider>(context, listen: true);
     void _sendMessage() async {
+      final textToSendId = Provider.of<ReplyProvider>(context, listen: false).messageId;
+      final textToSend = _enteredMessage.value;
+      _enteredMessage.value = '';
+      _controller.clear();
       final currentUser = FirebaseAuth.instance.currentUser;
+      Provider.of<ReplyProvider>(context, listen: false).closeReply();
+
       await FirebaseFirestore.instance.collection('chats/$chatId/messages').add({
-        'text': _enteredMessage.value,
+        'text': textToSend,
         'createdAt': Timestamp.now(),
         'userId': currentUser?.uid ?? '',
-        'repliedTo': provData.messageId,
+        'repliedTo': textToSendId,
       });
       await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
         'lastUpdated': DateTime.now(),
-        'lastMessage': _enteredMessage.value,
+        'lastMessage': textToSend,
         'lastSender': currentUser?.displayName,
       });
-      provData.closeReply();
-      _controller.clear();
-      _enteredMessage.value = '';
     }
 
     final deviceOrientation = MediaQuery.of(context).orientation;
