@@ -43,6 +43,8 @@ dependencies:
   intl: ^0.17.0
   shared_preferences: ^2.0.15
   collection: ^1.16.0
+  just_audio: ^0.9.28
+  audio_video_progress_bar: ^0.10.0
 
 
 dev_dependencies:

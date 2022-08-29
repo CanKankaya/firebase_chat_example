@@ -1,13 +1,13 @@
-import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
-import 'package:firebase_chat_example/widgets/custom_loading.dart';
 import 'package:firebase_chat_example/widgets/error_message.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
+import 'package:firebase_chat_example/widgets/custom_loading.dart';
+import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 
 class TestScreen extends StatelessWidget {
   TestScreen({Key? key}) : super(key: key);
