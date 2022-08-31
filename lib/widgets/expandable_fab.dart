@@ -30,12 +30,12 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     _open = widget.initialOpen ?? false;
     _controller = AnimationController(
       value: _open ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _expandAnimation = CurvedAnimation(
       curve: Curves.elasticInOut,
-      reverseCurve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.elasticInOut,
       parent: _controller,
     );
   }
@@ -61,7 +61,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   Widget build(BuildContext context) {
     return SizedBox.expand(
       child: Padding(
-        padding: const EdgeInsets.only(left: 32.0),
+        padding: const EdgeInsets.only(left: 32.0, bottom: 16),
         child: Stack(
           //**Change the main Fab location here */
           alignment: Alignment.bottomLeft,
@@ -128,15 +128,19 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           _open ? 0.7 : 1.0,
           1.0,
         ),
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 600),
         curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
         child: AnimatedOpacity(
-          opacity: _open ? 0.0 : 1.0,
+          opacity: _open ? 1.0 : 1.0,
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 600),
           child: FloatingActionButton(
+            backgroundColor: _open ? Colors.black : Colors.lightBlueAccent,
             onPressed: _toggle,
-            child: const Icon(Icons.settings),
+            child: Icon(
+              Icons.settings,
+              color: _open ? Colors.white : Colors.black,
+            ),
           ),
         ),
       ),
@@ -209,28 +213,6 @@ class ActionButton extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         icon: icon,
-      ),
-    );
-  }
-}
-
-@immutable
-class FakeItem extends StatelessWidget {
-  const FakeItem({
-    super.key,
-    required this.isBig,
-  });
-
-  final bool isBig;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
-      height: isBig ? 128.0 : 36.0,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        color: Colors.grey.shade300,
       ),
     );
   }

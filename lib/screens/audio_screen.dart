@@ -163,7 +163,7 @@ class _AudioScreenState extends State<AudioScreen> {
                             : () {
                                 //TODO: Change url here
                                 _audioManager.changeUrl(
-                                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
+                                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3');
                               },
                         child: const Text('Change audio test'),
                       );

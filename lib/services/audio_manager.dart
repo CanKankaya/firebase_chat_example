@@ -36,6 +36,7 @@ class AudioManager {
 //Example audio URL
 
   late AudioPlayer _audioPlayer;
+  bool isInitializing = false;
 
   AudioManager() {
     init();
@@ -66,57 +67,68 @@ class AudioManager {
   }
 
   void dispose() {
-    _audioPlayer.dispose();
+    if (!isInitializing) {
+      _audioPlayer.dispose();
+    }
   }
 
   Future<void> init() async {
-    buttonNotifier.value = ButtonState.loading;
-    _audioPlayer = AudioPlayer();
-    await _audioPlayer.setUrl(url);
-    log('CurrentUrl; \n $url');
+    try {
+      //
+      buttonNotifier.value = ButtonState.loading;
+      _audioPlayer = AudioPlayer();
+      isInitializing = true;
+      await _audioPlayer.setUrl(url);
+      isInitializing = false;
+      log('CurrentUrl; \n $url');
 
-    _audioPlayer.playerStateStream.listen((playerState) {
-      final isPlaying = playerState.playing;
-      final processingState = playerState.processingState;
-      if (processingState == ProcessingState.loading ||
-          processingState == ProcessingState.buffering) {
-        buttonNotifier.value = ButtonState.loading;
-      } else if (!isPlaying) {
-        buttonNotifier.value = ButtonState.paused;
-      } else if (processingState != ProcessingState.completed) {
-        buttonNotifier.value = ButtonState.playing;
-      } else {
-        _audioPlayer.pause();
-        _audioPlayer.seek(Duration.zero);
-      }
-    });
+      _audioPlayer.playerStateStream.listen((playerState) {
+        final isPlaying = playerState.playing;
+        final processingState = playerState.processingState;
+        if (processingState == ProcessingState.loading ||
+            processingState == ProcessingState.buffering) {
+          buttonNotifier.value = ButtonState.loading;
+        } else if (!isPlaying) {
+          buttonNotifier.value = ButtonState.paused;
+        } else if (processingState != ProcessingState.completed) {
+          buttonNotifier.value = ButtonState.playing;
+        } else {
+          _audioPlayer.pause();
+          _audioPlayer.seek(Duration.zero);
+        }
+      });
 
-    _audioPlayer.positionStream.listen((position) {
-      final oldState = progressNotifier.value;
-      progressNotifier.value = ProgressBarState(
-        current: position,
-        buffered: oldState.buffered,
-        total: oldState.total,
-      );
-    });
+      _audioPlayer.positionStream.listen((position) {
+        final oldState = progressNotifier.value;
+        progressNotifier.value = ProgressBarState(
+          current: position,
+          buffered: oldState.buffered,
+          total: oldState.total,
+        );
+      });
 
-    _audioPlayer.bufferedPositionStream.listen((bufferedPosition) {
-      final oldState = progressNotifier.value;
-      progressNotifier.value = ProgressBarState(
-        current: oldState.current,
-        buffered: bufferedPosition,
-        total: oldState.total,
-      );
-    });
+      _audioPlayer.bufferedPositionStream.listen((bufferedPosition) {
+        final oldState = progressNotifier.value;
+        progressNotifier.value = ProgressBarState(
+          current: oldState.current,
+          buffered: bufferedPosition,
+          total: oldState.total,
+        );
+      });
 
-    _audioPlayer.durationStream.listen((totalDuration) {
-      final oldState = progressNotifier.value;
-      progressNotifier.value = ProgressBarState(
-        current: oldState.current,
-        buffered: oldState.buffered,
-        total: totalDuration ?? Duration.zero,
-      );
-    });
-    buttonNotifier.value = ButtonState.paused;
+      _audioPlayer.durationStream.listen((totalDuration) {
+        final oldState = progressNotifier.value;
+        progressNotifier.value = ProgressBarState(
+          current: oldState.current,
+          buffered: oldState.buffered,
+          total: totalDuration ?? Duration.zero,
+        );
+      });
+      buttonNotifier.value = ButtonState.paused;
+    } catch (e) {
+      //
+      log('error occurred in audio init');
+      log(e.toString());
+    }
   }
 }

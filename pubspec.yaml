@@ -45,6 +45,9 @@ dependencies:
   collection: ^1.16.0
   just_audio: ^0.9.28
   audio_video_progress_bar: ^0.10.0
+  location: ^4.4.0
+  google_maps_flutter: ^2.1.12
+  flutter_polyline_points: ^1.0.0
 
 
 dev_dependencies:
