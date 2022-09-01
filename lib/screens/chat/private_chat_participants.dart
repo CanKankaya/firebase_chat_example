@@ -21,83 +21,6 @@ class PrivateChatParticipantsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-    _deleteCurrentChat(String chatId) async {
-      final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
-
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Remove Chat'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: const [
-                  Text('Are you sure you want to delete this chat?'),
-                ],
-              ),
-            ),
-            actions: [
-              ValueListenableBuilder(
-                valueListenable: isLoading,
-                builder: (context, bool value, __) {
-                  return TextButton(
-                    onPressed: () async {
-                      if (chatId == '') {
-                        Navigator.of(context).pop();
-                        SchedulerBinding.instance.addPostFrameCallback(
-                          (_) {
-                            simplerErrorMessage(
-                              context,
-                              'Couldnt find the chat',
-                              '',
-                              null,
-                              false,
-                            );
-                          },
-                        );
-                        return;
-                      } else {
-                        isLoading.value = true;
-                        await FirebaseFirestore.instance
-                            .collection('privateChats')
-                            .doc(chatId)
-                            .delete();
-
-                        SchedulerBinding.instance.addPostFrameCallback(
-                          (_) {
-                            isLoading.value = false;
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) => const PrivateChatsListScreen(),
-                                ),
-                                (route) => false);
-                            simplerErrorMessage(
-                              context,
-                              'Chat Deleted',
-                              '',
-                              null,
-                              false,
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: value
-                        ? const CircularProgressIndicator()
-                        : const Text(
-                            'Yes',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
     return StreamBuilder(
       stream: FirebaseFirestore.instance.collection('usersData').snapshots(),
       builder: (_, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
@@ -117,7 +40,7 @@ class PrivateChatParticipantsScreen extends StatelessWidget {
                   appBar: AppBar(
                     actions: [
                       IconButton(
-                        onPressed: () => _deleteCurrentChat(chatId),
+                        onPressed: () => _deleteCurrentChat(chatId, context),
                         icon: const Icon(Icons.delete_forever),
                       ),
                     ],
@@ -193,6 +116,83 @@ class PrivateChatParticipantsScreen extends StatelessWidget {
               );
             }
           },
+        );
+      },
+    );
+  }
+
+  _deleteCurrentChat(String chatId, BuildContext context) async {
+    final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Remove Chat'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const [
+                Text('Are you sure you want to delete this chat?'),
+              ],
+            ),
+          ),
+          actions: [
+            ValueListenableBuilder(
+              valueListenable: isLoading,
+              builder: (context, bool value, __) {
+                return TextButton(
+                  onPressed: () async {
+                    if (chatId == '') {
+                      Navigator.of(context).pop();
+                      SchedulerBinding.instance.addPostFrameCallback(
+                        (_) {
+                          simplerErrorMessage(
+                            context,
+                            'Couldnt find the chat',
+                            '',
+                            null,
+                            false,
+                          );
+                        },
+                      );
+                      return;
+                    } else {
+                      isLoading.value = true;
+                      await FirebaseFirestore.instance
+                          .collection('privateChats')
+                          .doc(chatId)
+                          .delete();
+
+                      SchedulerBinding.instance.addPostFrameCallback(
+                        (_) {
+                          isLoading.value = false;
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) => const PrivateChatsListScreen(),
+                              ),
+                              (route) => false);
+                          simplerErrorMessage(
+                            context,
+                            'Chat Deleted',
+                            '',
+                            null,
+                            false,
+                          );
+                        },
+                      );
+                    }
+                  },
+                  child: value
+                      ? const CircularProgressIndicator()
+                      : const Text(
+                          'Yes',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                );
+              },
+            ),
+          ],
         );
       },
     );
