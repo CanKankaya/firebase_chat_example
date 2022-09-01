@@ -12,7 +12,6 @@ import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 class TestScreen extends StatelessWidget {
   TestScreen({Key? key}) : super(key: key);
 
-  final int selectedIndex = 0;
   final ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
 
   final PageController _pageController = PageController(initialPage: 0);
@@ -661,5 +660,3 @@ class TestClick extends StatelessWidget {
 //     );
 //   }
 // }
-
-// // safearea>column>expanded>listview dene bi ara

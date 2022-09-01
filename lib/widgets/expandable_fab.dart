@@ -23,6 +23,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
   bool _open = false;
+  double turns = 0;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
 
   void _toggle() {
     setState(() {
+      turns += 4.0 / 8.0;
       _open = !_open;
       if (_open) {
         _controller.forward();
@@ -135,11 +137,16 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
           duration: const Duration(milliseconds: 600),
           child: FloatingActionButton(
-            backgroundColor: _open ? Colors.black : Colors.lightBlueAccent,
+            backgroundColor: Colors.black,
             onPressed: _toggle,
-            child: Icon(
-              Icons.settings,
-              color: _open ? Colors.white : Colors.black,
+            child: AnimatedRotation(
+              turns: turns,
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.elasticInOut,
+              child: const Icon(
+                Icons.settings,
+                color: Colors.amber,
+              ),
             ),
           ),
         ),

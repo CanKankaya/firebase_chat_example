@@ -1,16 +1,19 @@
 import 'dart:developer';
-import 'dart:math' as math;
-
-import 'package:firebase_chat_example/constants.dart';
-import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
+import 'package:location/location.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 
+import 'package:firebase_chat_example/constants.dart';
+import 'package:firebase_chat_example/services/map_service.dart';
+
+import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/expandable_fab.dart';
+
+import 'package:firebase_chat_example/screens/map_denied_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -27,35 +30,47 @@ class _MapScreenState extends State<MapScreen> {
   var isTrafficEnabled = false;
   var isPageLoading = true;
   var isFindingRoute = false;
+  var selectedIndex = 1;
+  var selectedTravelMode = TravelMode.driving;
 
+//**These are temporary LatLngs in case current user location is not found */
   LatLng centerScreen = const LatLng(40.9878681, 29.0367217);
   LatLng markerLocation = const LatLng(40.9878681, 29.0367217);
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  //** */
 
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late PolylinePoints polylinePoints;
   List<LatLng> polylineCoordinates = [];
   Map<PolylineId, Polyline> polylines = {};
   double totalDistance = 0;
 
-  double calculateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var a = 0.5 -
-        math.cos((lat2 - lat1) * p) / 2 +
-        math.cos(lat1 * p) * math.cos(lat2 * p) * (1 - math.cos((lon2 - lon1) * p)) / 2;
-    return 12742 * math.asin(math.sqrt(a));
+  void onSelect(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        selectedTravelMode = TravelMode.bicycling;
+        break;
+      case 1:
+        selectedTravelMode = TravelMode.driving;
+        break;
+      case 2:
+        selectedTravelMode = TravelMode.transit;
+        break;
+      case 3:
+        selectedTravelMode = TravelMode.walking;
+        break;
+    }
   }
 
-  Future<void> _createPolylines(double destLat, double destLong) async {
+  Future<void> _createPolylines(double destLat, double destLong, BuildContext context) async {
     setState(() {
       isFindingRoute = true;
     });
     polylineCoordinates.clear();
     polylines.clear();
-    Future.delayed(const Duration(milliseconds: 500)).then(
-      (_) => totalDistance = 0,
-    );
 
-    log(isFindingRoute.toString());
     polylinePoints = PolylinePoints();
     LocationData currentLocation = await Location().getLocation();
     double startLatitude = currentLocation.latitude ?? 0;
@@ -65,7 +80,7 @@ class _MapScreenState extends State<MapScreen> {
       googleMapsApiKey,
       PointLatLng(startLatitude, startLongitude),
       PointLatLng(destLat, destLong),
-      travelMode: TravelMode.transit,
+      travelMode: selectedTravelMode,
     );
 
     if (result.points.isNotEmpty) {
@@ -73,14 +88,23 @@ class _MapScreenState extends State<MapScreen> {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       }
     }
+    totalDistance = 0.0;
     for (var i = 0; i < polylineCoordinates.length - 1; i++) {
-      totalDistance += calculateDistance(
+      totalDistance += MapService().calculateDistance(
           polylineCoordinates[i].latitude,
           polylineCoordinates[i].longitude,
           polylineCoordinates[i + 1].latitude,
           polylineCoordinates[i + 1].longitude);
     }
-    log(totalDistance.toString());
+    if (totalDistance == 0.0) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong'),
+          ),
+        );
+      });
+    }
 
     var id = const PolylineId('poly');
 
@@ -93,16 +117,11 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       polylines[id] = polyline;
       isFindingRoute = false;
-      log(isFindingRoute.toString());
     });
   }
 
-  _onMapCreated(GoogleMapController controller) {
+  void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-  }
-
-  String _myWayToGenerateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   void _addMarker(LatLng latLng) {
@@ -112,7 +131,7 @@ class _MapScreenState extends State<MapScreen> {
     polylines.clear();
     //
 
-    var markerIdVal = _myWayToGenerateId();
+    var markerIdVal = MapService().myWayToGenerateId();
     final MarkerId markerId = MarkerId(markerIdVal);
 
     final Marker marker = Marker(
@@ -130,21 +149,122 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  Future<LocationData> _getCurrentLocation() async {
-    // Delay is only here to test loading state, you can remove it
-    await Future.delayed(const Duration(milliseconds: 1000));
-
+  void mapButtonHandler() async {
     var currentLocation = await Location().getLocation();
-    return currentLocation;
+
+    if (markers.isNotEmpty && !isFindingRoute) {
+      if (polylines.isNotEmpty) {
+        mapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            LatLngBounds(
+              southwest: LatLng(
+                  ((currentLocation.latitude ?? 0) <= markerLocation.latitude
+                          ? currentLocation.latitude
+                          : markerLocation.latitude) ??
+                      0,
+                  ((currentLocation.longitude ?? 0) <= markerLocation.longitude
+                          ? currentLocation.longitude
+                          : markerLocation.longitude) ??
+                      0),
+              northeast: LatLng(
+                  ((currentLocation.latitude ?? 0) <= markerLocation.latitude
+                          ? markerLocation.latitude
+                          : currentLocation.latitude) ??
+                      0,
+                  ((currentLocation.longitude ?? 0) <= markerLocation.longitude
+                          ? markerLocation.longitude
+                          : currentLocation.longitude) ??
+                      0),
+            ),
+            120,
+          ),
+        );
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback(
+          (_) {
+            _createPolylines(markerLocation.latitude, markerLocation.longitude, context).then(
+              (_) async {
+                if (currentLocation.latitude == null ||
+                    currentLocation.latitude == 0 ||
+                    currentLocation.longitude == null ||
+                    currentLocation.longitude == 0) {
+                  return;
+                }
+                mapController.animateCamera(
+                  CameraUpdate.newLatLngBounds(
+                    LatLngBounds(
+                      southwest: LatLng(
+                          ((currentLocation.latitude ?? 0) <= markerLocation.latitude
+                                  ? currentLocation.latitude
+                                  : markerLocation.latitude) ??
+                              0,
+                          ((currentLocation.longitude ?? 0) <= markerLocation.longitude
+                                  ? currentLocation.longitude
+                                  : markerLocation.longitude) ??
+                              0),
+                      northeast: LatLng(
+                          ((currentLocation.latitude ?? 0) <= markerLocation.latitude
+                                  ? markerLocation.latitude
+                                  : currentLocation.latitude) ??
+                              0,
+                          ((currentLocation.longitude ?? 0) <= markerLocation.longitude
+                                  ? markerLocation.longitude
+                                  : currentLocation.longitude) ??
+                              0),
+                    ),
+                    120,
+                  ),
+                );
+              },
+            );
+          },
+        );
+      }
+    }
+  }
+
+  void navigationButtonHandler() async {
+    if (polylines.isNotEmpty) {
+      var currentLocation = await Location().getLocation();
+      if (currentLocation.latitude == null ||
+          currentLocation.latitude == 0 ||
+          currentLocation.longitude == null ||
+          currentLocation.longitude == 0) {
+        return;
+      }
+
+      mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            zoom: 17,
+            tilt: 55,
+            target: LatLng(currentLocation.latitude ?? 0, currentLocation.longitude ?? 0),
+          ),
+        ),
+      );
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation().then((value) {
+    MapService().tryGetCurrentLocation().then((value) {
+      if (value == null) {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MapDeniedScreen(),
+            ));
+        return;
+      }
+
       centerScreen = LatLng(value.latitude ?? 0, value.longitude ?? 0);
-      setState(() {
-        isPageLoading = false;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        screenWidth = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
+        screenHeight = MediaQuery.of(context).size.height * MediaQuery.of(context).devicePixelRatio;
+        setState(() {
+          isPageLoading = false;
+        });
       });
     });
   }
@@ -161,11 +281,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth =
-        MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
-    double screenHeight =
-        MediaQuery.of(context).size.height * MediaQuery.of(context).devicePixelRatio;
-
     int middleX = (screenWidth / 2).round();
     int middleY = ((screenHeight / 2) - 120).round();
 
@@ -231,10 +346,12 @@ class _MapScreenState extends State<MapScreen> {
                 },
                 onCameraIdle: () async {
                   if (isTargetMode && flag) {
-                    var screenCoord = ScreenCoordinate(x: middleX, y: middleY);
-                    markerLocation = await mapController.getLatLng(screenCoord);
-                    log(markerLocation.latitude.toString());
-                    log(markerLocation.longitude.toString());
+                    markerLocation = await mapController.getLatLng(
+                      ScreenCoordinate(
+                        x: middleX,
+                        y: middleY,
+                      ),
+                    );
 
                     _addMarker(markerLocation);
                   }
@@ -243,29 +360,107 @@ class _MapScreenState extends State<MapScreen> {
               Positioned(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 60.0, top: 8.0, bottom: 8.0, right: 60.0),
-                  child: AnimatedContainer(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Material(
                       color: Colors.black,
-                      boxShadow: [
-                        if (polylines.isNotEmpty)
-                          const BoxShadow(
-                            color: Colors.grey,
-                            spreadRadius: 5,
-                            blurRadius: 7,
-                          ),
-                      ],
-                    ),
-                    duration: const Duration(milliseconds: 500),
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    height: polylines.isNotEmpty ? 60 : 0,
-                    child: Text(
-                      'Total Distance: ${totalDistance.toStringAsFixed(2)} KM',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
+                      child: AnimatedContainer(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        duration: const Duration(milliseconds: 500),
+                        width: double.infinity,
+                        height: polylines.isNotEmpty ? 80 : 0,
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  'Total Distance: ${totalDistance.toStringAsFixed(2)} KM',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    onPressed: selectedIndex == 0
+                                        ? null
+                                        : () {
+                                            onSelect(0);
+                                            _createPolylines(
+                                              markerLocation.latitude,
+                                              markerLocation.longitude,
+                                              context,
+                                            );
+                                          },
+                                    icon: Icon(
+                                      Icons.directions_bike,
+                                      color: selectedIndex == 0 ? Colors.amber : Colors.white,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: selectedIndex == 1
+                                        ? null
+                                        : () {
+                                            onSelect(1);
+                                            _createPolylines(
+                                              markerLocation.latitude,
+                                              markerLocation.longitude,
+                                              context,
+                                            );
+                                          },
+                                    icon: Icon(
+                                      Icons.directions_car,
+                                      color: selectedIndex == 1 ? Colors.amber : Colors.white,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: selectedIndex == 2
+                                        ? null
+                                        : () {
+                                            onSelect(2);
+                                            _createPolylines(
+                                              markerLocation.latitude,
+                                              markerLocation.longitude,
+                                              context,
+                                            );
+                                          },
+                                    icon: Icon(
+                                      Icons.directions_transit,
+                                      color: selectedIndex == 2 ? Colors.amber : Colors.white,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: selectedIndex == 3
+                                        ? null
+                                        : () {
+                                            onSelect(3);
+                                            _createPolylines(
+                                              markerLocation.latitude,
+                                              markerLocation.longitude,
+                                              context,
+                                            );
+                                          },
+                                    icon: Icon(
+                                      Icons.directions_walk,
+                                      color: selectedIndex == 3 ? Colors.amber : Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -311,28 +506,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
                 ActionButton(
-                  onPressed: () async {
-                    if (polylines.isNotEmpty) {
-                      var currentLocation = await Location().getLocation();
-                      if (currentLocation.latitude == null ||
-                          currentLocation.latitude == 0 ||
-                          currentLocation.longitude == null ||
-                          currentLocation.longitude == 0) {
-                        return;
-                      }
-
-                      mapController.animateCamera(
-                        CameraUpdate.newCameraPosition(
-                          CameraPosition(
-                            zoom: 17,
-                            tilt: 55,
-                            target: LatLng(
-                                currentLocation.latitude ?? 0, currentLocation.longitude ?? 0),
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: navigationButtonHandler,
                   backgroundColor: Colors.black,
                   icon: Icon(
                     Icons.navigation,
@@ -340,76 +514,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
                 ActionButton(
-                  onPressed: () async {
-                    var currentLocation = await Location().getLocation();
-
-                    if (markers.isNotEmpty && !isFindingRoute) {
-                      if (polylines.isNotEmpty) {
-                        mapController.animateCamera(
-                          CameraUpdate.newLatLngBounds(
-                            LatLngBounds(
-                              southwest: LatLng(
-                                  ((currentLocation.latitude ?? 0) <= markerLocation.latitude
-                                          ? currentLocation.latitude
-                                          : markerLocation.latitude) ??
-                                      0,
-                                  ((currentLocation.longitude ?? 0) <= markerLocation.longitude
-                                          ? currentLocation.longitude
-                                          : markerLocation.longitude) ??
-                                      0),
-                              northeast: LatLng(
-                                  ((currentLocation.latitude ?? 0) <= markerLocation.latitude
-                                          ? markerLocation.latitude
-                                          : currentLocation.latitude) ??
-                                      0,
-                                  ((currentLocation.longitude ?? 0) <= markerLocation.longitude
-                                          ? markerLocation.longitude
-                                          : currentLocation.longitude) ??
-                                      0),
-                            ),
-                            120,
-                          ),
-                        );
-                      } else {
-                        _createPolylines(markerLocation.latitude, markerLocation.longitude).then(
-                          (_) async {
-                            if (currentLocation.latitude == null ||
-                                currentLocation.latitude == 0 ||
-                                currentLocation.longitude == null ||
-                                currentLocation.longitude == 0) {
-                              return;
-                            }
-
-                            mapController.animateCamera(
-                              CameraUpdate.newLatLngBounds(
-                                LatLngBounds(
-                                  southwest: LatLng(
-                                      ((currentLocation.latitude ?? 0) <= markerLocation.latitude
-                                              ? currentLocation.latitude
-                                              : markerLocation.latitude) ??
-                                          0,
-                                      ((currentLocation.longitude ?? 0) <= markerLocation.longitude
-                                              ? currentLocation.longitude
-                                              : markerLocation.longitude) ??
-                                          0),
-                                  northeast: LatLng(
-                                      ((currentLocation.latitude ?? 0) <= markerLocation.latitude
-                                              ? markerLocation.latitude
-                                              : currentLocation.latitude) ??
-                                          0,
-                                      ((currentLocation.longitude ?? 0) <= markerLocation.longitude
-                                              ? markerLocation.longitude
-                                              : currentLocation.longitude) ??
-                                          0),
-                                ),
-                                120,
-                              ),
-                            );
-                          },
-                        );
-                      }
-                    }
-                  },
+                  onPressed: mapButtonHandler,
                   backgroundColor: Colors.black,
                   icon: isFindingRoute
                       ? const SimplerCustomLoader()
