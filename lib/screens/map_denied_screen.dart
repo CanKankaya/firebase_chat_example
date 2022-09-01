@@ -9,7 +9,57 @@ import 'package:firebase_chat_example/widgets/custom_loading.dart';
 import 'package:firebase_chat_example/screens/map_screen.dart';
 
 class MapDeniedScreen extends StatelessWidget {
-  const MapDeniedScreen({Key? key}) : super(key: key);
+  MapDeniedScreen({Key? key}) : super(key: key);
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: onWillPopHandler,
+      child: Scaffold(
+        appBar: AppBar(),
+        drawer: const AppDrawer(),
+        body: Column(
+          children: [
+            const Spacer(),
+            const Text(
+              'You denied me...\nJust like all the girls I ask out. haha :\') ',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Draggable(
+              feedback: SizedBox(
+                height: 150,
+                width: 150,
+                child: CustomLoader(),
+              ),
+              childWhenDragging: SizedBox(
+                height: 150,
+                width: 150,
+              ),
+              child: SizedBox(
+                height: 150,
+                width: 150,
+                child: CustomLoader(),
+              ),
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => _buttonHandler(context),
+              child: const Text(
+                ('Try again...'),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   _buttonHandler(BuildContext context) async {
     var boolValue = await MapService().tryGetPermission();
@@ -37,50 +87,17 @@ class MapDeniedScreen extends StatelessWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-
-    return WillPopScope(
-      onWillPop: () {
-        if (scaffoldKey.currentState != null) {
-          if (scaffoldKey.currentState!.isDrawerOpen) {
-            scaffoldKey.currentState!.closeDrawer();
-            return Future.value(false);
-          } else {
-            scaffoldKey.currentState!.openDrawer();
-            return Future.value(false);
-          }
-        } else {
-          return Future.value(false);
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(),
-        drawer: const AppDrawer(),
-        body: Column(
-          children: [
-            const Spacer(),
-            const Text(
-              'Well I just got denied.\nJust like all the girls I ask out. haha :\') ',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const CustomLoader(),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _buttonHandler(context),
-              child: const Text(
-                ('Try again...'),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+  Future<bool> onWillPopHandler() {
+    if (_scaffoldKey.currentState != null) {
+      if (_scaffoldKey.currentState!.isDrawerOpen) {
+        _scaffoldKey.currentState!.closeDrawer();
+        return Future.value(false);
+      } else {
+        _scaffoldKey.currentState!.openDrawer();
+        return Future.value(false);
+      }
+    } else {
+      return Future.value(false);
+    }
   }
 }
