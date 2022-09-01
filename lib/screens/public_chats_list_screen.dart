@@ -12,53 +12,14 @@ import 'package:firebase_chat_example/widgets/exit_popup.dart';
 import 'package:firebase_chat_example/screens/chat/public_chat_screen.dart';
 
 class PublicChatsListScreen extends StatelessWidget {
-  const PublicChatsListScreen({Key? key}) : super(key: key);
+  PublicChatsListScreen({Key? key}) : super(key: key);
+
+  final currentUser = FirebaseAuth.instance.currentUser;
+  final chatNameController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    final chatNameController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    Future<void> tryAddNewChat() async {
-      if (formKey.currentState!.validate()) {
-        try {
-          Navigator.pop(context);
-          final String generatedId = DateTime.now().microsecondsSinceEpoch.toString();
-
-          await FirebaseFirestore.instance.collection('chats').doc(generatedId).set({
-            'chatCreatorId': currentUser?.uid,
-            'chatName': chatNameController.text,
-            'createdAt': DateTime.now(),
-            'lastUpdated': DateTime.now(),
-            'lastMessage': '',
-            'lastSender': '',
-          }).then((_) {
-            FirebaseFirestore.instance
-                .collection('chats/$generatedId/participantsData')
-                .doc(currentUser?.uid)
-                .set({
-              'userId': currentUser?.uid,
-            });
-          });
-          chatNameController.text = '';
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Yeyy, added a new chat'),
-              ),
-            );
-          });
-        } catch (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Something went wrong'),
-            ),
-          );
-        }
-      }
-    }
-
     return WillPopScope(
       onWillPop: () => showExitPopup(context),
       child: GestureDetector(
@@ -113,7 +74,7 @@ class PublicChatsListScreen extends StatelessWidget {
                               const Spacer(),
                               ElevatedButton(
                                 onPressed: () {
-                                  tryAddNewChat();
+                                  tryAddNewChat(context);
                                 },
                                 child: const Text('Add New Public Chat'),
                               ),
@@ -130,6 +91,45 @@ class PublicChatsListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> tryAddNewChat(BuildContext context) async {
+    if (formKey.currentState!.validate()) {
+      try {
+        Navigator.pop(context);
+        final String generatedId = DateTime.now().microsecondsSinceEpoch.toString();
+
+        await FirebaseFirestore.instance.collection('chats').doc(generatedId).set({
+          'chatCreatorId': currentUser?.uid,
+          'chatName': chatNameController.text,
+          'createdAt': DateTime.now(),
+          'lastUpdated': DateTime.now(),
+          'lastMessage': '',
+          'lastSender': '',
+        }).then((_) {
+          FirebaseFirestore.instance
+              .collection('chats/$generatedId/participantsData')
+              .doc(currentUser?.uid)
+              .set({
+            'userId': currentUser?.uid,
+          });
+        });
+        chatNameController.text = '';
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Yeyy, added a new chat'),
+            ),
+          );
+        });
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong'),
+          ),
+        );
+      }
+    }
   }
 }
 

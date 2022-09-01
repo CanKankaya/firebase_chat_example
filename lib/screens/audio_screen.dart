@@ -18,37 +18,12 @@ class AudioScreen extends StatefulWidget {
 
 class _AudioScreenState extends State<AudioScreen> {
   late AudioManager _audioManager;
-
-  @override
-  void initState() {
-    super.initState();
-    _audioManager = AudioManager();
-  }
-
-  @override
-  void dispose() {
-    _audioManager.dispose();
-    super.dispose();
-  }
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () {
-        if (_scaffoldKey.currentState != null) {
-          if (_scaffoldKey.currentState!.isDrawerOpen) {
-            _scaffoldKey.currentState!.closeDrawer();
-            return Future.value(false);
-          } else {
-            _scaffoldKey.currentState!.openDrawer();
-            return Future.value(false);
-          }
-        } else {
-          return Future.value(false);
-        }
-      },
+      onWillPop: onWillPopHandler,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(),
@@ -177,5 +152,31 @@ class _AudioScreenState extends State<AudioScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _audioManager = AudioManager();
+  }
+
+  @override
+  void dispose() {
+    _audioManager.dispose();
+    super.dispose();
+  }
+
+  Future<bool> onWillPopHandler() {
+    if (_scaffoldKey.currentState != null) {
+      if (_scaffoldKey.currentState!.isDrawerOpen) {
+        _scaffoldKey.currentState!.closeDrawer();
+        return Future.value(false);
+      } else {
+        _scaffoldKey.currentState!.openDrawer();
+        return Future.value(false);
+      }
+    } else {
+      return Future.value(false);
+    }
   }
 }

@@ -112,7 +112,7 @@ class AuthScreen extends StatelessWidget {
           return const SplashScreen();
         } else {
           return snapshot.hasData
-              ? const PublicChatsListScreen()
+              ? PublicChatsListScreen()
               : WillPopScope(
                   onWillPop: () => showExitPopup(context),
                   child: Theme(

@@ -287,7 +287,7 @@ class PublicChatParticipantsScreen extends StatelessWidget {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (BuildContext context) => const PublicChatsListScreen(),
+                                builder: (BuildContext context) => PublicChatsListScreen(),
                               ),
                               (route) => false);
                           simplerErrorMessage(

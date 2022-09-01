@@ -33,6 +33,7 @@ class PrivateChatsListScreen extends StatelessWidget {
     );
   }
 }
+//TODO: add a way to start a private chat here
 
 class ChatsList extends StatelessWidget {
   const ChatsList({Key? key}) : super(key: key);

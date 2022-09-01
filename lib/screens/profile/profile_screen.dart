@@ -26,56 +26,6 @@ class ProfileScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _userDetailController = TextEditingController();
 
-  Future _selectImage() async {
-    var image = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 50,
-      maxWidth: 150,
-    );
-    if (image != null) {
-      _pickedImage.value = image;
-
-      _isUpdatable.value = true;
-    }
-  }
-
-  Future _tryUpdate() async {
-    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      _formKey.currentState?.save();
-      if (_pickedImage.value != null) {
-        _isLoading.value = true;
-
-        final ref =
-            FirebaseStorage.instance.ref().child('user_image').child('${currentUser!.uid}.jpg');
-        await ref.delete();
-        await ref.putFile(File(_pickedImage.value!.path));
-        final url = await ref.getDownloadURL();
-        await currentUser?.updatePhotoURL(url);
-
-        await currentUser?.updateDisplayName(_usernameController.text);
-
-        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
-          'username': _usernameController.text,
-          'userImageUrl': url,
-          'userDetail': _userDetailController.text,
-        }).then((_) {
-          _isLoading.value = false;
-        });
-      } else {
-        _isLoading.value = true;
-
-        await currentUser?.updateDisplayName(_usernameController.text);
-
-        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
-          'username': _usernameController.text,
-          'userDetail': _userDetailController.text,
-        }).then((value) {
-          _isLoading.value = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -290,5 +240,55 @@ class ProfileScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future _selectImage() async {
+    var image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 50,
+      maxWidth: 150,
+    );
+    if (image != null) {
+      _pickedImage.value = image;
+
+      _isUpdatable.value = true;
+    }
+  }
+
+  Future _tryUpdate() async {
+    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+      _formKey.currentState?.save();
+      if (_pickedImage.value != null) {
+        _isLoading.value = true;
+
+        final ref =
+            FirebaseStorage.instance.ref().child('user_image').child('${currentUser!.uid}.jpg');
+        await ref.delete();
+        await ref.putFile(File(_pickedImage.value!.path));
+        final url = await ref.getDownloadURL();
+        await currentUser?.updatePhotoURL(url);
+
+        await currentUser?.updateDisplayName(_usernameController.text);
+
+        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
+          'username': _usernameController.text,
+          'userImageUrl': url,
+          'userDetail': _userDetailController.text,
+        }).then((_) {
+          _isLoading.value = false;
+        });
+      } else {
+        _isLoading.value = true;
+
+        await currentUser?.updateDisplayName(_usernameController.text);
+
+        await FirebaseFirestore.instance.collection('usersData').doc(currentUser?.uid).update({
+          'username': _usernameController.text,
+          'userDetail': _userDetailController.text,
+        }).then((value) {
+          _isLoading.value = false;
+        });
+      }
+    }
   }
 }

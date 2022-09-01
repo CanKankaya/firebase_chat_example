@@ -347,9 +347,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<bool> onWillPopHandler() {
-    log('onwillpop');
-    log(_scaffoldKey.currentState!.hasDrawer.toString());
-
     if (_scaffoldKey.currentState != null) {
       if (_scaffoldKey.currentState!.isDrawerOpen) {
         _scaffoldKey.currentState!.closeDrawer();
