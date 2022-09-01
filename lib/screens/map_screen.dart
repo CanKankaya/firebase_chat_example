@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -150,6 +149,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void mapButtonHandler() async {
+    isTargetMode = false;
     var currentLocation = await Location().getLocation();
 
     if (markers.isNotEmpty && !isFindingRoute) {
@@ -224,6 +224,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void navigationButtonHandler() async {
+    setState(() {
+      isTargetMode = false;
+    });
+
     if (polylines.isNotEmpty) {
       var currentLocation = await Location().getLocation();
       if (currentLocation.latitude == null ||
@@ -262,6 +266,8 @@ class _MapScreenState extends State<MapScreen> {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         screenWidth = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
         screenHeight = MediaQuery.of(context).size.height * MediaQuery.of(context).devicePixelRatio;
+        middleX = (screenWidth / 2).round();
+        middleY = ((screenHeight / 2) - 120).round();
         setState(() {
           isPageLoading = false;
         });
@@ -281,10 +287,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    int middleX = (screenWidth / 2).round();
-    int middleY = ((screenHeight / 2) - 120).round();
-
-    log('build function ran');
     if (isPageLoading) {
       return Scaffold(
         appBar: AppBar(),
@@ -389,74 +391,78 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                             Align(
                               alignment: Alignment.bottomCenter,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    onPressed: selectedIndex == 0
-                                        ? null
-                                        : () {
-                                            onSelect(0);
-                                            _createPolylines(
-                                              markerLocation.latitude,
-                                              markerLocation.longitude,
-                                              context,
-                                            );
-                                          },
-                                    icon: Icon(
-                                      Icons.directions_bike,
-                                      color: selectedIndex == 0 ? Colors.amber : Colors.white,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 300),
+                                opacity: polylines.isNotEmpty ? 1.0 : 0.0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      onPressed: selectedIndex == 0
+                                          ? null
+                                          : () {
+                                              onSelect(0);
+                                              _createPolylines(
+                                                markerLocation.latitude,
+                                                markerLocation.longitude,
+                                                context,
+                                              );
+                                            },
+                                      icon: Icon(
+                                        Icons.directions_bike,
+                                        color: selectedIndex == 0 ? Colors.amber : Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: selectedIndex == 1
-                                        ? null
-                                        : () {
-                                            onSelect(1);
-                                            _createPolylines(
-                                              markerLocation.latitude,
-                                              markerLocation.longitude,
-                                              context,
-                                            );
-                                          },
-                                    icon: Icon(
-                                      Icons.directions_car,
-                                      color: selectedIndex == 1 ? Colors.amber : Colors.white,
+                                    IconButton(
+                                      onPressed: selectedIndex == 1
+                                          ? null
+                                          : () {
+                                              onSelect(1);
+                                              _createPolylines(
+                                                markerLocation.latitude,
+                                                markerLocation.longitude,
+                                                context,
+                                              );
+                                            },
+                                      icon: Icon(
+                                        Icons.directions_car,
+                                        color: selectedIndex == 1 ? Colors.amber : Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: selectedIndex == 2
-                                        ? null
-                                        : () {
-                                            onSelect(2);
-                                            _createPolylines(
-                                              markerLocation.latitude,
-                                              markerLocation.longitude,
-                                              context,
-                                            );
-                                          },
-                                    icon: Icon(
-                                      Icons.directions_transit,
-                                      color: selectedIndex == 2 ? Colors.amber : Colors.white,
+                                    IconButton(
+                                      onPressed: selectedIndex == 2
+                                          ? null
+                                          : () {
+                                              onSelect(2);
+                                              _createPolylines(
+                                                markerLocation.latitude,
+                                                markerLocation.longitude,
+                                                context,
+                                              );
+                                            },
+                                      icon: Icon(
+                                        Icons.directions_transit,
+                                        color: selectedIndex == 2 ? Colors.amber : Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: selectedIndex == 3
-                                        ? null
-                                        : () {
-                                            onSelect(3);
-                                            _createPolylines(
-                                              markerLocation.latitude,
-                                              markerLocation.longitude,
-                                              context,
-                                            );
-                                          },
-                                    icon: Icon(
-                                      Icons.directions_walk,
-                                      color: selectedIndex == 3 ? Colors.amber : Colors.white,
+                                    IconButton(
+                                      onPressed: selectedIndex == 3
+                                          ? null
+                                          : () {
+                                              onSelect(3);
+                                              _createPolylines(
+                                                markerLocation.latitude,
+                                                markerLocation.longitude,
+                                                context,
+                                              );
+                                            },
+                                      icon: Icon(
+                                        Icons.directions_walk,
+                                        color: selectedIndex == 3 ? Colors.amber : Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ],
