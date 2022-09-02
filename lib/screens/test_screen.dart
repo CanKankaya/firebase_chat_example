@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_chat_example/widgets/expandable_fab.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -21,6 +24,7 @@ class TestScreen extends StatelessWidget {
     const TestSettings(),
     const TestCode(),
     const TestClick(),
+    const TestFab(),
   ];
 
   void onSelect(int index) {
@@ -62,45 +66,52 @@ class TestScreen extends StatelessWidget {
           ),
           drawer: const AppDrawer(),
           bottomNavigationBar: ValueListenableBuilder(
-              valueListenable: _selectedIndex,
-              builder: (_, int value, __) {
-                return BottomNavigationBar(
-                  type: BottomNavigationBarType.shifting,
-                  selectedItemColor: Colors.amber,
-                  unselectedItemColor: Colors.grey,
-                  onTap: (index) {
-                    //
-                    _pageController.animateToPage(index,
-                        duration: const Duration(milliseconds: 500), curve: Curves.ease);
-                  },
-                  currentIndex: value,
-                  elevation: 10,
-                  showUnselectedLabels: false,
-                  items: const [
-                    BottomNavigationBarItem(
-                      backgroundColor: Colors.black87,
-                      label: 'Home',
-                      icon: Icon(Icons.home),
-                    ),
-                    BottomNavigationBarItem(
-                      label: 'Bar Chart',
-                      icon: Icon(Icons.bar_chart),
-                    ),
-                    BottomNavigationBarItem(
-                      label: 'Settings',
-                      icon: Icon(Icons.settings),
-                    ),
-                    BottomNavigationBarItem(
-                      label: 'Code',
-                      icon: Icon(Icons.code),
-                    ),
-                    BottomNavigationBarItem(
-                      label: 'ClickTest',
-                      icon: Icon(Icons.mouse),
-                    ),
-                  ],
-                );
-              }),
+            valueListenable: _selectedIndex,
+            builder: (_, int value, __) {
+              return BottomNavigationBar(
+                type: BottomNavigationBarType.shifting,
+                selectedItemColor: Colors.amber,
+                unselectedItemColor: Colors.grey,
+                onTap: (index) {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.ease,
+                  );
+                },
+                currentIndex: value,
+                elevation: 10,
+                showUnselectedLabels: false,
+                items: const [
+                  BottomNavigationBarItem(
+                    backgroundColor: Colors.black87,
+                    label: 'Home',
+                    icon: Icon(Icons.home),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'Bar Chart',
+                    icon: Icon(Icons.bar_chart),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'Settings',
+                    icon: Icon(Icons.settings),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'Code',
+                    icon: Icon(Icons.code),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'ClickTest',
+                    icon: Icon(Icons.mouse),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'Fab',
+                    icon: Icon(Icons.control_point),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -540,7 +551,45 @@ class TestClick extends StatelessWidget {
   }
 }
 
+class TestFab extends StatelessWidget {
+  const TestFab({Key? key}) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
+    return ExpandableFab(
+      alignment: Alignment.bottomLeft,
+      step: 90,
+      distance: 80,
+      smallDistance: 30,
+      children: [
+        ActionButton(
+          onPressed: () {
+            log('pressed');
+          },
+          icon: const Icon(
+            Icons.construction,
+          ),
+        ),
+        ActionButton(
+          onPressed: () {
+            log('pressed');
+          },
+          icon: const Icon(
+            Icons.construction,
+          ),
+        ),
+        ActionButton(
+          onPressed: () {
+            log('pressed');
+          },
+          icon: const Icon(
+            Icons.construction,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 // //Chart's data class
 // class DataType {

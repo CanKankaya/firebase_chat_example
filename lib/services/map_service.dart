@@ -1,8 +1,6 @@
 import 'package:location/location.dart';
 import 'dart:math';
 
-// import 'package:permission_handler/permission_handler.dart';
-
 final mapService = MapService();
 
 //TODO: Check conditions below;

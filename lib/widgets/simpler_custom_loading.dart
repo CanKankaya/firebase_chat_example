@@ -118,11 +118,11 @@ class Arc2Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect3 = Rect.fromLTWH(0.0 + (0.5 * size.width) / 2, 0.0 + (0.5 * size.height) / 2,
+    Rect rect2 = Rect.fromLTWH(0.0 + (0.5 * size.width) / 2, 0.0 + (0.5 * size.height) / 2,
         size.width - 0.5 * size.width, size.height - 0.5 * size.height);
 
-    canvas.drawArc(rect3, 0.0, 0.8 * pi, false, p2);
-    canvas.drawArc(rect3, 1.0 * pi, 0.8 * pi, false, p2);
+    canvas.drawArc(rect2, 0.0, 0.8 * pi, false, p2);
+    canvas.drawArc(rect2, 1.0 * pi, 0.8 * pi, false, p2);
   }
 
   @override

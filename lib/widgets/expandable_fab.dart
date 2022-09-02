@@ -8,12 +8,18 @@ class ExpandableFab extends StatefulWidget {
     super.key,
     this.initialOpen,
     required this.distance,
+    required this.smallDistance,
     required this.children,
+    this.step = 90,
+    this.alignment = Alignment.bottomLeft,
   });
 
   final bool? initialOpen;
   final double distance;
-  final List<Widget> children;
+  final double smallDistance;
+  final List<ActionButton> children;
+  final double step;
+  final Alignment alignment;
 
   @override
   State<ExpandableFab> createState() => _ExpandableFabState();
@@ -66,7 +72,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         padding: const EdgeInsets.only(left: 32.0, bottom: 16),
         child: Stack(
           //**Change the main Fab location here */
-          alignment: Alignment.bottomLeft,
+          alignment: widget.alignment,
           //** */
           clipBehavior: Clip.none,
           children: [
@@ -105,15 +111,31 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
 
   List<Widget> _buildExpandingActionButtons() {
     final children = <Widget>[];
-    final count = widget.children.length;
-    final step = 90.0 / (count - 1);
-    for (var i = 0, angleInDegrees = 0.0; i < count; i++, angleInDegrees += step) {
+    final bigList = widget.children.where((element) => !element.isSmall).toList();
+    final smallList = widget.children.where((element) => element.isSmall).toList();
+    final bigCount = bigList.length;
+    final smallCount = smallList.length;
+
+    var step = widget.step / (bigCount - 1);
+    for (var i = 0, angleInDegrees = 0.0; i < bigCount; i++, angleInDegrees += step) {
       children.add(
         _ExpandingActionButton(
           directionInDegrees: angleInDegrees,
           maxDistance: widget.distance,
           progress: _expandAnimation,
-          child: widget.children[i],
+          child: bigList[i],
+        ),
+      );
+    }
+
+    step = 90.0 / (smallCount - 1);
+    for (var i = 0, angleInDegrees = 0.0; i < smallCount; i++, angleInDegrees += step) {
+      children.add(
+        _ExpandingActionButton(
+          directionInDegrees: angleInDegrees,
+          maxDistance: widget.smallDistance,
+          progress: _expandAnimation,
+          child: smallList[i],
         ),
       );
     }
@@ -131,13 +153,13 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           1.0,
         ),
         duration: const Duration(milliseconds: 600),
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.5, curve: Curves.linear),
         child: AnimatedOpacity(
           opacity: _open ? 1.0 : 1.0,
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
           duration: const Duration(milliseconds: 600),
           child: FloatingActionButton(
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.lightBlue,
             onPressed: _toggle,
             child: AnimatedRotation(
               turns: turns,
@@ -145,7 +167,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
               curve: Curves.elasticInOut,
               child: const Icon(
                 Icons.settings,
-                color: Colors.amber,
+                color: Colors.black,
               ),
             ),
           ),
@@ -182,6 +204,7 @@ class _ExpandingActionButton extends StatelessWidget {
           //**Change the action buttons location here */
           left: 4.0 + offset.dx,
           bottom: 4.0 + offset.dy,
+
           //** */
           child: Transform.rotate(
             angle: (1.0 - progress.value) * math.pi / 2,
@@ -204,11 +227,13 @@ class ActionButton extends StatelessWidget {
     this.onPressed,
     required this.icon,
     this.backgroundColor = Colors.black,
+    this.isSmall = false,
   });
 
   final VoidCallback? onPressed;
   final Widget icon;
   final Color backgroundColor;
+  final bool isSmall;
 
   @override
   Widget build(BuildContext context) {

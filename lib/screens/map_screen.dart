@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -33,12 +32,11 @@ class _MapScreenState extends State<MapScreen> {
   var selectedIndex = 1;
   var selectedTravelMode = TravelMode.driving;
 
-//**These are temporary LatLngs in case current user location is not found */
-  LatLng centerScreen = const LatLng(40.9878681, 29.0367217);
-  LatLng markerLocation = const LatLng(40.9878681, 29.0367217);
-  //** */
+  late LatLng centerScreen;
+  late LatLng markerLocation;
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+
   late PolylinePoints polylinePoints;
   List<LatLng> polylineCoordinates = [];
   Map<PolylineId, Polyline> polylines = {};
@@ -242,9 +240,12 @@ class _MapScreenState extends State<MapScreen> {
             ],
           ),
           floatingActionButton: ExpandableFab(
-            distance: 150.0,
+            alignment: Alignment.bottomLeft,
+            distance: 140.0,
+            smallDistance: 80.0,
             children: [
               ActionButton(
+                isSmall: true,
                 onPressed: () async {
                   setState(() {
                     markers.clear();
@@ -303,6 +304,24 @@ class _MapScreenState extends State<MapScreen> {
                   color: isTargetMode ? Colors.black : Colors.amber,
                 ),
               ),
+              ActionButton(
+                isSmall: true,
+                onPressed: () {},
+                backgroundColor: Colors.black,
+                icon: const Icon(
+                  Icons.construction,
+                  color: Colors.white,
+                ),
+              ),
+              ActionButton(
+                isSmall: true,
+                onPressed: () {},
+                backgroundColor: Colors.black,
+                icon: const Icon(
+                  Icons.construction,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
         ),
@@ -313,6 +332,10 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    //**These are temporary assignments in case current user location is not found */
+    centerScreen = const LatLng(40.9878681, 29.0367217);
+    markerLocation = const LatLng(40.9878681, 29.0367217);
+    //** */
     MapService().tryGetCurrentLocation().then((value) {
       if (value == null) {
         Navigator.pushReplacement(
@@ -338,12 +361,12 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
-    super.dispose();
-
     markers.clear();
     polylineCoordinates.clear();
     polylines.clear();
     totalDistance = 0;
+
+    super.dispose();
   }
 
   Future<bool> onWillPopHandler() {
