@@ -1,4 +1,4 @@
-import 'package:location/location.dart';
+import 'package:location/location.dart' as loc;
 import 'dart:math';
 
 final mapService = MapService();
@@ -10,28 +10,28 @@ final mapService = MapService();
 //Permission granted, location disabled
 
 class MapService {
-  Future<LocationData?> tryGetCurrentLocation() async {
-    var status = await Location().hasPermission();
+  Future<loc.LocationData?> tryGetCurrentLocation() async {
+    var status = await loc.Location().hasPermission();
 
-    if (status == PermissionStatus.denied) {
-      var value = await Location().requestPermission();
+    if (status == loc.PermissionStatus.denied) {
+      var value = await loc.Location().requestPermission();
 
-      if (value == PermissionStatus.granted) {
-        var currentLocation = await Location().getLocation();
+      if (value == loc.PermissionStatus.granted) {
+        var currentLocation = await loc.Location().getLocation();
 
         return currentLocation;
       } else {
         return null;
       }
     } else {
-      var currentLocation = await Location().getLocation();
+      var currentLocation = await loc.Location().getLocation();
       return currentLocation;
     }
   }
 
   Future<bool> tryGetPermission() async {
-    var value = await Location().requestPermission();
-    if (value == PermissionStatus.granted) {
+    var value = await loc.Location().requestPermission();
+    if (value == loc.PermissionStatus.granted) {
       return true;
     }
     return false;

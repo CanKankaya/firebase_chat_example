@@ -6,7 +6,7 @@ import 'package:firebase_chat_example/services/map_service.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/custom_loading.dart';
 
-import 'package:firebase_chat_example/screens/map_screen.dart';
+import 'package:firebase_chat_example/screens/mapstuff/map_screen.dart';
 
 class MapDeniedScreen extends StatelessWidget {
   MapDeniedScreen({Key? key}) : super(key: key);

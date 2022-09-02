@@ -13,7 +13,7 @@ import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
-import 'package:firebase_chat_example/screens/map_screen.dart';
+import 'package:firebase_chat_example/screens/mapstuff/map_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);

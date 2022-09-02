@@ -1,7 +1,11 @@
+import 'dart:developer';
+
+import 'package:firebase_chat_example/screens/mapstuff/place_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_place/google_place.dart';
 
-import 'package:location/location.dart';
+import 'package:location/location.dart' as loc;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -11,8 +15,9 @@ import 'package:firebase_chat_example/services/map_service.dart';
 import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/expandable_fab.dart';
+import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 
-import 'package:firebase_chat_example/screens/map_denied_screen.dart';
+import 'package:firebase_chat_example/screens/mapstuff/map_denied_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -29,6 +34,7 @@ class _MapScreenState extends State<MapScreen> {
   var isTrafficEnabled = false;
   var isPageLoading = true;
   var isFindingRoute = false;
+  var isSearchMode = false;
   var selectedIndex = 1;
   var selectedTravelMode = TravelMode.driving;
 
@@ -72,7 +78,19 @@ class _MapScreenState extends State<MapScreen> {
         onWillPop: onWillPopHandler,
         child: Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(),
+          appBar: AppBar(
+            actions: [
+              CustomIconButton(
+                iconSize: 32,
+                icon: AnimatedIcons.search_ellipsis,
+                buttonFon: () {
+                  setState(() {
+                    isSearchMode = !isSearchMode;
+                  });
+                },
+              ),
+            ],
+          ),
           drawer: const AppDrawer(),
           body: Stack(
             children: [
@@ -237,6 +255,10 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                 ),
+              Positioned(
+                right: 0,
+                child: SearchSheet(isSearchMode: isSearchMode),
+              )
             ],
           ),
           floatingActionButton: ExpandableFab(
@@ -336,6 +358,7 @@ class _MapScreenState extends State<MapScreen> {
     centerScreen = const LatLng(40.9878681, 29.0367217);
     markerLocation = const LatLng(40.9878681, 29.0367217);
     //** */
+
     MapService().tryGetCurrentLocation().then((value) {
       if (value == null) {
         Navigator.pushReplacement(
@@ -348,8 +371,10 @@ class _MapScreenState extends State<MapScreen> {
 
       centerScreen = LatLng(value.latitude ?? 0, value.longitude ?? 0);
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        screenWidth = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
-        screenHeight = MediaQuery.of(context).size.height * MediaQuery.of(context).devicePixelRatio;
+        deviceWidth = MediaQuery.of(context).size.width;
+        deviceHeight = MediaQuery.of(context).size.height;
+        screenWidth = deviceWidth * MediaQuery.of(context).devicePixelRatio;
+        screenHeight = deviceHeight * MediaQuery.of(context).devicePixelRatio;
         middleX = (screenWidth / 2).round();
         middleY = ((screenHeight / 2) - 120).round();
         setState(() {
@@ -411,7 +436,7 @@ class _MapScreenState extends State<MapScreen> {
     polylines.clear();
 
     polylinePoints = PolylinePoints();
-    LocationData currentLocation = await Location().getLocation();
+    loc.LocationData currentLocation = await loc.Location().getLocation();
     double startLatitude = currentLocation.latitude ?? 0;
     double startLongitude = currentLocation.longitude ?? 0;
 
@@ -490,7 +515,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void mapButtonHandler() async {
     isTargetMode = false;
-    var currentLocation = await Location().getLocation();
+    var currentLocation = await loc.Location().getLocation();
 
     if (markers.isNotEmpty && !isFindingRoute) {
       if (polylines.isNotEmpty) {
@@ -569,7 +594,7 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     if (polylines.isNotEmpty) {
-      var currentLocation = await Location().getLocation();
+      var currentLocation = await loc.Location().getLocation();
       if (currentLocation.latitude == null ||
           currentLocation.latitude == 0 ||
           currentLocation.longitude == null ||
@@ -587,5 +612,146 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
     }
+  }
+}
+
+class SearchSheet extends StatefulWidget {
+  const SearchSheet({
+    Key? key,
+    required this.isSearchMode,
+  }) : super(key: key);
+
+  final bool isSearchMode;
+
+  @override
+  State<SearchSheet> createState() => _SearchSheetState();
+}
+
+class _SearchSheetState extends State<SearchSheet> {
+  final GooglePlace googlePlace = GooglePlace(googleMapsApiKey);
+  List<AutocompletePrediction> predictions = [];
+  var spamCheck = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(25),
+        ),
+        color: widget.isSearchMode ? Theme.of(context).secondaryHeaderColor : Colors.transparent,
+      ),
+      height: widget.isSearchMode ? 250 : 0,
+      width: deviceWidth,
+      child: Column(
+        children: [
+          if (widget.isSearchMode)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: "Search",
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.blue,
+                      width: 2.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black54,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    autoCompleteSearch(value);
+                  } else {
+                    if (predictions.isNotEmpty && mounted) {
+                      setState(() {
+                        predictions = [];
+                      });
+                    }
+                  }
+                },
+              ),
+            ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: ListView.builder(
+                itemCount: predictions.length,
+                itemBuilder: (context, i) {
+                  return ListTile(
+                    leading: Icon(
+                      Icons.pin_drop,
+                      color: widget.isSearchMode ? Colors.white : Colors.transparent,
+                    ),
+                    title: Text(
+                      predictions[i].description ?? 'No Description',
+                      style: TextStyle(
+                        color: widget.isSearchMode ? null : Colors.transparent,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.map,
+                        color: widget.isSearchMode ? Colors.white : Colors.transparent,
+                      ),
+                      onPressed: () {
+                        //TODO: close fab when opening search
+                        //TODO: carry isSearchMode and other map bools to mapService
+                        //TODO: close the search bar after click then,
+                        //TODO: add navigation to the location here
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PlaceDetailScreen(
+                            placeId: predictions[i].placeId ?? '',
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void autoCompleteSearch(String value) async {
+    if (spamCheck == false) {
+      var result = await googlePlace.autocomplete.get(value);
+      if (result != null && result.predictions != null && mounted) {
+        setState(() {
+          predictions = result.predictions as List<AutocompletePrediction>;
+        });
+      }
+      spamCheck = true;
+      Future.delayed(
+        const Duration(seconds: 2),
+        () async {
+          spamCheck = false;
+          var result = await googlePlace.autocomplete.get(value);
+          if (result != null && result.predictions != null && mounted) {
+            setState(() {
+              predictions = result.predictions as List<AutocompletePrediction>;
+            });
+          }
+        },
+      );
+    }
+  }
+
+  Future<void> navigateToLocation() async {
+    //TODO:
   }
 }

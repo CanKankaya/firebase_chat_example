@@ -5,6 +5,7 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:firebase_chat_example/services/audio_manager.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 
 //TODO: Try audio stuff here
 class AudioScreen extends StatefulWidget {
@@ -78,16 +79,14 @@ class _AudioScreenState extends State<AudioScreen> {
                                       child: const CircularProgressIndicator(),
                                     );
                                   case ButtonState.paused:
-                                    return IconButton(
-                                      icon: const Icon(Icons.play_arrow),
-                                      iconSize: 32.0,
-                                      onPressed: _audioManager.play,
+                                    return CustomIconButton(
+                                      iconSize: 32,
+                                      buttonFon: () => _audioManager.play(),
                                     );
                                   case ButtonState.playing:
-                                    return IconButton(
-                                      icon: const Icon(Icons.pause),
-                                      iconSize: 32.0,
-                                      onPressed: _audioManager.pause,
+                                    return CustomIconButton(
+                                      iconSize: 32,
+                                      buttonFon: () => _audioManager.pause(),
                                     );
                                 }
                               },
@@ -112,7 +111,6 @@ class _AudioScreenState extends State<AudioScreen> {
                         onPressed: value == ButtonState.loading
                             ? null
                             : () {
-                                //TODO: Reset player here
                                 _audioManager.pause();
                                 _audioManager.seek(Duration.zero);
                               },
@@ -138,7 +136,7 @@ class _AudioScreenState extends State<AudioScreen> {
                             : () {
                                 //TODO: Change url here
                                 _audioManager.changeUrl(
-                                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3');
+                                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
                               },
                         child: const Text('Change audio test'),
                       );

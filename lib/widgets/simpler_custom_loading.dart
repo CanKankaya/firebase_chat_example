@@ -12,10 +12,10 @@ class SimplerCustomLoader extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  SimplerCustomLoaderState createState() => SimplerCustomLoaderState();
+  State<SimplerCustomLoader> createState() => _SimplerCustomLoaderState();
 }
 
-class SimplerCustomLoaderState extends State<SimplerCustomLoader> with TickerProviderStateMixin {
+class _SimplerCustomLoaderState extends State<SimplerCustomLoader> with TickerProviderStateMixin {
   late Animation<double> animation1;
   late Animation<double> animation2;
 
