@@ -541,7 +541,7 @@ class TestClick extends StatelessWidget {
               ElevatedButton(
                 onPressed: () => spamCheckFunction(
                   duration: const Duration(milliseconds: 500),
-                  clickPosition: Offset(deviceWidth - 25, 50),
+                  clickPosition: Offset(deviceWidth / 2, deviceHeight / 2),
                 ),
                 child: const Text('Simulate Click'),
               ),
