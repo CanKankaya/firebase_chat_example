@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:firebase_chat_example/services/map_service.dart';
 import 'package:flutter/material.dart';
 
 @immutable
 class ExpandableFab extends StatefulWidget {
   const ExpandableFab({
     super.key,
-    this.initialOpen,
+    this.initialOpen = false,
     required this.distance,
     required this.smallDistance,
     required this.children,
@@ -14,7 +15,7 @@ class ExpandableFab extends StatefulWidget {
     this.alignment = Alignment.bottomLeft,
   });
 
-  final bool? initialOpen;
+  final bool initialOpen;
   final double distance;
   final double smallDistance;
   final List<ActionButton> children;
@@ -34,7 +35,11 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _open = widget.initialOpen ?? false;
+    if (widget.initialOpen) {
+      _open = true;
+      mapService.toggleFab();
+    }
+
     _controller = AnimationController(
       value: _open ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 600),
@@ -57,6 +62,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     setState(() {
       turns += 4.0 / 8.0;
       _open = !_open;
+      mapService.toggleFab();
       if (_open) {
         _controller.forward();
       } else {

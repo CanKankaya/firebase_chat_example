@@ -1,13 +1,10 @@
-import 'dart:developer';
-
-import 'package:firebase_chat_example/screens/mapstuff/place_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_place/google_place.dart';
 
 import 'package:location/location.dart' as loc;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_place/google_place.dart';
 
 import 'package:firebase_chat_example/constants.dart';
 import 'package:firebase_chat_example/services/map_service.dart';
@@ -17,7 +14,9 @@ import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/expandable_fab.dart';
 import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 
+import 'package:firebase_chat_example/screens/no_internet_screen.dart';
 import 'package:firebase_chat_example/screens/mapstuff/map_denied_screen.dart';
+import 'package:firebase_chat_example/screens/mapstuff/place_detail_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -35,8 +34,13 @@ class _MapScreenState extends State<MapScreen> {
   var isPageLoading = true;
   var isFindingRoute = false;
   var isSearchMode = false;
+  var spamClick = true;
+  var spamCheck = false;
   var selectedIndex = 1;
   var selectedTravelMode = TravelMode.driving;
+
+  final GooglePlace googlePlace = GooglePlace(googleMapsApiKey);
+  List<AutocompletePrediction> predictions = [];
 
   late LatLng centerScreen;
   late LatLng markerLocation;
@@ -52,7 +56,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     if (isPageLoading) {
       return WillPopScope(
-        onWillPop: onWillPopHandler,
+        onWillPop: _onWillPopHandler,
         child: Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(),
@@ -75,7 +79,7 @@ class _MapScreenState extends State<MapScreen> {
       );
     } else {
       return WillPopScope(
-        onWillPop: onWillPopHandler,
+        onWillPop: _onWillPopHandler,
         child: Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
@@ -83,11 +87,7 @@ class _MapScreenState extends State<MapScreen> {
               CustomIconButton(
                 iconSize: 32,
                 icon: AnimatedIcons.search_ellipsis,
-                buttonFon: () {
-                  setState(() {
-                    isSearchMode = !isSearchMode;
-                  });
-                },
+                buttonFon: _searchButtonHandler,
               ),
             ],
           ),
@@ -104,16 +104,9 @@ class _MapScreenState extends State<MapScreen> {
                 initialCameraPosition: CameraPosition(zoom: 14, target: centerScreen),
                 markers: Set<Marker>.of(markers.values),
                 polylines: Set<Polyline>.of(polylines.values),
-                onTap: (latLng) {
-                  //
-                },
-                onLongPress: (latLng) {
-                  markerLocation = latLng;
-                  _addMarker(latLng);
-                },
-                onCameraMove: (position) {
-                  //
-                },
+                onTap: null,
+                onLongPress: _mapOnLongPressHandler,
+                onCameraMove: null,
                 onCameraIdle: () async {
                   if (isTargetMode && flag) {
                     markerLocation = await mapController.getLatLng(
@@ -130,114 +123,7 @@ class _MapScreenState extends State<MapScreen> {
               Positioned(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 60.0, top: 8.0, bottom: 8.0, right: 60.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Material(
-                      color: Colors.black,
-                      child: AnimatedContainer(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        duration: const Duration(milliseconds: 500),
-                        width: double.infinity,
-                        height: polylines.isNotEmpty ? 80 : 0,
-                        child: Stack(
-                          children: [
-                            Align(
-                              alignment: Alignment.topCenter,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  'Total Distance: ${totalDistance.toStringAsFixed(2)} KM',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 19,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: AnimatedOpacity(
-                                duration: const Duration(milliseconds: 300),
-                                opacity: polylines.isNotEmpty ? 1.0 : 0.0,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      onPressed: selectedIndex == 0
-                                          ? null
-                                          : () {
-                                              onSelect(0);
-                                              _createPolylines(
-                                                markerLocation.latitude,
-                                                markerLocation.longitude,
-                                                context,
-                                              );
-                                            },
-                                      icon: Icon(
-                                        Icons.directions_bike,
-                                        color: selectedIndex == 0 ? Colors.amber : Colors.white,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: selectedIndex == 1
-                                          ? null
-                                          : () {
-                                              onSelect(1);
-                                              _createPolylines(
-                                                markerLocation.latitude,
-                                                markerLocation.longitude,
-                                                context,
-                                              );
-                                            },
-                                      icon: Icon(
-                                        Icons.directions_car,
-                                        color: selectedIndex == 1 ? Colors.amber : Colors.white,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: selectedIndex == 2
-                                          ? null
-                                          : () {
-                                              onSelect(2);
-                                              _createPolylines(
-                                                markerLocation.latitude,
-                                                markerLocation.longitude,
-                                                context,
-                                              );
-                                            },
-                                      icon: Icon(
-                                        Icons.directions_transit,
-                                        color: selectedIndex == 2 ? Colors.amber : Colors.white,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: selectedIndex == 3
-                                          ? null
-                                          : () {
-                                              onSelect(3);
-                                              _createPolylines(
-                                                markerLocation.latitude,
-                                                markerLocation.longitude,
-                                                context,
-                                              );
-                                            },
-                                      icon: Icon(
-                                        Icons.directions_walk,
-                                        color: selectedIndex == 3 ? Colors.amber : Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: _buildHeadWidget(context),
                 ),
               ),
               if (isTargetMode)
@@ -257,95 +143,11 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               Positioned(
                 right: 0,
-                child: SearchSheet(isSearchMode: isSearchMode),
-              )
-            ],
-          ),
-          floatingActionButton: ExpandableFab(
-            alignment: Alignment.bottomLeft,
-            distance: 140.0,
-            smallDistance: 80.0,
-            children: [
-              ActionButton(
-                isSmall: true,
-                onPressed: () async {
-                  setState(() {
-                    markers.clear();
-                    polylineCoordinates.clear();
-                    polylines.clear();
-                    Future.delayed(const Duration(milliseconds: 500)).then(
-                      (_) => totalDistance = 0,
-                    );
-                  });
-                },
-                backgroundColor: Colors.black,
-                icon: Icon(
-                  Icons.delete,
-                  color: markers.isNotEmpty ? Colors.amber : Colors.grey,
-                ),
-              ),
-              ActionButton(
-                onPressed: navigationButtonHandler,
-                backgroundColor: Colors.black,
-                icon: Icon(
-                  Icons.navigation,
-                  color: polylines.isNotEmpty ? Colors.amber : Colors.grey,
-                ),
-              ),
-              ActionButton(
-                onPressed: mapButtonHandler,
-                backgroundColor: Colors.black,
-                icon: isFindingRoute
-                    ? const SimplerCustomLoader()
-                    : Icon(
-                        Icons.map,
-                        color: markers.isNotEmpty ? Colors.amber : Colors.grey,
-                      ),
-              ),
-              ActionButton(
-                onPressed: () {
-                  setState(() {
-                    isTrafficEnabled = !isTrafficEnabled;
-                  });
-                },
-                backgroundColor: isTrafficEnabled ? Colors.blue : Colors.black,
-                icon: Icon(
-                  Icons.traffic,
-                  color: isTrafficEnabled ? Colors.black : Colors.amber,
-                ),
-              ),
-              ActionButton(
-                onPressed: () {
-                  setState(() {
-                    isTargetMode = !isTargetMode;
-                  });
-                },
-                backgroundColor: isTargetMode ? Colors.blue : Colors.black,
-                icon: Icon(
-                  Icons.control_point,
-                  color: isTargetMode ? Colors.black : Colors.amber,
-                ),
-              ),
-              ActionButton(
-                isSmall: true,
-                onPressed: () {},
-                backgroundColor: Colors.black,
-                icon: const Icon(
-                  Icons.construction,
-                  color: Colors.white,
-                ),
-              ),
-              ActionButton(
-                isSmall: true,
-                onPressed: () {},
-                backgroundColor: Colors.black,
-                icon: const Icon(
-                  Icons.construction,
-                  color: Colors.white,
-                ),
+                child: _buildSearchSheet(),
               ),
             ],
           ),
+          floatingActionButton: _buildExpandableFab(),
         ),
       );
     }
@@ -359,28 +161,40 @@ class _MapScreenState extends State<MapScreen> {
     markerLocation = const LatLng(40.9878681, 29.0367217);
     //** */
 
-    MapService().tryGetCurrentLocation().then((value) {
-      if (value == null) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MapDeniedScreen(),
-            ));
-        return;
-      }
+    mapService.checkInternet().then((value) {
+      if (value) {
+        mapService.tryGetCurrentLocation().then((value) {
+          if (value == null) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MapDeniedScreen(),
+                ));
+            return;
+          }
 
-      centerScreen = LatLng(value.latitude ?? 0, value.longitude ?? 0);
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        deviceWidth = MediaQuery.of(context).size.width;
-        deviceHeight = MediaQuery.of(context).size.height;
-        screenWidth = deviceWidth * MediaQuery.of(context).devicePixelRatio;
-        screenHeight = deviceHeight * MediaQuery.of(context).devicePixelRatio;
-        middleX = (screenWidth / 2).round();
-        middleY = ((screenHeight / 2) - 120).round();
-        setState(() {
-          isPageLoading = false;
+          centerScreen = LatLng(value.latitude ?? 0, value.longitude ?? 0);
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            deviceWidth = MediaQuery.of(context).size.width;
+            deviceHeight = MediaQuery.of(context).size.height;
+            screenWidth = deviceWidth * MediaQuery.of(context).devicePixelRatio;
+            screenHeight = deviceHeight * MediaQuery.of(context).devicePixelRatio;
+            middleX = (screenWidth / 2).round();
+            middleY = ((screenHeight / 2) - 120).round();
+            setState(() {
+              isPageLoading = false;
+            });
+          });
         });
-      });
+      } else {
+        //
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NoInternetScreen(),
+          ),
+        );
+      }
     });
   }
 
@@ -390,11 +204,12 @@ class _MapScreenState extends State<MapScreen> {
     polylineCoordinates.clear();
     polylines.clear();
     totalDistance = 0;
+    mapController.dispose();
 
     super.dispose();
   }
 
-  Future<bool> onWillPopHandler() {
+  Future<bool> _onWillPopHandler() {
     if (_scaffoldKey.currentState != null) {
       if (_scaffoldKey.currentState!.isDrawerOpen) {
         _scaffoldKey.currentState!.closeDrawer();
@@ -408,7 +223,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void onSelect(int index) {
+  void _onSelect(int index) {
     setState(() {
       selectedIndex = index;
     });
@@ -454,7 +269,7 @@ class _MapScreenState extends State<MapScreen> {
     }
     totalDistance = 0.0;
     for (var i = 0; i < polylineCoordinates.length - 1; i++) {
-      totalDistance += MapService().calculateDistance(
+      totalDistance += mapService.calculateDistance(
           polylineCoordinates[i].latitude,
           polylineCoordinates[i].longitude,
           polylineCoordinates[i + 1].latitude,
@@ -495,7 +310,7 @@ class _MapScreenState extends State<MapScreen> {
     polylines.clear();
     //
 
-    var markerIdVal = MapService().myWayToGenerateId();
+    var markerIdVal = mapService.myWayToGenerateId();
     final MarkerId markerId = MarkerId(markerIdVal);
 
     final Marker marker = Marker(
@@ -513,7 +328,12 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void mapButtonHandler() async {
+  void _mapButtonHandler() async {
+    if (isSearchMode) {
+      mapService.simulateClickFunction(
+        clickPosition: Offset(deviceWidth - 25, 50),
+      );
+    }
     isTargetMode = false;
     var currentLocation = await loc.Location().getLocation();
 
@@ -588,7 +408,12 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void navigationButtonHandler() async {
+  void _navigationButtonHandler() async {
+    if (isSearchMode) {
+      mapService.simulateClickFunction(
+        clickPosition: Offset(deviceWidth - 25, 50),
+      );
+    }
     setState(() {
       isTargetMode = false;
     });
@@ -613,121 +438,53 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
   }
-}
 
-class SearchSheet extends StatefulWidget {
-  const SearchSheet({
-    Key? key,
-    required this.isSearchMode,
-  }) : super(key: key);
-
-  final bool isSearchMode;
-
-  @override
-  State<SearchSheet> createState() => _SearchSheetState();
-}
-
-class _SearchSheetState extends State<SearchSheet> {
-  final GooglePlace googlePlace = GooglePlace(googleMapsApiKey);
-  List<AutocompletePrediction> predictions = [];
-  var spamCheck = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(25),
-        ),
-        color: widget.isSearchMode ? Theme.of(context).secondaryHeaderColor : Colors.transparent,
-      ),
-      height: widget.isSearchMode ? 250 : 0,
-      width: deviceWidth,
-      child: Column(
-        children: [
-          if (widget.isSearchMode)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: "Search",
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.black54,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                    autoCompleteSearch(value);
-                  } else {
-                    if (predictions.isNotEmpty && mounted) {
-                      setState(() {
-                        predictions = [];
-                      });
-                    }
-                  }
-                },
-              ),
-            ),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: ListView.builder(
-                itemCount: predictions.length,
-                itemBuilder: (context, i) {
-                  return ListTile(
-                    leading: Icon(
-                      Icons.pin_drop,
-                      color: widget.isSearchMode ? Colors.white : Colors.transparent,
-                    ),
-                    title: Text(
-                      predictions[i].description ?? 'No Description',
-                      style: TextStyle(
-                        color: widget.isSearchMode ? null : Colors.transparent,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        Icons.map,
-                        color: widget.isSearchMode ? Colors.white : Colors.transparent,
-                      ),
-                      onPressed: () {
-                        //TODO: close fab when opening search
-                        //TODO: carry isSearchMode and other map bools to mapService
-                        //TODO: close the search bar after click then,
-                        //TODO: add navigation to the location here
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlaceDetailScreen(
-                            placeId: predictions[i].placeId ?? '',
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _deleteButtonHandler() async {
+    setState(() {
+      markers.clear();
+      polylineCoordinates.clear();
+      polylines.clear();
+      Future.delayed(const Duration(milliseconds: 500)).then(
+        (_) => totalDistance = 0,
+      );
+    });
   }
 
-  void autoCompleteSearch(String value) async {
+  void _targetModeButtonHandler() {
+    if (isSearchMode) {
+      mapService.simulateClickFunction(
+        clickPosition: Offset(deviceWidth - 25, 50),
+      );
+    }
+
+    setState(() {
+      isTargetMode = !isTargetMode;
+    });
+  }
+
+  void _trafficButtonHandler() {
+    setState(() {
+      isTrafficEnabled = !isTrafficEnabled;
+    });
+  }
+
+  void _searchButtonHandler() {
+    setState(() {
+      isSearchMode = !isSearchMode;
+    });
+  }
+
+  void _mapOnLongPressHandler(LatLng latLng) {
+    if (isSearchMode) {
+      mapService.simulateClickFunction(
+        clickPosition: Offset(deviceWidth - 25, 50),
+      );
+    }
+    markerLocation = latLng;
+    _addMarker(latLng);
+  }
+
+  void _autoCompleteSearch(String value) async {
     if (spamCheck == false) {
       var result = await googlePlace.autocomplete.get(value);
       if (result != null && result.predictions != null && mounted) {
@@ -751,7 +508,274 @@ class _SearchSheetState extends State<SearchSheet> {
     }
   }
 
-  Future<void> navigateToLocation() async {
-    //TODO:
+  Widget _buildHeadWidget(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: Material(
+        color: Colors.black,
+        child: AnimatedContainer(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          duration: const Duration(milliseconds: 500),
+          width: double.infinity,
+          height: polylines.isNotEmpty ? 80 : 0,
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Total Distance: ${totalDistance.toStringAsFixed(2)} KM',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: polylines.isNotEmpty ? 1.0 : 0.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: selectedIndex == 0
+                            ? null
+                            : () {
+                                _onSelect(0);
+                                _createPolylines(
+                                  markerLocation.latitude,
+                                  markerLocation.longitude,
+                                  context,
+                                );
+                              },
+                        icon: Icon(
+                          Icons.directions_bike,
+                          color: selectedIndex == 0 ? Colors.amber : Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: selectedIndex == 1
+                            ? null
+                            : () {
+                                _onSelect(1);
+                                _createPolylines(
+                                  markerLocation.latitude,
+                                  markerLocation.longitude,
+                                  context,
+                                );
+                              },
+                        icon: Icon(
+                          Icons.directions_car,
+                          color: selectedIndex == 1 ? Colors.amber : Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: selectedIndex == 2
+                            ? null
+                            : () {
+                                _onSelect(2);
+                                _createPolylines(
+                                  markerLocation.latitude,
+                                  markerLocation.longitude,
+                                  context,
+                                );
+                              },
+                        icon: Icon(
+                          Icons.directions_transit,
+                          color: selectedIndex == 2 ? Colors.amber : Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: selectedIndex == 3
+                            ? null
+                            : () {
+                                _onSelect(3);
+                                _createPolylines(
+                                  markerLocation.latitude,
+                                  markerLocation.longitude,
+                                  context,
+                                );
+                              },
+                        icon: Icon(
+                          Icons.directions_walk,
+                          color: selectedIndex == 3 ? Colors.amber : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandableFab() {
+    return ExpandableFab(
+      alignment: Alignment.bottomLeft,
+      distance: 140.0,
+      smallDistance: 80.0,
+      children: [
+        ActionButton(
+          isSmall: true,
+          onPressed: _deleteButtonHandler,
+          backgroundColor: Colors.black,
+          icon: Icon(
+            Icons.delete,
+            color: markers.isNotEmpty ? Colors.amber : Colors.grey,
+          ),
+        ),
+        ActionButton(
+          onPressed: _navigationButtonHandler,
+          backgroundColor: Colors.black,
+          icon: Icon(
+            Icons.navigation,
+            color: polylines.isNotEmpty ? Colors.amber : Colors.grey,
+          ),
+        ),
+        ActionButton(
+          onPressed: _mapButtonHandler,
+          backgroundColor: Colors.black,
+          icon: isFindingRoute
+              ? const SimplerCustomLoader()
+              : Icon(
+                  Icons.map,
+                  color: markers.isNotEmpty ? Colors.amber : Colors.grey,
+                ),
+        ),
+        ActionButton(
+          onPressed: _trafficButtonHandler,
+          backgroundColor: isTrafficEnabled ? Colors.blue : Colors.black,
+          icon: Icon(
+            Icons.traffic,
+            color: isTrafficEnabled ? Colors.black : Colors.amber,
+          ),
+        ),
+        ActionButton(
+          onPressed: _targetModeButtonHandler,
+          backgroundColor: isTargetMode ? Colors.blue : Colors.black,
+          icon: Icon(
+            Icons.control_point,
+            color: isTargetMode ? Colors.black : Colors.amber,
+          ),
+        ),
+        ActionButton(
+          isSmall: true,
+          onPressed: () {},
+          backgroundColor: Colors.black,
+          icon: const Icon(
+            Icons.construction,
+            color: Colors.white,
+          ),
+        ),
+        ActionButton(
+          isSmall: true,
+          onPressed: () {},
+          backgroundColor: Colors.black,
+          icon: const Icon(
+            Icons.construction,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchSheet() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(25),
+        ),
+        color: isSearchMode ? Theme.of(context).secondaryHeaderColor : Colors.transparent,
+      ),
+      height: isSearchMode ? 250 : 0,
+      width: deviceWidth,
+      child: Column(
+        children: [
+          if (isSearchMode)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  labelText: "Search",
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.blue,
+                      width: 2.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black54,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    _autoCompleteSearch(value);
+                  } else {
+                    if (predictions.isNotEmpty && mounted) {
+                      setState(() {
+                        predictions = [];
+                      });
+                    }
+                  }
+                },
+              ),
+            ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: ListView.builder(
+                itemCount: predictions.length,
+                itemBuilder: (context, i) {
+                  return ListTile(
+                    leading: Icon(
+                      Icons.location_city,
+                      color: isSearchMode ? Colors.white : Colors.transparent,
+                    ),
+                    title: Text(
+                      predictions[i].description ?? 'No Description',
+                      style: TextStyle(
+                        color: isSearchMode ? null : Colors.transparent,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.pin_drop,
+                        color: isSearchMode ? Colors.amber : Colors.transparent,
+                      ),
+                      onPressed: () async {},
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PlaceDetailScreen(
+                            placeId: predictions[i].placeId ?? '',
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

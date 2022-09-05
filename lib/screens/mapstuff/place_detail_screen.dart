@@ -1,8 +1,9 @@
 import 'dart:typed_data';
-import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_place/google_place.dart';
+
+import 'package:firebase_chat_example/constants.dart';
 
 import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 

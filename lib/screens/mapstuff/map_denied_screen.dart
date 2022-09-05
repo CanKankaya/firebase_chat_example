@@ -18,6 +18,7 @@ class MapDeniedScreen extends StatelessWidget {
     return WillPopScope(
       onWillPop: onWillPopHandler,
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(),
         drawer: const AppDrawer(),
         body: Column(
