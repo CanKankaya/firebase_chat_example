@@ -1,5 +1,7 @@
-import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
+
+import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:firebase_chat_example/widgets/custom_loading.dart';
 
 class NoInternetScreen extends StatelessWidget {
   NoInternetScreen({Key? key}) : super(key: key);
@@ -14,7 +16,9 @@ class NoInternetScreen extends StatelessWidget {
       drawer: const AppDrawer(),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: const [
+            CustomLoader(),
             Text(
               'No Internet',
               style: TextStyle(fontSize: 20),

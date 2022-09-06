@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,10 +9,12 @@ import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/profile/profile_screen.dart';
 import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';
 import 'package:firebase_chat_example/screens/mapstuff/map_screen.dart';
+import 'package:firebase_chat_example/screens/search_bar_test_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -98,6 +99,19 @@ class AppDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => MapScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.build),
+                    title: const Text('SearchBar Test Page'),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchBarTestScreen(),
                         ),
                       );
                     },

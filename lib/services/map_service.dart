@@ -16,11 +16,11 @@ import 'package:firebase_chat_example/constants.dart';
 final mapService = MapService();
 
 //TODO: Check conditions below;
-//Permission not asked, location disabled
-//Permission denied already, location disabled
+//Permission not asked, location disabled (works fine)
+//Permission denied already, location disabled (works fine)
 //Permission granted, location enabled (works fine)
-//Permission granted, location disabled
-//Permission denied, location enabled/disabled
+//Permission granted, location disabled (works fine)
+//Permission denied, location enabled/disabled (works fine)
 
 class MapService with ChangeNotifier {
   var isFabOpen = false;
@@ -36,9 +36,6 @@ class MapService with ChangeNotifier {
   var selectedIndex = 1;
   var selectedTravelMode = TravelMode.driving;
 
-  //Can use completer like below, but it cant dispose, blows up when you re-enter screen
-  // late Completer<GoogleMapController> mapController = Completer();
-  //TODO: mapController not initialized error
   late GoogleMapController mapController;
   final GooglePlace googlePlace = GooglePlace(googleMapsApiKey);
 
@@ -403,7 +400,7 @@ class MapService with ChangeNotifier {
       spamCheck = true;
 
       Future.delayed(
-        const Duration(seconds: 2),
+        const Duration(seconds: 1),
         () async {
           spamCheck = false;
           var result = await googlePlace.autocomplete.get(value);
@@ -419,6 +416,18 @@ class MapService with ChangeNotifier {
   Future<bool> tryGetPermission() async {
     var value = await loc.Location().requestPermission();
     if (value == loc.PermissionStatus.granted) {
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> tryGetLocationService() async {
+    var isEnabled = await loc.Location().serviceEnabled();
+    if (isEnabled) {
+      return true;
+    }
+    var value = await loc.Location().requestService();
+    if (value) {
       return true;
     }
     return false;

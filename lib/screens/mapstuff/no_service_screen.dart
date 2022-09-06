@@ -8,8 +8,8 @@ import 'package:firebase_chat_example/widgets/custom_loading.dart';
 
 import 'package:firebase_chat_example/screens/mapstuff/map_screen.dart';
 
-class MapDeniedScreen extends StatelessWidget {
-  MapDeniedScreen({Key? key}) : super(key: key);
+class NoServiceScreen extends StatelessWidget {
+  NoServiceScreen({Key? key}) : super(key: key);
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -26,8 +26,7 @@ class MapDeniedScreen extends StatelessWidget {
             children: [
               const Spacer(),
               const Text(
-                'You denied me...\nJust like all the girls I ask out. haha :\') ',
-                textAlign: TextAlign.center,
+                'Location Service is Disabled',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -54,7 +53,7 @@ class MapDeniedScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () => _buttonHandler(context),
                 child: const Text(
-                  ('Try again...'),
+                  ('Enable location'),
                 ),
               )
             ],
@@ -65,7 +64,7 @@ class MapDeniedScreen extends StatelessWidget {
   }
 
   _buttonHandler(BuildContext context) async {
-    var boolValue = await mapService.tryGetPermission();
+    var boolValue = await mapService.tryGetLocationService();
     if (boolValue) {
       SchedulerBinding.instance.addPostFrameCallback(
         (_) {

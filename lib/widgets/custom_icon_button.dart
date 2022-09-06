@@ -27,16 +27,18 @@ class CustomIconButtonState extends State<CustomIconButton> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     return IconButton(
-        iconSize: widget.iconSize,
-        onPressed: () {
-          _handleOnPressed();
-          widget.buttonFon();
-        },
-        icon: AnimatedIcon(
-          icon: widget.icon,
-          progress: _animationController,
-          color: widget.iconColor,
-        ));
+      iconSize: widget.iconSize,
+      onPressed: () {
+        _handleOnPressed();
+        widget.buttonFon();
+      },
+      icon: AnimatedIcon(
+        icon: widget.icon,
+        progress: _animationController,
+        color: widget.iconColor,
+        size: 26,
+      ),
+    );
   }
 
   @override
