@@ -97,7 +97,7 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MapScreen(),
+                          builder: (context) => MapScreen(),
                         ),
                       );
                     },

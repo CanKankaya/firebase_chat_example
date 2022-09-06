@@ -1,7 +1,7 @@
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
 
 import 'package:firebase_chat_example/services/map_service.dart';
-import 'package:flutter/material.dart';
 
 @immutable
 class ExpandableFab extends StatefulWidget {
@@ -42,7 +42,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
 
     _controller = AnimationController(
       value: _open ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 650),
       vsync: this,
     );
     _expandAnimation = CurvedAnimation(
@@ -134,7 +134,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
       );
     }
 
-    step = 90.0 / (smallCount - 1);
+    step = widget.step / (smallCount - 1);
     for (var i = 0, angleInDegrees = 0.0; i < smallCount; i++, angleInDegrees += step) {
       children.add(
         _ExpandingActionButton(
@@ -158,18 +158,18 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           _open ? 0.7 : 1.0,
           1.0,
         ),
-        duration: const Duration(milliseconds: 600),
+        duration: const Duration(milliseconds: 650),
         curve: const Interval(0.0, 0.5, curve: Curves.linear),
         child: AnimatedOpacity(
           opacity: _open ? 1.0 : 1.0,
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
-          duration: const Duration(milliseconds: 600),
+          duration: const Duration(milliseconds: 650),
           child: FloatingActionButton(
             backgroundColor: Colors.lightBlue,
             onPressed: _toggle,
             child: AnimatedRotation(
               turns: turns,
-              duration: const Duration(milliseconds: 600),
+              duration: const Duration(milliseconds: 650),
               curve: Curves.elasticInOut,
               child: const Icon(
                 Icons.settings,

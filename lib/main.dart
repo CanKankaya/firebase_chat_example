@@ -1,8 +1,9 @@
-import 'package:firebase_chat_example/services/map_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
+import 'package:firebase_chat_example/services/map_service.dart';
 
 import 'package:firebase_chat_example/providers/add_participant_provider.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeModel>(
         builder: (context, ThemeModel themeNotifier, __) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Flutter Demo',
             theme: themeNotifier.isDark ? ThemeData.dark() : ThemeData.light(),
             home: AuthScreen(),
