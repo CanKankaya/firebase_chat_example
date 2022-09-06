@@ -1,10 +1,11 @@
-import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_chat_example/constants.dart';
 
 import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 import 'package:firebase_chat_example/widgets/app_drawer.dart';

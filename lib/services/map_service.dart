@@ -20,6 +20,7 @@ final mapService = MapService();
 //Permission denied already, location disabled
 //Permission granted, location enabled (works fine)
 //Permission granted, location disabled
+//Permission denied, location enabled/disabled
 
 class MapService with ChangeNotifier {
   var isFabOpen = false;
