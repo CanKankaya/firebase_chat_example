@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -17,9 +18,22 @@ class PublicChatsListScreen extends StatelessWidget {
   final currentUser = FirebaseAuth.instance.currentUser;
   final chatNameController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  static int _counter = 0;
 
   @override
   Widget build(BuildContext context) {
+    if (_counter == 0) {
+      _counter++;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        deviceWidth = MediaQuery.of(context).size.width;
+        deviceHeight = MediaQuery.of(context).size.height;
+        screenWidth = deviceWidth * MediaQuery.of(context).devicePixelRatio;
+        screenHeight = deviceHeight * MediaQuery.of(context).devicePixelRatio;
+        middleX = (screenWidth / 2).round();
+        middleY = ((screenHeight / 2) - 120).round();
+      });
+    }
+
     return WillPopScope(
       onWillPop: () => showExitPopup(context),
       child: GestureDetector(
