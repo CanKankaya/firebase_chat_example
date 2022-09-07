@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:firebase_chat_example/screens/search_bar_test_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -128,6 +129,17 @@ class TestHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchBarTestScreen(),
+              ),
+            );
+          },
+          child: const Text('Go to search bar test'),
+        ),
         Expanded(
           flex: 2,
           child: Padding(
