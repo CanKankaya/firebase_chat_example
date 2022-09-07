@@ -15,12 +15,13 @@ import 'package:firebase_chat_example/constants.dart';
 
 final mapService = MapService();
 
-//TODO: Check conditions below;
-//Permission not asked, location disabled (works fine)
-//Permission denied already, location disabled (works fine)
-//Permission granted, location enabled (works fine)
-//Permission granted, location disabled (works fine)
-//Permission denied, location enabled/disabled (works fine)
+//** INFO: Code in the map screen should be like this to initialize this service */
+//Consumer<MapService>(
+// builder: (_, map, __) => GoogleMap(
+//   onMapCreated: (controller) {
+//     map.mapController = controller;
+//   },
+//** */
 
 class MapService with ChangeNotifier {
   var isFabOpen = false;

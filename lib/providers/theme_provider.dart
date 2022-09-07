@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:firebase_chat_example/providers/theme_preference.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeModel extends ChangeNotifier {
   bool _isDark = false;
@@ -20,5 +20,19 @@ class ThemeModel extends ChangeNotifier {
   getPreferences() async {
     _isDark = await _preferences.getTheme();
     notifyListeners();
+  }
+}
+
+class ThemePreferences {
+  static const prefKey = "pref_key";
+
+  setTheme(bool value) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setBool(prefKey, value);
+  }
+
+  getTheme() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getBool(prefKey) ?? false;
   }
 }

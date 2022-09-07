@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:firebase_chat_example/screens/search_bar_test_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -14,6 +13,8 @@ import 'package:firebase_chat_example/widgets/exit_popup.dart';
 import 'package:firebase_chat_example/widgets/custom_loading.dart';
 import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:firebase_chat_example/widgets/expandable_fab.dart';
+
+import 'package:firebase_chat_example/screens/holacon_test_screen.dart';
 
 class TestScreen extends StatelessWidget {
   TestScreen({Key? key}) : super(key: key);
@@ -134,11 +135,11 @@ class TestHome extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SearchBarTestScreen(),
+                builder: (context) => HolaconTestScreen(),
               ),
             );
           },
-          child: const Text('Go to search bar test'),
+          child: const Text('Go to Holacon test screen'),
         ),
         Expanded(
           flex: 2,
@@ -574,7 +575,7 @@ class TestFab extends StatelessWidget {
       alignment: Alignment.bottomLeft,
       step: 90,
       distance: 80,
-      smallDistance: 30,
+      secondaryDistance: 30,
       children: [
         ActionButton(
           onPressed: () {

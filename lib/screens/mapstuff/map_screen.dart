@@ -44,158 +44,159 @@ class MapScreen extends StatelessWidget {
           return NoInternetScreen();
         }
         return FutureBuilder<bool>(
-            future: mapService.tryGetLocationService(),
-            builder: (context, serviceSnap) {
-              if (serviceSnap.connectionState == ConnectionState.waiting ||
-                  serviceSnap.connectionState == ConnectionState.none) {
-                return const Scaffold(
-                  body: Center(
-                    child: SimplerCustomLoader(),
-                  ),
-                );
-              }
-              if (!serviceSnap.data!) {
-                return NoServiceScreen();
-              }
-              return FutureBuilder<bool>(
-                future: mapService.tryGetPermission(),
-                builder: (_, permissionSnap) {
-                  if (permissionSnap.connectionState == ConnectionState.waiting ||
-                      permissionSnap.connectionState == ConnectionState.none) {
-                    return const Scaffold(
-                      body: Center(
-                        child: SimplerCustomLoader(),
-                      ),
-                    );
-                  }
-                  if (!permissionSnap.data!) {
-                    return MapDeniedScreen();
-                  }
-                  return FutureBuilder<LatLng?>(
-                    future: initFunction(context),
-                    builder: (_, futureSnap) {
-                      if (futureSnap.connectionState == ConnectionState.waiting ||
-                          futureSnap.connectionState == ConnectionState.none) {
-                        return WillPopScope(
-                          onWillPop: _onWillPopHandler,
-                          child: Scaffold(
-                            resizeToAvoidBottomInset: false,
-                            appBar: AppBar(),
-                            drawer: const AppDrawer(),
-                            body: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  SimplerCustomLoader(),
-                                  Text(
-                                    'Finding your location...',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      var currentLocation = futureSnap.data;
-
+          future: mapService.tryGetLocationService(),
+          builder: (context, serviceSnap) {
+            if (serviceSnap.connectionState == ConnectionState.waiting ||
+                serviceSnap.connectionState == ConnectionState.none) {
+              return const Scaffold(
+                body: Center(
+                  child: SimplerCustomLoader(),
+                ),
+              );
+            }
+            if (!serviceSnap.data!) {
+              return NoServiceScreen();
+            }
+            return FutureBuilder<bool>(
+              future: mapService.tryGetPermission(),
+              builder: (_, permissionSnap) {
+                if (permissionSnap.connectionState == ConnectionState.waiting ||
+                    permissionSnap.connectionState == ConnectionState.none) {
+                  return const Scaffold(
+                    body: Center(
+                      child: SimplerCustomLoader(),
+                    ),
+                  );
+                }
+                if (!permissionSnap.data!) {
+                  return MapDeniedScreen();
+                }
+                return FutureBuilder<LatLng?>(
+                  future: initFunction(context),
+                  builder: (_, futureSnap) {
+                    if (futureSnap.connectionState == ConnectionState.waiting ||
+                        futureSnap.connectionState == ConnectionState.none) {
                       return WillPopScope(
                         onWillPop: _onWillPopHandler,
                         child: Scaffold(
                           resizeToAvoidBottomInset: false,
-                          key: _scaffoldKey,
-                          appBar: AppBar(
-                            actions: [
-                              Consumer<MapService>(
-                                builder: (_, map, __) => CustomIconButton(
-                                  iconSize: 32,
-                                  icon: AnimatedIcons.search_ellipsis,
-                                  buttonFon: map.searchButtonHandler,
-                                ),
-                              ),
-                            ],
-                          ),
+                          appBar: AppBar(),
                           drawer: const AppDrawer(),
-                          body: Stack(
-                            children: [
-                              Consumer<MapService>(
-                                builder: (_, map, __) => GoogleMap(
-                                  onMapCreated: (controller) {
-                                    map.mapController = controller;
-                                  },
-                                  trafficEnabled: map.isTrafficEnabled,
-                                  myLocationEnabled: true,
-                                  mapToolbarEnabled: false,
-                                  buildingsEnabled: false,
-                                  compassEnabled: true,
-                                  initialCameraPosition: CameraPosition(
-                                      zoom: 14, target: currentLocation ?? map.centerScreen),
-                                  markers: Set<Marker>.of(map.markers.values),
-                                  polylines: Set<Polyline>.of(map.polylines.values),
-                                  onTap: null,
-                                  onLongPress: map.mapOnLongPressHandler,
-                                  onCameraMove: null,
-                                  onCameraIdle: () async {
-                                    if (map.isTargetMode && map.flag) {
-                                      map.markerLocation = await map.mapController.getLatLng(
-                                        ScreenCoordinate(
-                                          x: middleX,
-                                          y: middleY,
-                                        ),
-                                      );
-                                      map.addMarker(map.markerLocation);
-                                    }
-                                  },
-                                ),
-                              ),
-                              Positioned(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 60.0, top: 8.0, bottom: 8.0, right: 60.0),
-                                  child: _buildHeadWidget(context),
-                                ),
-                              ),
-                              Consumer<MapService>(
-                                builder: (_, map, __) => IgnorePointer(
-                                  ignoring: true,
-                                  child: map.isTargetMode
-                                      ? Container(
-                                          color: Colors.lightBlue.withOpacity(0.1),
-                                          child: Center(
-                                            child: Theme(
-                                              data: ThemeData.light(),
-                                              child: const Icon(
-                                                Icons.control_point,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : Container(),
-                                ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                child: _buildSearchSheet(context),
-                              ),
-                            ],
+                          body: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                SimplerCustomLoader(),
+                                Text(
+                                  'Finding your location...',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                          floatingActionButton: _buildExpandableFab(context),
                         ),
                       );
-                    },
-                  );
-                },
-              );
-            });
+                    }
+
+                    var currentLocation = futureSnap.data;
+
+                    return WillPopScope(
+                      onWillPop: _onWillPopHandler,
+                      child: Scaffold(
+                        resizeToAvoidBottomInset: false,
+                        key: _scaffoldKey,
+                        appBar: AppBar(
+                          actions: [
+                            Consumer<MapService>(
+                              builder: (_, map, __) => CustomIconButton(
+                                iconSize: 32,
+                                icon: AnimatedIcons.search_ellipsis,
+                                buttonFon: map.searchButtonHandler,
+                              ),
+                            ),
+                          ],
+                        ),
+                        drawer: const AppDrawer(),
+                        body: Stack(
+                          children: [
+                            Consumer<MapService>(
+                              builder: (_, map, __) => GoogleMap(
+                                onMapCreated: (controller) {
+                                  map.mapController = controller;
+                                },
+                                trafficEnabled: map.isTrafficEnabled,
+                                myLocationEnabled: true,
+                                mapToolbarEnabled: false,
+                                buildingsEnabled: false,
+                                compassEnabled: true,
+                                initialCameraPosition: CameraPosition(
+                                    zoom: 14, target: currentLocation ?? map.centerScreen),
+                                markers: Set<Marker>.of(map.markers.values),
+                                polylines: Set<Polyline>.of(map.polylines.values),
+                                onTap: null,
+                                onLongPress: map.mapOnLongPressHandler,
+                                onCameraMove: null,
+                                onCameraIdle: () async {
+                                  if (map.isTargetMode && map.flag) {
+                                    map.markerLocation = await map.mapController.getLatLng(
+                                      ScreenCoordinate(
+                                        x: middleX,
+                                        y: middleY,
+                                      ),
+                                    );
+                                    map.addMarker(map.markerLocation);
+                                  }
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 60.0, top: 8.0, bottom: 8.0, right: 60.0),
+                                child: _buildHeadWidget(context),
+                              ),
+                            ),
+                            Consumer<MapService>(
+                              builder: (_, map, __) => IgnorePointer(
+                                ignoring: true,
+                                child: map.isTargetMode
+                                    ? Container(
+                                        color: Colors.lightBlue.withOpacity(0.1),
+                                        child: Center(
+                                          child: Theme(
+                                            data: ThemeData.light(),
+                                            child: const Icon(
+                                              Icons.control_point,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                              ),
+                            ),
+                            Positioned(
+                              right: 0,
+                              child: _buildSearchSheet(context),
+                            ),
+                          ],
+                        ),
+                        floatingActionButton: _buildExpandableFab(context),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
       },
     );
   }
 
-//TODO: extract checks outside, run the futurebuilder AFTER all the checks
+//TODO: extract checks outside, run the futurebuilder AFTER all the local checks
   Future<LatLng?> initFunction(BuildContext context) async {
     log('init future ran');
 
@@ -350,7 +351,7 @@ class MapScreen extends StatelessWidget {
       builder: (_, map, __) => ExpandableFab(
         alignment: Alignment.bottomLeft,
         distance: 140.0,
-        smallDistance: 80.0,
+        secondaryDistance: 80.0,
         children: [
           ActionButton(
             isSmall: true,

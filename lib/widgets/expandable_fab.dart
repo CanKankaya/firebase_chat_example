@@ -9,7 +9,7 @@ class ExpandableFab extends StatefulWidget {
     super.key,
     this.initialOpen = false,
     required this.distance,
-    required this.smallDistance,
+    required this.secondaryDistance,
     required this.children,
     this.step = 90,
     this.alignment = Alignment.bottomLeft,
@@ -17,7 +17,7 @@ class ExpandableFab extends StatefulWidget {
 
   final bool initialOpen;
   final double distance;
-  final double smallDistance;
+  final double secondaryDistance;
   final List<ActionButton> children;
   final double step;
   final Alignment alignment;
@@ -139,7 +139,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
       children.add(
         _ExpandingActionButton(
           directionInDegrees: angleInDegrees,
-          maxDistance: widget.smallDistance,
+          maxDistance: widget.secondaryDistance,
           progress: _expandAnimation,
           child: smallList[i],
         ),

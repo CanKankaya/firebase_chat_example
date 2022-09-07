@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class SearchBarTestScreen extends StatelessWidget {
-  SearchBarTestScreen({Key? key}) : super(key: key);
+class HolaconTestScreen extends StatelessWidget {
+  HolaconTestScreen({Key? key}) : super(key: key);
 
   final _isSearchMode = ValueNotifier<bool>(false);
   final _searchBarController = TextEditingController();
   final focusNode = FocusNode();
 
-  // bu deviceWidth geçici atama
+  //TODO:bu deviceWidth ve deviceHeight geçici atama
   final deviceWidth = 360.0;
   final deviceHeight = 640.0;
 
@@ -19,8 +20,23 @@ class SearchBarTestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar(context),
-      body: const Center(
-        child: CircularProgressIndicator(),
+      body: Center(
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet<dynamic>(
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (context) => customCodeBottomSheet(context),
+                );
+              },
+              child: const Text('Etkinlik aktifleştir bottom sheet'),
+            ),
+            const CircularProgressIndicator(),
+          ],
+        ),
       ),
     );
   }
@@ -130,6 +146,7 @@ class SearchBarTestScreen extends StatelessWidget {
                       onPressed: () {
                         // Filtre button fonksiyonu
                         showModalBottomSheet<dynamic>(
+                          backgroundColor: Colors.transparent,
                           isScrollControlled: true,
                           context: context,
                           builder: (context) => customBottomSheet(context),
@@ -159,6 +176,7 @@ class SearchBarTestScreen extends StatelessWidget {
         ),
         child: Container(
           decoration: const BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),
@@ -200,6 +218,7 @@ class SearchBarTestScreen extends StatelessWidget {
                 height: 0.8,
               ),
               Form(
+                //TODO: add formkey to validate page
                 child: Expanded(
                   child: ListView(
                     children: [
@@ -221,6 +240,7 @@ class SearchBarTestScreen extends StatelessWidget {
                               ),
                               child: TextFormField(
                                 decoration: const InputDecoration(
+                                  hintText: '...',
                                   suffixIcon: Icon(
                                     Icons.search,
                                     color: Colors.grey,
@@ -374,7 +394,7 @@ class SearchBarTestScreen extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.lightBlue,
+                                primary: Colors.blueGrey,
                               ),
                               child: const Text(
                                 'Filtrele',
@@ -412,4 +432,172 @@ class SearchBarTestScreen extends StatelessWidget {
           ),
         ),
       );
+
+  Widget customCodeBottomSheet(BuildContext context) => ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
+          ),
+          height: deviceHeight - 100,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                      size: 26,
+                    ),
+                    iconSize: 12,
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Etkinlik Aktifleştir',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(width: 40)
+                ],
+              ),
+              const Divider(
+                color: Colors.grey,
+                height: 0.8,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                      ),
+                    ],
+                    color: Colors.blueGrey,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: const Icon(
+                    Icons.key,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'E-posta ya da SMS yolu ile tarafınıza ulaştırılan voucher içerisinde bulunan 12 haneli aktivasyon kodunuzu buraya girerek etkinliği hesabınızda aktifleştirebiliriniz.',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10.0),
+                child: Container(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 0.8,
+                    ),
+                  ),
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    maxLength: 13,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      CustomTextFormatter(sample: '######-######', seperator: '-'),
+                      FilteringTextInputFormatter.allow(RegExp('[0-9-]')),
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: '###### - ######',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                      ),
+                      counterText: '',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: Theme(
+                      data: ThemeData.light(),
+                      child: ElevatedButton(
+                        //TODO: onpressed
+                        onPressed: null,
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.blueGrey,
+                        ),
+                        child: const Text(
+                          'Katıl',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+}
+
+class CustomTextFormatter extends TextInputFormatter {
+  final String sample;
+  final String seperator;
+
+  CustomTextFormatter({
+    required this.sample,
+    required this.seperator,
+  });
+
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isNotEmpty) {
+      if (newValue.text.length > oldValue.text.length) {
+        if (newValue.text.length > sample.length) {
+          return oldValue;
+        }
+        if (newValue.text.length < sample.length && sample[newValue.text.length - 1] == seperator) {
+          return TextEditingValue(
+            text: '${oldValue.text}$seperator${newValue.text.substring(newValue.text.length - 1)}',
+            selection: TextSelection.collapsed(offset: newValue.selection.end + 1),
+          );
+        }
+      }
+    }
+    return newValue;
+  }
 }
