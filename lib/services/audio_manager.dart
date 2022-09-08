@@ -61,11 +61,13 @@ class AudioManager {
   }
 
   void play(int index) {
+    isPlaying = true;
     _audioPlayer.play();
     lastActiveIndex.value = index;
   }
 
   void pause() {
+    isPlaying = false;
     _audioPlayer.pause();
   }
 

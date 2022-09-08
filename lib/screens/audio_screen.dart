@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
@@ -6,6 +5,7 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:firebase_chat_example/services/audio_manager.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 
 import 'package:firebase_chat_example/screens/mapstuff/no_internet_screen.dart';
 
@@ -78,8 +78,12 @@ class _AudioScreenState extends State<AudioScreen> {
                             onPressed: value == ButtonState.loading
                                 ? null
                                 : () {
-                                    _audioManager.dispose();
-                                    _audioManager.init();
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const AudioScreen(),
+                                      ),
+                                    );
                                   },
                             child: const Text('Reset audio test'),
                           );
@@ -143,6 +147,7 @@ class CustomPlayer extends StatelessWidget {
   final int index;
   final String url;
 
+//TODO: save the last progress location and use it later
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -181,14 +186,11 @@ class CustomPlayer extends StatelessWidget {
                                       position: position,
                                       urlToChange: url,
                                     );
-                                    if (audioManager.isPlaying) {
-                                      audioManager.initIcon.value = false;
-                                    } else {
-                                      audioManager.initIcon.value = true;
-                                    }
+                                    audioManager.isPlaying
+                                        ? audioManager.initIcon.value = false
+                                        : audioManager.initIcon.value = true;
                                   }
                                 : (position) async {
-                                    audioManager.isPlaying = true;
                                     await audioManager.changeUrl(url, index);
                                     audioManager.play(index);
                                     audioManager.seek(
@@ -206,10 +208,10 @@ class CustomPlayer extends StatelessWidget {
                       ),
                       ValueListenableBuilder<bool>(
                         valueListenable: audioManager.initIcon,
-                        builder: (context, initValue, __) {
+                        builder: (_, initValue, __) {
                           return ValueListenableBuilder<int>(
                             valueListenable: audioManager.lastActiveIndex,
-                            builder: (context, indexValue, __) {
+                            builder: (_, indexValue, __) {
                               return ValueListenableBuilder<ButtonState>(
                                 valueListenable: audioManager.buttonNotifier,
                                 builder: (_, value, __) {
@@ -225,11 +227,9 @@ class CustomPlayer extends StatelessWidget {
                                                 : AnimatedIcons.pause_play,
                                             buttonFon: audioManager.isPlaying
                                                 ? () {
-                                                    audioManager.isPlaying = false;
                                                     audioManager.pause();
                                                   }
                                                 : () async {
-                                                    audioManager.isPlaying = true;
                                                     audioManager.play(index);
                                                   },
                                           );
@@ -244,7 +244,6 @@ class CustomPlayer extends StatelessWidget {
                                       case ButtonState.paused:
                                         return IconButton(
                                           onPressed: () async {
-                                            audioManager.isPlaying = true;
                                             await audioManager.changeUrl(url, index);
                                             audioManager.play(index);
                                           },
@@ -255,7 +254,6 @@ class CustomPlayer extends StatelessWidget {
                                       case ButtonState.playing:
                                         return IconButton(
                                           onPressed: () async {
-                                            audioManager.isPlaying = true;
                                             await audioManager.changeUrl(url, index);
                                             audioManager.play(index);
                                           },

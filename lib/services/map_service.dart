@@ -141,10 +141,11 @@ class MapService with ChangeNotifier {
     totalDistance = 0.0;
     for (var i = 0; i < polylineCoordinates.length - 1; i++) {
       totalDistance += calculateDistance(
-          polylineCoordinates[i].latitude,
-          polylineCoordinates[i].longitude,
-          polylineCoordinates[i + 1].latitude,
-          polylineCoordinates[i + 1].longitude);
+        polylineCoordinates[i].latitude,
+        polylineCoordinates[i].longitude,
+        polylineCoordinates[i + 1].latitude,
+        polylineCoordinates[i + 1].longitude,
+      );
     }
     if (totalDistance == 0.0) {
       SchedulerBinding.instance.addPostFrameCallback((_) {

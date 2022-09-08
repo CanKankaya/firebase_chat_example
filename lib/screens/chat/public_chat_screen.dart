@@ -185,6 +185,7 @@ class Messages extends StatelessWidget {
                       );
                     }
                   },
+                  //TODO: convert this to generated list inside column aswell
                   child: ValueListenableBuilder(
                     valueListenable: _itemCount,
                     builder: (_, int itemCountValue, __) {
