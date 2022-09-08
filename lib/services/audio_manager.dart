@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -49,7 +48,6 @@ class AudioManager {
     lastActiveIndex = index;
 
     if (url == newUrl) {
-      log('did nothing because Url is the same');
     } else {
       buttonNotifier.value = ButtonState.loading;
       await _audioPlayer.pause();
@@ -80,7 +78,6 @@ class AudioManager {
   Future<Duration> getDuration(String url) async {
     var tempPlayer = AudioPlayer();
     await tempPlayer.setUrl(url);
-    log(tempPlayer.duration.toString());
     var duration = tempPlayer.duration ?? Duration.zero;
     tempPlayer.dispose();
     return duration;
@@ -112,7 +109,6 @@ class AudioManager {
       isInitializing = true;
       await _audioPlayer.setUrl(url);
       isInitializing = false;
-      log('CurrentUrl; \n $url');
 
       _audioPlayer.playerStateStream.listen((playerState) {
         final isPlaying = playerState.playing;
@@ -158,9 +154,8 @@ class AudioManager {
       });
       buttonNotifier.value = ButtonState.paused;
     } catch (e) {
-      //
-      log('error occurred in audio init');
-      log(e.toString());
+      //TODO: error handling here
+
     }
   }
 }

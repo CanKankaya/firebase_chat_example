@@ -26,6 +26,8 @@ class PublicChatsListScreen extends StatelessWidget {
     if (_counter == 0) {
       _counter++;
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        //INFO: this is the first screen of the app so deviceData initialization is done here
+        //_counter is to make sure this function only runs when you first enter this screen
         deviceWidth = MediaQuery.of(context).size.width;
         deviceHeight = MediaQuery.of(context).size.height;
         screenWidth = deviceWidth * MediaQuery.of(context).devicePixelRatio;

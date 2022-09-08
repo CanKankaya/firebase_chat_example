@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -70,19 +68,6 @@ class _AudioScreenState extends State<AudioScreen> {
                         ).toList(),
                       ),
                     ),
-                    // child: ListView.separated(
-                    //   padding: const EdgeInsets.all(16),
-                    //   itemCount: urls.length,
-                    //   separatorBuilder: (context, index) => const Divider(
-                    //     color: Colors.amber,
-                    //     thickness: 1,
-                    //   ),
-                    //   itemBuilder: (context, index) => CustomPlayer(
-                    //     audioManager: _audioManager,
-                    //     index: index,
-                    //     url: urls[index],
-                    //   ),
-                    // ),
                   ),
                   Row(
                     children: [
@@ -202,136 +187,136 @@ class CustomPlayer extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               child: FutureBuilder<Duration>(
-                  future: audioManager.getDuration(url),
-                  builder: (context, futureValue) {
-                    return Column(
-                      children: [
-                        ValueListenableBuilder<ProgressBarState>(
-                          valueListenable: audioManager.progressNotifier,
-                          builder: (_, value, __) {
-                            return ProgressBar(
-                              progress: audioManager.lastActiveIndex == index
-                                  ? value.current
-                                  : Duration.zero,
-                              buffered: audioManager.lastActiveIndex == index
-                                  ? value.buffered
-                                  : Duration.zero,
-                              total: futureValue.data ?? Duration.zero,
-                              onSeek: audioManager.lastActiveIndex == index
-                                  ? (position) => audioManager.seek(
-                                        index: index,
-                                        position: position,
-                                        urlToChange: url,
-                                      )
-                                  : (position) async {
-                                      audioManager.isPlaying = true;
-                                      await audioManager.changeUrl(url, index);
-                                      audioManager.play(index);
-                                      audioManager.seek(
-                                        index: index,
-                                        position: position,
-                                        urlToChange: url,
+                future: audioManager.getDuration(url),
+                builder: (context, futureValue) {
+                  return Column(
+                    children: [
+                      ValueListenableBuilder<ProgressBarState>(
+                        valueListenable: audioManager.progressNotifier,
+                        builder: (_, value, __) {
+                          return ProgressBar(
+                            progress: audioManager.lastActiveIndex == index
+                                ? value.current
+                                : Duration.zero,
+                            buffered: audioManager.lastActiveIndex == index
+                                ? value.buffered
+                                : Duration.zero,
+                            total: futureValue.data ?? Duration.zero,
+                            onSeek: audioManager.lastActiveIndex == index
+                                ? (position) => audioManager.seek(
+                                      index: index,
+                                      position: position,
+                                      urlToChange: url,
+                                    )
+                                : (position) async {
+                                    audioManager.isPlaying = true;
+                                    await audioManager.changeUrl(url, index);
+                                    audioManager.play(index);
+                                    audioManager.seek(
+                                      index: index,
+                                      position: position,
+                                      urlToChange: url,
+                                    );
+                                    SchedulerBinding.instance.addPostFrameCallback((_) {
+                                      ScaffoldMessenger.of(context).clearSnackBars();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(audioManager.lastActiveIndex.toString()),
+                                        ),
                                       );
-                                      SchedulerBinding.instance.addPostFrameCallback((_) {
-                                        ScaffoldMessenger.of(context).clearSnackBars();
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(audioManager.lastActiveIndex.toString()),
-                                          ),
-                                        );
-                                      });
-                                    },
-                              progressBarColor: Colors.amber,
-                              thumbColor: Colors.amber,
-                              baseBarColor: Colors.grey[800],
-                              bufferedBarColor: Colors.grey,
-                            );
-                          },
-                        ),
-                        ValueListenableBuilder<ButtonState>(
-                          valueListenable: audioManager.buttonNotifier,
-                          builder: (_, value, __) {
-                            switch (value) {
-                              case ButtonState.loading:
-                                if (audioManager.lastActiveIndex == index) {
-                                  return Container(
-                                    margin: const EdgeInsets.all(8.0),
-                                    width: 32.0,
-                                    height: 32.0,
-                                    child: const CircularProgressIndicator(),
-                                  );
-                                } else {
-                                  return IconButton(
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.play_arrow_rounded),
-                                    iconSize: 32,
-                                  );
-                                }
-                              case ButtonState.paused:
+                                    });
+                                  },
+                            progressBarColor: Colors.amber,
+                            thumbColor: Colors.amber,
+                            baseBarColor: Colors.grey[800],
+                            bufferedBarColor: Colors.grey,
+                          );
+                        },
+                      ),
+                      ValueListenableBuilder<ButtonState>(
+                        valueListenable: audioManager.buttonNotifier,
+                        builder: (_, value, __) {
+                          switch (value) {
+                            case ButtonState.loading:
+                              if (audioManager.lastActiveIndex == index) {
+                                return Container(
+                                  margin: const EdgeInsets.all(8.0),
+                                  width: 32.0,
+                                  height: 32.0,
+                                  child: const CircularProgressIndicator(),
+                                );
+                              } else {
                                 return IconButton(
+                                  onPressed: () {},
                                   icon: const Icon(Icons.play_arrow_rounded),
                                   iconSize: 32,
-                                  onPressed: audioManager.isPlaying &&
-                                          audioManager.lastActiveIndex != index
-                                      ? () {
+                                );
+                              }
+                            case ButtonState.paused:
+                              return IconButton(
+                                icon: const Icon(Icons.play_arrow_rounded),
+                                iconSize: 32,
+                                onPressed:
+                                    audioManager.isPlaying && audioManager.lastActiveIndex != index
+                                        ? () {
+                                            ScaffoldMessenger.of(context).clearSnackBars();
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Did nothing'),
+                                              ),
+                                            );
+                                          }
+                                        : () async {
+                                            //TODO:
+                                            audioManager.isPlaying = true;
+                                            await audioManager.changeUrl(url, index);
+                                            audioManager.play(index);
+                                            SchedulerBinding.instance.addPostFrameCallback((_) {
+                                              ScaffoldMessenger.of(context).clearSnackBars();
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content:
+                                                      Text(audioManager.lastActiveIndex.toString()),
+                                                ),
+                                              );
+                                            });
+                                          },
+                              );
+                            case ButtonState.playing:
+                              return audioManager.isPlaying && audioManager.lastActiveIndex != index
+                                  ? IconButton(
+                                      icon: const Icon(Icons.play_arrow_rounded),
+                                      iconSize: 32,
+                                      onPressed: () async {
+                                        audioManager.isPlaying = true;
+                                        await audioManager.changeUrl(url, index);
+                                        audioManager.play(index);
+                                        SchedulerBinding.instance.addPostFrameCallback((_) {
                                           ScaffoldMessenger.of(context).clearSnackBars();
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Did nothing'),
+                                            SnackBar(
+                                              content:
+                                                  Text(audioManager.lastActiveIndex.toString()),
                                             ),
                                           );
-                                        }
-                                      : () async {
-                                          //TODO:
-                                          audioManager.isPlaying = true;
-                                          await audioManager.changeUrl(url, index);
-                                          audioManager.play(index);
-                                          SchedulerBinding.instance.addPostFrameCallback((_) {
-                                            ScaffoldMessenger.of(context).clearSnackBars();
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content:
-                                                    Text(audioManager.lastActiveIndex.toString()),
-                                              ),
-                                            );
-                                          });
-                                        },
-                                );
-                              case ButtonState.playing:
-                                return audioManager.isPlaying &&
-                                        audioManager.lastActiveIndex != index
-                                    ? IconButton(
-                                        icon: const Icon(Icons.play_arrow_rounded),
-                                        iconSize: 32,
-                                        onPressed: () async {
-                                          audioManager.isPlaying = true;
-                                          await audioManager.changeUrl(url, index);
-                                          audioManager.play(index);
-                                          SchedulerBinding.instance.addPostFrameCallback((_) {
-                                            ScaffoldMessenger.of(context).clearSnackBars();
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content:
-                                                    Text(audioManager.lastActiveIndex.toString()),
-                                              ),
-                                            );
-                                          });
-                                        })
-                                    : IconButton(
-                                        icon: const Icon(Icons.pause),
-                                        iconSize: 32,
-                                        onPressed: () {
-                                          //TODO:
-                                          audioManager.isPlaying = false;
-                                          audioManager.pause();
-                                        },
-                                      );
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  }),
+                                        });
+                                      })
+                                  : IconButton(
+                                      icon: const Icon(Icons.pause),
+                                      iconSize: 32,
+                                      onPressed: () {
+                                        //TODO:
+                                        audioManager.isPlaying = false;
+                                        audioManager.pause();
+                                      },
+                                    );
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

@@ -12,6 +12,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 
 import 'package:firebase_chat_example/constants.dart';
+//INFO: get the deviceData on application startup and set them in a constants page for later use
+//DONT use mediaquery in later stages of the app
 
 final mapService = MapService();
 

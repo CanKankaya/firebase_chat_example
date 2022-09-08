@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -304,7 +305,6 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
     Offset tapPosition = const Offset(0.0, 0.0);
 
     return Dismissible(
@@ -442,7 +442,7 @@ class MessageWidget extends StatelessWidget {
                 alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                 child: Container(
                   constraints: BoxConstraints(
-                    maxWidth: deviceSize.width * 0.65,
+                    maxWidth: deviceWidth * 0.65,
                   ),
                   margin: const EdgeInsets.only(
                     top: 16,
@@ -507,7 +507,7 @@ class MessageWidget extends StatelessWidget {
                         if (isMe) const SizedBox(width: 20),
                         Container(
                           constraints: BoxConstraints(
-                            maxWidth: deviceSize.width * 0.65,
+                            maxWidth: deviceWidth * 0.65,
                           ),
                           decoration: BoxDecoration(
                             border: Border.all(
