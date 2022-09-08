@@ -107,7 +107,9 @@ class ChatItem extends StatelessWidget {
         }
         //**index dependant logic here */
         DateTime dt = (individualChatData?['lastUpdated'] as Timestamp).toDate();
-        String formattedDate = DateFormat.yMMMMd().format(dt);
+        String formattedDate = dt.day == DateTime.now().day
+            ? DateFormat.Hm().format(dt)
+            : DateFormat.yMMMMd().format(dt);
         String lastMessage = individualChatData?['lastMessage'] == ''
             ? '"This Chat is Empty"'
             : individualChatData?['lastMessage'];
@@ -127,89 +129,97 @@ class ChatItem extends StatelessWidget {
             }
             final DocumentSnapshot<Object?>? otherUserData = otherUserDataSnapshot.data;
 
-            return InkWell(
-              splashColor: Colors.amber,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => PrivateChatScreen(
-                        chatId: individualChatData?.id ?? '', otherUser: otherUserData),
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: MaterialButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                  side: const BorderSide(
+                    color: Colors.teal,
+                    width: 2.0,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                color: Colors.grey[800],
+                splashColor: Colors.amber,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => PrivateChatScreen(
+                          chatId: individualChatData?.id ?? '', otherUser: otherUserData),
+                    ),
+                  );
+                },
                 child: Container(
-                  height: 70,
                   decoration: BoxDecoration(
-                    color: Colors.grey[800],
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: Colors.amber,
-                            ),
-                            borderRadius: BorderRadius.circular(25),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 2,
+                            color: Colors.amber,
                           ),
-                          child: CircleAvatar(
-                            radius: 23,
-                            backgroundImage: NetworkImage(
-                              otherUserData?['userImageUrl'] ?? '',
-                            ),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: CircleAvatar(
+                          radius: 23,
+                          backgroundImage: NetworkImage(
+                            otherUserData?['userImageUrl'] ?? '',
                           ),
                         ),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            otherUserData?['username'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              if (!chatEmpty)
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                //
+                                Expanded(
+                                  child: Text(
+                                    otherUserData?['username'] ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                                  ),
+                                ),
                                 Text(
-                                  isLastSenderYou
-                                      ? 'You: '
-                                      : '${otherUserData?['username'] ?? ''}: ',
-                                  style: const TextStyle(color: Colors.white),
+                                  formattedDate,
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                                 ),
-                              Text(
-                                lastMessage,
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            RichText(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: chatEmpty
+                                        ? ''
+                                        : isLastSenderYou
+                                            ? 'You: '
+                                            : '${individualChatData?['lastSender']}: ',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: lastMessage,
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          formattedDate,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

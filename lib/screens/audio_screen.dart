@@ -1,3 +1,4 @@
+import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -65,7 +66,7 @@ class _AudioScreenState extends State<AudioScreen> {
                             index: index,
                             url: urls[index],
                           ),
-                        ).toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -106,7 +107,7 @@ class _AudioScreenState extends State<AudioScreen> {
                                   : () {
                                       //TODO: Change url here
                                       _audioManager.changeUrl(
-                                        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+                                        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
                                         0,
                                       );
                                     },
@@ -195,19 +196,26 @@ class CustomPlayer extends StatelessWidget {
                         valueListenable: audioManager.progressNotifier,
                         builder: (_, value, __) {
                           return ProgressBar(
-                            progress: audioManager.lastActiveIndex == index
+                            progress: audioManager.lastActiveIndex.value == index
                                 ? value.current
                                 : Duration.zero,
-                            buffered: audioManager.lastActiveIndex == index
+                            buffered: audioManager.lastActiveIndex.value == index
                                 ? value.buffered
                                 : Duration.zero,
                             total: futureValue.data ?? Duration.zero,
-                            onSeek: audioManager.lastActiveIndex == index
-                                ? (position) => audioManager.seek(
+                            onSeek: audioManager.lastActiveIndex.value == index
+                                ? (position) {
+                                    audioManager.seek(
                                       index: index,
                                       position: position,
                                       urlToChange: url,
-                                    )
+                                    );
+                                    if (audioManager.isPlaying) {
+                                      audioManager.initIcon.value = false;
+                                    } else {
+                                      audioManager.initIcon.value = true;
+                                    }
+                                  }
                                 : (position) async {
                                     audioManager.isPlaying = true;
                                     await audioManager.changeUrl(url, index);
@@ -217,6 +225,7 @@ class CustomPlayer extends StatelessWidget {
                                       position: position,
                                       urlToChange: url,
                                     );
+
                                     SchedulerBinding.instance.addPostFrameCallback((_) {
                                       ScaffoldMessenger.of(context).clearSnackBars();
                                       ScaffoldMessenger.of(context).showSnackBar(
@@ -233,86 +242,103 @@ class CustomPlayer extends StatelessWidget {
                           );
                         },
                       ),
-                      ValueListenableBuilder<ButtonState>(
-                        valueListenable: audioManager.buttonNotifier,
-                        builder: (_, value, __) {
-                          switch (value) {
-                            case ButtonState.loading:
-                              if (audioManager.lastActiveIndex == index) {
-                                return Container(
-                                  margin: const EdgeInsets.all(8.0),
-                                  width: 32.0,
-                                  height: 32.0,
-                                  child: const CircularProgressIndicator(),
-                                );
-                              } else {
-                                return IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.play_arrow_rounded),
-                                  iconSize: 32,
-                                );
-                              }
-                            case ButtonState.paused:
-                              return IconButton(
-                                icon: const Icon(Icons.play_arrow_rounded),
-                                iconSize: 32,
-                                onPressed:
-                                    audioManager.isPlaying && audioManager.lastActiveIndex != index
-                                        ? () {
-                                            ScaffoldMessenger.of(context).clearSnackBars();
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Did nothing'),
-                                              ),
-                                            );
-                                          }
-                                        : () async {
-                                            //TODO:
-                                            audioManager.isPlaying = true;
-                                            await audioManager.changeUrl(url, index);
-                                            audioManager.play(index);
-                                            SchedulerBinding.instance.addPostFrameCallback((_) {
-                                              ScaffoldMessenger.of(context).clearSnackBars();
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content:
-                                                      Text(audioManager.lastActiveIndex.toString()),
-                                                ),
+                      ValueListenableBuilder<bool>(
+                          valueListenable: audioManager.initIcon,
+                          builder: (context, initValue, __) {
+                            return ValueListenableBuilder<int>(
+                                valueListenable: audioManager.lastActiveIndex,
+                                builder: (context, indexValue, __) {
+                                  return ValueListenableBuilder<ButtonState>(
+                                    valueListenable: audioManager.buttonNotifier,
+                                    builder: (_, value, __) {
+                                      if (audioManager.lastActiveIndex.value == index) {
+                                        return value == ButtonState.loading
+                                            ? const Padding(
+                                                padding: EdgeInsets.all(6.0),
+                                                child: CircularProgressIndicator(),
+                                              )
+                                            : CustomIconButton(
+                                                icon: initValue
+                                                    ? AnimatedIcons.play_pause
+                                                    : AnimatedIcons.pause_play,
+                                                buttonFon: audioManager.isPlaying
+                                                    ? () {
+                                                        audioManager.isPlaying = false;
+                                                        audioManager.pause();
+                                                      }
+                                                    : () async {
+                                                        audioManager.isPlaying = true;
+                                                        audioManager.play(index);
+                                                        SchedulerBinding.instance
+                                                            .addPostFrameCallback((_) {
+                                                          ScaffoldMessenger.of(context)
+                                                              .clearSnackBars();
+                                                          ScaffoldMessenger.of(context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(audioManager
+                                                                  .lastActiveIndex.value
+                                                                  .toString()),
+                                                            ),
+                                                          );
+                                                        });
+                                                      },
                                               );
-                                            });
-                                          },
-                              );
-                            case ButtonState.playing:
-                              return audioManager.isPlaying && audioManager.lastActiveIndex != index
-                                  ? IconButton(
-                                      icon: const Icon(Icons.play_arrow_rounded),
-                                      iconSize: 32,
-                                      onPressed: () async {
-                                        audioManager.isPlaying = true;
-                                        await audioManager.changeUrl(url, index);
-                                        audioManager.play(index);
-                                        SchedulerBinding.instance.addPostFrameCallback((_) {
-                                          ScaffoldMessenger.of(context).clearSnackBars();
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content:
-                                                  Text(audioManager.lastActiveIndex.toString()),
-                                            ),
-                                          );
-                                        });
-                                      })
-                                  : IconButton(
-                                      icon: const Icon(Icons.pause),
-                                      iconSize: 32,
-                                      onPressed: () {
-                                        //TODO:
-                                        audioManager.isPlaying = false;
-                                        audioManager.pause();
-                                      },
-                                    );
-                          }
-                        },
-                      ),
+                                      } else {
+                                        switch (value) {
+                                          case ButtonState.loading:
+                                            return IconButton(
+                                              onPressed: () {},
+                                              icon: const Icon(Icons.play_arrow),
+                                              iconSize: 24,
+                                            );
+                                          case ButtonState.paused:
+                                            return IconButton(
+                                              onPressed: () async {
+                                                audioManager.isPlaying = true;
+                                                await audioManager.changeUrl(url, index);
+                                                audioManager.play(index);
+                                                SchedulerBinding.instance.addPostFrameCallback((_) {
+                                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(audioManager
+                                                          .lastActiveIndex.value
+                                                          .toString()),
+                                                    ),
+                                                  );
+                                                });
+                                              },
+                                              icon: const Icon(Icons.play_arrow),
+                                              iconSize: 24,
+                                            );
+
+                                          case ButtonState.playing:
+                                            return IconButton(
+                                              onPressed: () async {
+                                                audioManager.isPlaying = true;
+                                                await audioManager.changeUrl(url, index);
+                                                audioManager.play(index);
+                                                SchedulerBinding.instance.addPostFrameCallback((_) {
+                                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(audioManager
+                                                          .lastActiveIndex.value
+                                                          .toString()),
+                                                    ),
+                                                  );
+                                                });
+                                              },
+                                              icon: const Icon(Icons.play_arrow),
+                                              iconSize: 24,
+                                            );
+                                        }
+                                      }
+                                    },
+                                  );
+                                });
+                          }),
                     ],
                   );
                 },

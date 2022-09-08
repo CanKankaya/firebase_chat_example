@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
             title: 'Flutter Demo',
             theme: themeNotifier.isDark ? ThemeData.dark() : ThemeData.light(),
             home: AuthScreen(),
+            //TODO: add a proper home screen, navigate user from there
           );
         },
       ),

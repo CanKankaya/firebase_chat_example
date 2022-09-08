@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +8,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:firebase_chat_example/constants.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/chat/private_chat_participants.dart';
-import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/chat/private_chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
 
 class PrivateChatScreen extends StatelessWidget {
@@ -226,9 +226,10 @@ class PrivateChatScreen extends StatelessWidget {
                             body: Column(
                               children: [
                                 Messages(
-                                    chatId: chatId,
-                                    participantsData: participantsData,
-                                    usersData: usersData),
+                                  chatId: chatId,
+                                  participantsData: participantsData,
+                                  usersData: usersData,
+                                ),
                                 const ReplyWidget(),
                                 NewMessageWidget(chatId: chatId),
                               ],
@@ -310,59 +311,63 @@ class Messages extends StatelessWidget {
             child: ValueListenableBuilder(
               valueListenable: _itemCount,
               builder: (_, int itemCountValue, __) {
-                return ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: scrollController,
-                  reverse: true,
-                  itemCount: (documents?.length ?? 0) > itemCountValue
-                      ? itemCountValue
-                      : (documents?.length ?? 0),
-                  itemBuilder: (context, index) {
-                    //** Index dependant logic here */
-                    final currentMessage = documents?[index];
-                    bool isMe = currentMessage?['userId'] == currentUser?.uid;
-                    final whichUser = usersData?.firstWhere(
-                      (element) => element.id == currentMessage?['userId'],
-                    );
+                return SizedBox.expand(
+                  child: SingleChildScrollView(
+                    reverse: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: List.generate(
+                        (documents?.length ?? 0) > itemCountValue
+                            ? itemCountValue
+                            : (documents?.length ?? 0),
+                        (index) {
+                          final currentMessage = documents?[index];
+                          bool isMe = currentMessage?['userId'] == currentUser?.uid;
+                          final whichUser = usersData?.firstWhere(
+                            (element) => element.id == currentMessage?['userId'],
+                          );
 
-                    DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
-                    String formattedDate = dt.day == DateTime.now().day
-                        ? DateFormat.Hm().format(dt)
-                        : DateFormat.yMMMMd().format(dt);
-                    //** */
+                          DateTime dt = (currentMessage?['createdAt'] as Timestamp).toDate();
+                          String formattedDate = dt.day == DateTime.now().day
+                              ? DateFormat.Hm().format(dt)
+                              : DateFormat.yMMMMd().format(dt);
+                          //** */
 
-                    //** Reply dependant logic here */
-                    final isReply = currentMessage?['repliedTo'] != '';
-                    QueryDocumentSnapshot<Object?>? repliedToMessage;
-                    QueryDocumentSnapshot<Object?>? repliedToUser;
+                          //** Reply dependant logic here */
+                          final isReply = currentMessage?['repliedTo'] != '';
+                          QueryDocumentSnapshot<Object?>? repliedToMessage;
+                          QueryDocumentSnapshot<Object?>? repliedToUser;
 
-                    if (isReply) {
-                      repliedToMessage = documents?.firstWhereOrNull(
-                        (QueryDocumentSnapshot<Object?>? element) =>
-                            element?.id == currentMessage?['repliedTo'],
-                      );
-                      if (repliedToMessage != null) {
-                        repliedToUser = usersData?.firstWhereOrNull(
-                          (element) => element.id == repliedToMessage?['userId'],
-                        );
-                      }
-                    }
-                    final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
-                    final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
-                    //** */
-                    return MessageWidget(
-                      chatId: chatId,
-                      isMe: isMe,
-                      whichUser: whichUser,
-                      formattedDate: formattedDate,
-                      currentMessage: currentMessage,
-                      isReply: isReply,
-                      repliedToMessage: repliedToMessage,
-                      repliedToUser: repliedToUser,
-                      isReplyToCurrentUser: isReplyToCurrentUser,
-                      isReplyToSelf: isReplyToSelf,
-                    );
-                  },
+                          if (isReply) {
+                            repliedToMessage = documents?.firstWhereOrNull(
+                              (QueryDocumentSnapshot<Object?>? element) =>
+                                  element?.id == currentMessage?['repliedTo'],
+                            );
+                            if (repliedToMessage != null) {
+                              repliedToUser = usersData?.firstWhereOrNull(
+                                (element) => element.id == repliedToMessage?['userId'],
+                              );
+                            }
+                          }
+                          final isReplyToCurrentUser = currentUser?.uid == repliedToUser?['userId'];
+                          final isReplyToSelf = currentMessage?['userId'] == currentUser?.uid;
+                          //** */
+                          return MessageWidget(
+                            chatId: chatId,
+                            isMe: isMe,
+                            whichUser: whichUser,
+                            formattedDate: formattedDate,
+                            currentMessage: currentMessage,
+                            isReply: isReply,
+                            repliedToMessage: repliedToMessage,
+                            repliedToUser: repliedToUser,
+                            isReplyToCurrentUser: isReplyToCurrentUser,
+                            isReplyToSelf: isReplyToSelf,
+                          );
+                        },
+                      ).reversed.toList(),
+                    ),
+                  ),
                 );
               },
             ),

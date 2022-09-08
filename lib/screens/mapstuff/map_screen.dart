@@ -100,7 +100,6 @@ class MapScreen extends StatelessWidget {
                         ),
                       );
                     }
-
                     var currentLocation = futureSnap.data;
 
                     return WillPopScope(

@@ -1,4 +1,3 @@
-import 'package:firebase_chat_example/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:firebase_chat_example/constants.dart';
 import 'package:firebase_chat_example/providers/reply_provider.dart';
 
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';

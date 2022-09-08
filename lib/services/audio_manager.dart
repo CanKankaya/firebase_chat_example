@@ -21,6 +21,7 @@ enum ButtonState {
   loading,
 }
 
+//Example audio URL
 var url = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
 class AudioManager {
@@ -32,12 +33,11 @@ class AudioManager {
     ),
   );
   final buttonNotifier = ValueNotifier<ButtonState>(ButtonState.paused);
-
-//Example audio URL
+  final lastActiveIndex = ValueNotifier<int>(0);
+  final initIcon = ValueNotifier<bool>(true);
 
   late AudioPlayer _audioPlayer;
   bool isInitializing = false;
-  var lastActiveIndex = 0;
   bool isPlaying = false;
 
   AudioManager() {
@@ -45,10 +45,11 @@ class AudioManager {
   }
 
   Future<void> changeUrl(String newUrl, int index) async {
-    lastActiveIndex = index;
+    lastActiveIndex.value = index;
 
     if (url == newUrl) {
     } else {
+      initIcon.value = false;
       buttonNotifier.value = ButtonState.loading;
       await _audioPlayer.pause();
       await _audioPlayer.seek(Duration.zero);
@@ -61,7 +62,7 @@ class AudioManager {
 
   void play(int index) {
     _audioPlayer.play();
-    lastActiveIndex = index;
+    lastActiveIndex.value = index;
   }
 
   void pause() {
@@ -69,7 +70,7 @@ class AudioManager {
   }
 
   void seek({required Duration position, required int index, required String urlToChange}) {
-    if (lastActiveIndex != index) {
+    if (lastActiveIndex.value != index) {
       changeUrl(urlToChange, index);
     }
     _audioPlayer.seek(position);
@@ -99,6 +100,7 @@ class AudioManager {
   void dispose() {
     if (!isInitializing) {
       _audioPlayer.dispose();
+      initIcon.value = true;
     }
   }
 

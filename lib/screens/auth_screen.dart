@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_chat_example/widgets/exit_popup.dart';
 
 import 'package:firebase_chat_example/screens/splash_screen.dart';
-import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/chat/public_chats_list_screen.dart';
 
 class AuthScreen extends StatelessWidget {
   AuthScreen({Key? key}) : super(key: key);
@@ -248,47 +248,47 @@ class AuthScreen extends StatelessWidget {
                                                   }),
                                               if (!isLoginValue)
                                                 ValueListenableBuilder(
-                                                    valueListenable: _hideConfirmPassword,
-                                                    builder: (context, bool confirmPassValue, __) {
-                                                      return TextFormField(
-                                                        key: const ValueKey('confirmPassword'),
-                                                        enabled: !isLoginValue,
-                                                        onSaved: (newValue) {
-                                                          userPassword = newValue;
-                                                        },
-                                                        maxLength: 30,
-                                                        obscureText: confirmPassValue,
-                                                        validator: (value) {
-                                                          if (value == null ||
-                                                              value.isEmpty ||
-                                                              value.length < 8 ||
-                                                              value !=
-                                                                  _userPasswordController.text) {
-                                                            return 'Passwords do not match';
-                                                          } else {
-                                                            return null;
-                                                          }
-                                                        },
-                                                        decoration: InputDecoration(
-                                                          labelText: 'Confirm Password',
-                                                          suffixIcon: IconButton(
-                                                            onPressed: () {
-                                                              _hideConfirmPassword.value =
-                                                                  !_hideConfirmPassword.value;
-                                                            },
-                                                            icon: confirmPassValue
-                                                                ? const Icon(
-                                                                    Icons.visibility_off,
-                                                                    color: Colors.grey,
-                                                                  )
-                                                                : const Icon(
-                                                                    Icons.visibility,
-                                                                    color: Colors.blue,
-                                                                  ),
-                                                          ),
+                                                  valueListenable: _hideConfirmPassword,
+                                                  builder: (context, bool confirmPassValue, __) {
+                                                    return TextFormField(
+                                                      key: const ValueKey('confirmPassword'),
+                                                      enabled: !isLoginValue,
+                                                      onSaved: (newValue) {
+                                                        userPassword = newValue;
+                                                      },
+                                                      maxLength: 30,
+                                                      obscureText: confirmPassValue,
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty ||
+                                                            value.length < 8 ||
+                                                            value != _userPasswordController.text) {
+                                                          return 'Passwords do not match';
+                                                        } else {
+                                                          return null;
+                                                        }
+                                                      },
+                                                      decoration: InputDecoration(
+                                                        labelText: 'Confirm Password',
+                                                        suffixIcon: IconButton(
+                                                          onPressed: () {
+                                                            _hideConfirmPassword.value =
+                                                                !_hideConfirmPassword.value;
+                                                          },
+                                                          icon: confirmPassValue
+                                                              ? const Icon(
+                                                                  Icons.visibility_off,
+                                                                  color: Colors.grey,
+                                                                )
+                                                              : const Icon(
+                                                                  Icons.visibility,
+                                                                  color: Colors.blue,
+                                                                ),
                                                         ),
-                                                      );
-                                                    }),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
                                               const SizedBox(height: 12),
                                               loadingValue
                                                   ? const CircularProgressIndicator()

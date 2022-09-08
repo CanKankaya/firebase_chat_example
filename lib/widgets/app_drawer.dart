@@ -8,8 +8,8 @@ import 'package:firebase_chat_example/providers/theme_provider.dart';
 import 'package:firebase_chat_example/widgets/alert_dialog.dart';
 
 import 'package:firebase_chat_example/screens/profile/profile_screen.dart';
-import 'package:firebase_chat_example/screens/public_chats_list_screen.dart';
-import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/chat/public_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/chat/private_chats_list_screen.dart';
 import 'package:firebase_chat_example/screens/audio_screen.dart';
 import 'package:firebase_chat_example/screens/auth_screen.dart';
 import 'package:firebase_chat_example/screens/test_screen.dart';

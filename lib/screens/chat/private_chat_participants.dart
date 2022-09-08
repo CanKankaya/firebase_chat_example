@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_chat_example/widgets/simpler_error_message.dart';
 
 import 'package:firebase_chat_example/screens/other_user/other_userdata_screen.dart';
-import 'package:firebase_chat_example/screens/private_chats_list_screen.dart';
+import 'package:firebase_chat_example/screens/chat/private_chats_list_screen.dart';
 
 class PrivateChatParticipantsScreen extends StatelessWidget {
   final String chatId;

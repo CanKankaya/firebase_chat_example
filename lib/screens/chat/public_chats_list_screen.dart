@@ -113,7 +113,6 @@ class PublicChatsListScreen extends StatelessWidget {
   Future<void> tryAddNewChat(BuildContext context) async {
     if (formKey.currentState!.validate()) {
       try {
-        Navigator.pop(context);
         final String generatedId = DateTime.now().microsecondsSinceEpoch.toString();
 
         await FirebaseFirestore.instance.collection('chats').doc(generatedId).set({
@@ -133,6 +132,7 @@ class PublicChatsListScreen extends StatelessWidget {
         });
         chatNameController.text = '';
         SchedulerBinding.instance.addPostFrameCallback((_) {
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Yeyy, added a new chat'),
@@ -209,7 +209,10 @@ class ChatItem extends StatelessWidget {
         }
         //**index dependant logic here */
         DateTime dt = (individualChatData?['lastUpdated'] as Timestamp).toDate();
-        String formattedDate = DateFormat.yMMMMd().format(dt);
+        String formattedDate = dt.day == DateTime.now().day
+            ? DateFormat.Hm().format(dt)
+            : DateFormat.yMMMMd().format(dt);
+
         final participantsData = participantsSnapshot.data?.docs;
         int index =
             participantsData?.map((e) => e.id).toList().indexOf(currentUser?.uid ?? '') ?? -1;
@@ -222,95 +225,101 @@ class ChatItem extends StatelessWidget {
 
         //** */
 
-        return InkWell(
-          splashColor: Colors.amber,
-          onTap: () {
-            if (userBelongs) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PublicChatScreen(
-                    chatId: individualChatData?.id ?? '',
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: MaterialButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.0),
+              side: BorderSide(
+                color: userBelongs ? Colors.teal : Colors.red,
+                width: 2.0,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            color: Colors.grey[800],
+            highlightColor: userBelongs ? Colors.teal.withOpacity(0.3) : Colors.red,
+            splashColor: userBelongs ? Colors.teal : Colors.red,
+            onPressed: () {
+              if (userBelongs) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PublicChatScreen(
+                      chatId: individualChatData?.id ?? '',
+                    ),
                   ),
-                ),
-              );
-            } else {
-              simplerErrorMessage(
-                context,
-                'You Shall Not Pass!',
-                '',
-                null,
-                true,
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
+                );
+              } else {
+                simplerErrorMessage(
+                  context,
+                  'You Shall Not Pass!',
+                  '',
+                  null,
+                  true,
+                );
+              }
+            },
             child: Container(
-              height: 70,
               decoration: BoxDecoration(
-                color: Colors.grey[800],
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Icon(
-                        Icons.people,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
+                  const Icon(
+                    Icons.people,
+                    size: 40,
+                    color: Colors.white,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
+                  const SizedBox(width: 5),
+                  Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          individualChatData?['chatName'] ?? '',
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 5),
                         Row(
                           children: [
-                            if (!chatEmpty)
-                              Text(
-                                isLastSenderYou
-                                    ? 'You: '
-                                    : '${individualChatData?['lastSender']}: ',
-                                style: const TextStyle(color: Colors.white),
+                            //
+                            Expanded(
+                              child: Text(
+                                individualChatData?['chatName'] ?? '',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: const TextStyle(color: Colors.white, fontSize: 18),
                               ),
+                            ),
                             Text(
-                              lastMessage,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
+                              formattedDate,
+                              style: const TextStyle(color: Colors.grey, fontSize: 12),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        RichText(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: chatEmpty
+                                    ? ''
+                                    : isLastSenderYou
+                                        ? 'You: '
+                                        : '${individualChatData?['lastSender']}: ',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: lastMessage,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      formattedDate,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                  )
                 ],
               ),
             ),
