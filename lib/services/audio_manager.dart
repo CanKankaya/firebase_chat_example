@@ -37,6 +37,8 @@ class AudioManager {
 
   late AudioPlayer _audioPlayer;
   bool isInitializing = false;
+  var lastActiveIndex = 0;
+  bool isPlaying = false;
 
   AudioManager() {
     init();
@@ -46,24 +48,39 @@ class AudioManager {
     if (url == newUrl) {
       log('did nothing because Url is the same');
     } else {
-      _audioPlayer.pause();
-      _audioPlayer.seek(Duration.zero);
-      _audioPlayer.dispose();
+      buttonNotifier.value = ButtonState.loading;
+      await _audioPlayer.pause();
+      await _audioPlayer.seek(Duration.zero);
+      await _audioPlayer.dispose();
       url = newUrl;
       await init();
+      buttonNotifier.value = ButtonState.paused;
     }
   }
 
-  void play() {
+  void play(int index) {
     _audioPlayer.play();
+    lastActiveIndex = index;
   }
 
   void pause() {
     _audioPlayer.pause();
   }
 
-  void seek(Duration position) {
+  void seek({required Duration position, required int index, required String urlToChange}) {
+    if (lastActiveIndex != index) {
+      changeUrl(urlToChange);
+    }
     _audioPlayer.seek(position);
+  }
+
+  Future<Duration> getDuration(String url) async {
+    var tempPlayer = AudioPlayer();
+    await tempPlayer.setUrl(url);
+    log(tempPlayer.duration.toString());
+    var duration = tempPlayer.duration ?? Duration.zero;
+    tempPlayer.dispose();
+    return duration;
   }
 
   void dispose() {
@@ -74,7 +91,6 @@ class AudioManager {
 
   Future<void> init() async {
     try {
-      //
       buttonNotifier.value = ButtonState.loading;
       _audioPlayer = AudioPlayer();
       isInitializing = true;
