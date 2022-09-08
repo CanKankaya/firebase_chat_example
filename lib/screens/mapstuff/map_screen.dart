@@ -354,7 +354,7 @@ class MapScreen extends StatelessWidget {
         secondaryDistance: 80.0,
         children: [
           ActionButton(
-            isSmall: true,
+            isSecondary: true,
             onPressed: map.deleteButtonHandler,
             backgroundColor: Colors.black,
             icon: Icon(
@@ -397,7 +397,7 @@ class MapScreen extends StatelessWidget {
             ),
           ),
           ActionButton(
-            isSmall: true,
+            isSecondary: true,
             onPressed: () {},
             backgroundColor: Colors.black,
             icon: const Icon(
@@ -406,7 +406,7 @@ class MapScreen extends StatelessWidget {
             ),
           ),
           ActionButton(
-            isSmall: true,
+            isSecondary: true,
             onPressed: () {},
             backgroundColor: Colors.black,
             icon: const Icon(

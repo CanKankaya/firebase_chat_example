@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_chat_example/services/map_service.dart';
 
-@immutable
 class ExpandableFab extends StatefulWidget {
   const ExpandableFab({
     super.key,
@@ -117,10 +116,10 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
 
   List<Widget> _buildExpandingActionButtons() {
     final children = <Widget>[];
-    final bigList = widget.children.where((element) => !element.isSmall).toList();
-    final smallList = widget.children.where((element) => element.isSmall).toList();
-    final bigCount = bigList.length;
-    final smallCount = smallList.length;
+    final primaryList = widget.children.where((element) => !element.isSecondary).toList();
+    final secondaryList = widget.children.where((element) => element.isSecondary).toList();
+    final bigCount = primaryList.length;
+    final smallCount = secondaryList.length;
 
     var step = widget.step / (bigCount - 1);
     for (var i = 0, angleInDegrees = 0.0; i < bigCount; i++, angleInDegrees += step) {
@@ -129,7 +128,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           directionInDegrees: angleInDegrees,
           maxDistance: widget.distance,
           progress: _expandAnimation,
-          child: bigList[i],
+          child: primaryList[i],
         ),
       );
     }
@@ -141,7 +140,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           directionInDegrees: angleInDegrees,
           maxDistance: widget.secondaryDistance,
           progress: _expandAnimation,
-          child: smallList[i],
+          child: secondaryList[i],
         ),
       );
     }
@@ -183,7 +182,6 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   }
 }
 
-@immutable
 class _ExpandingActionButton extends StatelessWidget {
   const _ExpandingActionButton({
     required this.directionInDegrees,
@@ -226,20 +224,19 @@ class _ExpandingActionButton extends StatelessWidget {
   }
 }
 
-@immutable
 class ActionButton extends StatelessWidget {
   const ActionButton({
     super.key,
     this.onPressed,
     required this.icon,
     this.backgroundColor = Colors.black,
-    this.isSmall = false,
+    this.isSecondary = false,
   });
 
   final VoidCallback? onPressed;
   final Widget icon;
   final Color backgroundColor;
-  final bool isSmall;
+  final bool isSecondary;
 
   @override
   Widget build(BuildContext context) {

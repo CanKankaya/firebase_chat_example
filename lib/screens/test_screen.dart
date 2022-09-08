@@ -517,9 +517,11 @@ class TestClick extends StatelessWidget {
         Future.delayed(
           duration,
           () {
-            GestureBinding.instance.handlePointerEvent(PointerUpEvent(
-              position: clickPosition,
-            ));
+            GestureBinding.instance.handlePointerEvent(
+              PointerUpEvent(
+                position: clickPosition,
+              ),
+            );
             spamFlag = true;
           },
         );
@@ -548,7 +550,9 @@ class TestClick extends StatelessWidget {
                 child: const SizedBox(
                   width: 300,
                   height: 300,
-                  child: Center(child: Text("Big button.")),
+                  child: Center(
+                    child: Text("Big button."),
+                  ),
                 ),
               ),
               ElevatedButton(
