@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -6,6 +8,8 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:firebase_chat_example/services/audio_manager.dart';
 
 import 'package:firebase_chat_example/widgets/app_drawer.dart';
+
+import 'package:firebase_chat_example/screens/mapstuff/no_internet_screen.dart';
 
 //TODO: Try audio stuff here
 class AudioScreen extends StatefulWidget {
@@ -31,95 +35,109 @@ class _AudioScreenState extends State<AudioScreen> {
     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
   ];
-  var urlDurations = [];
+  List<Duration> urlDurations = [];
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: onWillPopHandler,
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(),
-        drawer: const AppDrawer(),
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    urls.length,
-                    (index) => CustomPlayer(
-                      audioManager: _audioManager,
-                      index: index,
-                      url: urls[index],
+    return FutureBuilder<bool>(
+        future: _audioManager.checkInternet(),
+        builder: (context, futureVal) {
+          if (futureVal.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (!(futureVal.data ?? false)) {
+            return NoInternetScreen();
+          }
+          return WillPopScope(
+            onWillPop: onWillPopHandler,
+            child: Scaffold(
+              key: _scaffoldKey,
+              appBar: AppBar(),
+              drawer: const AppDrawer(),
+              body: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: List.generate(
+                          urls.length,
+                          (index) => CustomPlayer(
+                            audioManager: _audioManager,
+                            index: index,
+                            url: urls[index],
+                          ),
+                        ).toList(),
+                      ),
                     ),
-                  ).toList(),
-                ),
+                    // child: ListView.separated(
+                    //   padding: const EdgeInsets.all(16),
+                    //   itemCount: urls.length,
+                    //   separatorBuilder: (context, index) => const Divider(
+                    //     color: Colors.amber,
+                    //     thickness: 1,
+                    //   ),
+                    //   itemBuilder: (context, index) => CustomPlayer(
+                    //     audioManager: _audioManager,
+                    //     index: index,
+                    //     url: urls[index],
+                    //   ),
+                    // ),
+                  ),
+                  Row(
+                    children: [
+                      const Text('DEBUG BUTTON:'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ValueListenableBuilder<ButtonState>(
+                          valueListenable: _audioManager.buttonNotifier,
+                          builder: (_, value, __) {
+                            return ElevatedButton(
+                              onPressed: value == ButtonState.loading
+                                  ? null
+                                  : () {
+                                      _audioManager.dispose();
+                                      _audioManager.init();
+                                    },
+                              child: const Text('Reset audio test'),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8)
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Text('DEBUG BUTTON:'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ValueListenableBuilder<ButtonState>(
+                          valueListenable: _audioManager.buttonNotifier,
+                          builder: (_, value, __) {
+                            return ElevatedButton(
+                              onPressed: value == ButtonState.loading
+                                  ? null
+                                  : () {
+                                      //TODO: Change url here
+                                      _audioManager.changeUrl(
+                                        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+                                        0,
+                                      );
+                                    },
+                              child: const Text('Change audio test'),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8)
+                    ],
+                  )
+                ],
               ),
-              // child: ListView.separated(
-              //   padding: const EdgeInsets.all(16),
-              //   itemCount: urls.length,
-              //   separatorBuilder: (context, index) => const Divider(
-              //     color: Colors.amber,
-              //     thickness: 1,
-              //   ),
-              //   itemBuilder: (context, index) => CustomPlayer(
-              //     audioManager: _audioManager,
-              //     index: index,
-              //     url: urls[index],
-              //   ),
-              // ),
             ),
-            Row(
-              children: [
-                const Text('DEBUG BUTTON:'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ValueListenableBuilder<ButtonState>(
-                    valueListenable: _audioManager.buttonNotifier,
-                    builder: (_, value, __) {
-                      return ElevatedButton(
-                        onPressed: value == ButtonState.loading
-                            ? null
-                            : () {
-                                _audioManager.dispose();
-                                _audioManager.init();
-                              },
-                        child: const Text('Reset audio test'),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8)
-              ],
-            ),
-            Row(
-              children: [
-                const Text('DEBUG BUTTON:'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ValueListenableBuilder<ButtonState>(
-                    valueListenable: _audioManager.buttonNotifier,
-                    builder: (_, value, __) {
-                      return ElevatedButton(
-                        onPressed: value == ButtonState.loading
-                            ? null
-                            : () {
-                                //TODO: Change url here
-                                _audioManager.changeUrl(
-                                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
-                              },
-                        child: const Text('Change audio test'),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8)
-              ],
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   @override
@@ -136,7 +154,7 @@ class _AudioScreenState extends State<AudioScreen> {
 
   void initDurations() async {
     for (var element in urls) {
-      var item = _audioManager.getDuration(element);
+      var item = await _audioManager.getDuration(element);
       urlDurations.add(item);
     }
   }
@@ -207,7 +225,7 @@ class CustomPlayer extends StatelessWidget {
                                       )
                                   : (position) async {
                                       audioManager.isPlaying = true;
-                                      await audioManager.changeUrl(url);
+                                      await audioManager.changeUrl(url, index);
                                       audioManager.play(index);
                                       audioManager.seek(
                                         index: index,
@@ -235,12 +253,20 @@ class CustomPlayer extends StatelessWidget {
                           builder: (_, value, __) {
                             switch (value) {
                               case ButtonState.loading:
-                                return Container(
-                                  margin: const EdgeInsets.all(8.0),
-                                  width: 32.0,
-                                  height: 32.0,
-                                  child: const CircularProgressIndicator(),
-                                );
+                                if (audioManager.lastActiveIndex == index) {
+                                  return Container(
+                                    margin: const EdgeInsets.all(8.0),
+                                    width: 32.0,
+                                    height: 32.0,
+                                    child: const CircularProgressIndicator(),
+                                  );
+                                } else {
+                                  return IconButton(
+                                    onPressed: () {},
+                                    icon: const Icon(Icons.play_arrow_rounded),
+                                    iconSize: 32,
+                                  );
+                                }
                               case ButtonState.paused:
                                 return IconButton(
                                   icon: const Icon(Icons.play_arrow_rounded),
@@ -258,7 +284,7 @@ class CustomPlayer extends StatelessWidget {
                                       : () async {
                                           //TODO:
                                           audioManager.isPlaying = true;
-                                          await audioManager.changeUrl(url);
+                                          await audioManager.changeUrl(url, index);
                                           audioManager.play(index);
                                           SchedulerBinding.instance.addPostFrameCallback((_) {
                                             ScaffoldMessenger.of(context).clearSnackBars();
@@ -279,7 +305,7 @@ class CustomPlayer extends StatelessWidget {
                                         iconSize: 32,
                                         onPressed: () async {
                                           audioManager.isPlaying = true;
-                                          await audioManager.changeUrl(url);
+                                          await audioManager.changeUrl(url, index);
                                           audioManager.play(index);
                                           SchedulerBinding.instance.addPostFrameCallback((_) {
                                             ScaffoldMessenger.of(context).clearSnackBars();

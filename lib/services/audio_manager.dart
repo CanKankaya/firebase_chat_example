@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ enum ButtonState {
   loading,
 }
 
-var url = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+var url = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
 class AudioManager {
   final progressNotifier = ValueNotifier<ProgressBarState>(
@@ -44,7 +45,9 @@ class AudioManager {
     init();
   }
 
-  Future<void> changeUrl(String newUrl) async {
+  Future<void> changeUrl(String newUrl, int index) async {
+    lastActiveIndex = index;
+
     if (url == newUrl) {
       log('did nothing because Url is the same');
     } else {
@@ -69,7 +72,7 @@ class AudioManager {
 
   void seek({required Duration position, required int index, required String urlToChange}) {
     if (lastActiveIndex != index) {
-      changeUrl(urlToChange);
+      changeUrl(urlToChange, index);
     }
     _audioPlayer.seek(position);
   }
@@ -81,6 +84,19 @@ class AudioManager {
     var duration = tempPlayer.duration ?? Duration.zero;
     tempPlayer.dispose();
     return duration;
+  }
+
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
   }
 
   void dispose() {

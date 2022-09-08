@@ -24,7 +24,7 @@ final mapService = MapService();
 //** */
 
 class MapService with ChangeNotifier {
-  var isFabOpen = false;
+  // var isFabOpen = false;
   var flag = true;
   var spamClick = true;
   var spamCheck = false;
@@ -52,9 +52,9 @@ class MapService with ChangeNotifier {
   late PolylinePoints polylinePoints;
   double totalDistance = 0;
 
-  void toggleFab() {
-    isFabOpen = !isFabOpen;
-  }
+  // void toggleFab() {
+  //   isFabOpen = !isFabOpen;
+  // }
 
   void updateCenterScreen(LatLng latLng) {
     centerScreen = latLng;

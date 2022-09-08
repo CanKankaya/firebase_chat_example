@@ -155,7 +155,11 @@ class MapScreen extends StatelessWidget {
                             Positioned(
                               child: Padding(
                                 padding: const EdgeInsets.only(
-                                    left: 60.0, top: 8.0, bottom: 8.0, right: 60.0),
+                                  left: 60.0,
+                                  top: 8.0,
+                                  bottom: 8.0,
+                                  right: 60.0,
+                                ),
                                 child: _buildHeadWidget(context),
                               ),
                             ),
