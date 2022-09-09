@@ -10,6 +10,7 @@ import 'package:firebase_chat_example/widgets/app_drawer.dart';
 import 'package:firebase_chat_example/widgets/custom_icon_button.dart';
 
 import 'package:firebase_chat_example/screens/mapstuff/no_internet_screen.dart';
+import 'package:flutter/scheduler.dart';
 
 class AudioScreen extends StatefulWidget {
   const AudioScreen({Key? key}) : super(key: key);
@@ -181,20 +182,18 @@ class CustomPlayer extends StatelessWidget {
                           var isThisActive = audioManager.lastActiveIndex.value == index;
                           if (isThisActive) {
                             lastPosition = value.current;
-
-                            //TODO: this is a temporary "on audio finished" function
-                            //Find a proper way to trigger this
-                            if (value.current >= value.total - const Duration(milliseconds: 300)) {
-                              //
+                            if (value.current >= value.total - const Duration(milliseconds: 250)) {
                               log('check if audio finished');
                               audioManager.pause();
+                              SchedulerBinding.instance.addPostFrameCallback((_) {
+                                audioManager.initIcon.value = true;
+                              });
 
                               audioManager.seek(
                                 position: Duration.zero,
                               );
                             }
                           }
-
                           return ProgressBar(
                             progress: isThisActive ? value.current : lastPosition,
                             buffered: isThisActive ? value.buffered : Duration.zero,

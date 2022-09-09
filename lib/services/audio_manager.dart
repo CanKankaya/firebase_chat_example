@@ -85,7 +85,7 @@ class AudioManager {
     var tempPlayer = AudioPlayer();
     await tempPlayer.setUrl(url);
     var duration = tempPlayer.duration ?? Duration.zero;
-    tempPlayer.dispose();
+    await tempPlayer.dispose();
     return duration;
   }
 

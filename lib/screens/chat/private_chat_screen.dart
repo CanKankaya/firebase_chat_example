@@ -277,6 +277,7 @@ class Messages extends StatelessWidget {
                             ? itemCountValue
                             : (documents?.length ?? 0),
                         (index) {
+                          //  ** Index dependant logic here */
                           final currentMessage = documents?[index];
                           bool isMe = currentMessage?['userId'] == currentUser?.uid;
                           final whichUser = usersData?.firstWhere(
