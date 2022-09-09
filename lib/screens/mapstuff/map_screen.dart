@@ -199,7 +199,6 @@ class MapScreen extends StatelessWidget {
     );
   }
 
-//TODO: extract checks outside, run the futurebuilder AFTER all the local checks
   Future<LatLng?> initFunction(BuildContext context) async {
     log('init future ran');
 

@@ -62,6 +62,10 @@ class AudioManager {
     }
   }
 
+  void setLoop() {
+    _audioPlayer.setLoopMode(LoopMode.all);
+  }
+
   void play(int index) {
     isPlaying = true;
     _audioPlayer.play();
@@ -73,8 +77,8 @@ class AudioManager {
     _audioPlayer.pause();
   }
 
-  void seek({required Duration position}) async {
-    _audioPlayer.seek(position);
+  Future<void> seek({required Duration position}) async {
+    await _audioPlayer.seek(position);
   }
 
   Future<Duration> getDuration(String url) async {

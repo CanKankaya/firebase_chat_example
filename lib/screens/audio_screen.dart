@@ -141,14 +141,21 @@ class CustomPlayer extends StatelessWidget {
   final int index;
   final String url;
 
-//TODO: save the last progress location and use it later
   @override
   Widget build(BuildContext context) {
     log('PlayerWidget build method ran');
     var lastPosition = Duration.zero;
     var savedPosition = Duration.zero;
 
-    //TODO: when you switch to new player, first thing to do: somehow set value.current to lastPosition
+    //TODO: add functions to;
+
+    //currentplayer repeat button
+    //other players restart button while paused
+    //other players restart button while playing
+    //other players repeat button while paused
+    //other players repeat button while playing
+
+    //TODO: fix button visual bug when player stops automatically
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -171,17 +178,29 @@ class CustomPlayer extends StatelessWidget {
                       ValueListenableBuilder<ProgressBarState>(
                         valueListenable: audioManager.progressNotifier,
                         builder: (_, value, __) {
-                          var isThisOnePlaying = audioManager.lastActiveIndex.value == index;
-                          if (isThisOnePlaying) {
+                          var isThisActive = audioManager.lastActiveIndex.value == index;
+                          if (isThisActive) {
                             lastPosition = value.current;
+
+                            //TODO: this is a temporary "on audio finished" function
+                            //Find a proper way to trigger this
+                            if (value.current >= value.total - const Duration(milliseconds: 300)) {
+                              //
+                              log('check if audio finished');
+                              audioManager.pause();
+
+                              audioManager.seek(
+                                position: Duration.zero,
+                              );
+                            }
                           }
+
                           return ProgressBar(
-                            progress: isThisOnePlaying ? value.current : lastPosition,
-                            buffered: isThisOnePlaying ? value.buffered : Duration.zero,
+                            progress: isThisActive ? value.current : lastPosition,
+                            buffered: isThisActive ? value.buffered : Duration.zero,
                             total: futureValue.data ?? Duration.zero,
-                            onSeek: isThisOnePlaying
+                            onSeek: isThisActive
                                 ? (position) {
-                                    log('triggered onSeek');
                                     audioManager.seek(
                                       position: position,
                                     );
@@ -190,60 +209,123 @@ class CustomPlayer extends StatelessWidget {
                                         : audioManager.initIcon.value = true;
                                   }
                                 : (position) async {
-                                    log('triggered onSeek');
+                                    log(position.toString());
                                     await audioManager.changeUrl(url, index, position);
                                     audioManager.seek(
                                       position: position,
                                     );
                                     audioManager.play(index);
                                   },
-                            progressBarColor: isThisOnePlaying ? Colors.amber : Colors.teal,
-                            thumbColor: isThisOnePlaying ? Colors.amber : Colors.teal,
+                            progressBarColor: isThisActive ? Colors.amber : Colors.teal,
+                            thumbColor: isThisActive ? Colors.amber : Colors.teal,
                             baseBarColor: Colors.grey[800],
                             bufferedBarColor: Colors.grey,
                           );
                         },
                       ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: audioManager.initIcon,
-                        builder: (_, initValue, __) {
-                          return ValueListenableBuilder<int>(
-                            valueListenable: audioManager.lastActiveIndex,
-                            builder: (_, indexValue, __) {
-                              return ValueListenableBuilder<ButtonState>(
-                                valueListenable: audioManager.buttonNotifier,
-                                builder: (_, value, __) {
-                                  if (audioManager.lastActiveIndex.value == index) {
-                                    return value == ButtonState.loading
-                                        ? const Padding(
+                      ValueListenableBuilder<int>(
+                        valueListenable: audioManager.lastActiveIndex,
+                        builder: (_, indexValue, __) {
+                          return ValueListenableBuilder<ButtonState>(
+                            valueListenable: audioManager.buttonNotifier,
+                            builder: (_, buttonValue, __) {
+                              if (audioManager.lastActiveIndex.value == index) {
+                                return buttonValue == ButtonState.loading
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: const [
+                                          IconButton(
+                                            onPressed: null,
+                                            icon: Icon(
+                                              Icons.replay,
+                                            ),
+                                          ),
+                                          Padding(
                                             padding: EdgeInsets.all(6.0),
                                             child: CircularProgressIndicator(),
-                                          )
-                                        : CustomIconButton(
-                                            icon: initValue
-                                                ? AnimatedIcons.play_pause
-                                                : AnimatedIcons.pause_play,
-                                            onPressed: audioManager.isPlaying
-                                                ? () {
+                                          ),
+                                          IconButton(
+                                            onPressed: null,
+                                            icon: Icon(
+                                              Icons.repeat,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          IconButton(
+                                            onPressed: lastPosition == Duration.zero
+                                                ? null
+                                                : () {
                                                     audioManager.pause();
-                                                  }
-                                                : () async {
-                                                    audioManager.play(index);
+                                                    audioManager.initIcon.value = true;
+                                                    audioManager.seek(
+                                                      position: Duration.zero,
+                                                    );
                                                   },
-                                          );
-                                  } else {
-                                    switch (value) {
-                                      case ButtonState.loading:
-                                        return IconButton(
-                                          onPressed: () {},
-                                          icon: const Icon(Icons.play_arrow),
+                                            icon: const Icon(Icons.replay),
+                                          ),
+                                          ValueListenableBuilder<bool>(
+                                              valueListenable: audioManager.initIcon,
+                                              builder: (context, initValue, __) {
+                                                return CustomIconButton(
+                                                  icon: initValue
+                                                      ? AnimatedIcons.play_pause
+                                                      : AnimatedIcons.pause_play,
+                                                  onPressed: audioManager.isPlaying
+                                                      ? () {
+                                                          audioManager.pause();
+                                                        }
+                                                      : () async {
+                                                          audioManager.play(index);
+                                                        },
+                                                );
+                                              }),
+                                          //TODO: set LoopMode of the current player
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: const Icon(Icons.repeat),
+                                          ),
+                                        ],
+                                      );
+                              } else {
+                                switch (buttonValue) {
+                                  case ButtonState.loading:
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: const [
+                                        IconButton(
+                                          onPressed: null,
+                                          icon: Icon(
+                                            Icons.replay,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.play_arrow),
                                           iconSize: 24,
-                                        );
-                                      case ButtonState.paused:
-                                        return IconButton(
+                                        ),
+                                        IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.repeat),
+                                        ),
+                                      ],
+                                    );
+                                  case ButtonState.paused:
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(
+                                            Icons.replay,
+                                          ),
+                                        ),
+                                        IconButton(
                                           onPressed: () async {
                                             savedPosition = lastPosition;
-                                            log(savedPosition.toString());
                                             await audioManager.changeUrl(url, index, savedPosition);
                                             audioManager.seek(
                                               position: savedPosition,
@@ -252,13 +334,26 @@ class CustomPlayer extends StatelessWidget {
                                           },
                                           icon: const Icon(Icons.play_arrow),
                                           iconSize: 24,
-                                        );
-
-                                      case ButtonState.playing:
-                                        return IconButton(
+                                        ),
+                                        const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.repeat),
+                                        ),
+                                      ],
+                                    );
+                                  case ButtonState.playing:
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(
+                                            Icons.replay,
+                                          ),
+                                        ),
+                                        IconButton(
                                           onPressed: () async {
                                             savedPosition = lastPosition;
-                                            log(savedPosition.toString());
                                             await audioManager.changeUrl(url, index, savedPosition);
                                             audioManager.seek(
                                               position: savedPosition,
@@ -267,11 +362,15 @@ class CustomPlayer extends StatelessWidget {
                                           },
                                           icon: const Icon(Icons.play_arrow),
                                           iconSize: 24,
-                                        );
-                                    }
-                                  }
-                                },
-                              );
+                                        ),
+                                        const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.repeat),
+                                        ),
+                                      ],
+                                    );
+                                }
+                              }
                             },
                           );
                         },

@@ -26,41 +26,18 @@ class PrivateChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<QueryDocumentSnapshot<Object?>>? usersData;
-
-    Future _getAndSetUserData() async {
+    Future<List<QueryDocumentSnapshot<Object?>>> _getUserData() async {
       QuerySnapshot userSnapshot = await FirebaseFirestore.instance.collection('usersData').get();
-      usersData = userSnapshot.docs;
-    }
-
-    Future _getAndSetChatData() async {
-      await FirebaseFirestore.instance.collection('privateChats').doc(chatId).get();
+      return userSnapshot.docs;
     }
 
     if (chatId == '') {
       return WillPopScope(
-        onWillPop: () {
-          Provider.of<ReplyProvider>(context, listen: false).closeReply();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const PrivateChatsListScreen(),
-            ),
-          );
-          return Future.value(true);
-        },
+        onWillPop: () => _onWillPopHandler(context),
         child: Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              onPressed: () {
-                Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PrivateChatsListScreen(),
-                  ),
-                );
-              },
+              onPressed: () => _onWillPopHandler(context),
               icon: const Icon(Icons.arrow_back),
             ),
           ),
@@ -74,178 +51,157 @@ class PrivateChatScreen extends StatelessWidget {
         ),
       );
     } else {
-      return FutureBuilder(
-        future: _getAndSetUserData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return FutureBuilder(
-            future: _getAndSetChatData(),
-            builder: (context, chatSnapshot) {
-              return StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('privateChats/$chatId/participantsData')
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
-                  if (chatSnapshot.connectionState == ConnectionState.waiting ||
-                      chatSnapshot.connectionState == ConnectionState.none ||
-                      participantsSnapshot.connectionState == ConnectionState.waiting ||
-                      participantsSnapshot.connectionState == ConnectionState.none) {
-                    return const Scaffold(
-                      body: Center(
-                        child: CircularProgressIndicator(),
+      return FutureBuilder<List<QueryDocumentSnapshot<Object?>>>(
+        future: _getUserData(),
+        builder: (context, userSnapshot) {
+          return StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('privateChats/$chatId/participantsData')
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> participantsSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting ||
+                  participantsSnapshot.connectionState == ConnectionState.waiting ||
+                  participantsSnapshot.connectionState == ConnectionState.none) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              } else {
+                final usersData = userSnapshot.data;
+                final participantsData = participantsSnapshot.data?.docs;
+                final foundUser = participantsData?.firstWhereOrNull(
+                  (element) => element.id == currentUser?.uid,
+                );
+                if (foundUser == null) {
+                  return WillPopScope(
+                    onWillPop: () => _onWillPopHandler(context),
+                    child: Scaffold(
+                      appBar: AppBar(
+                        leading: IconButton(
+                          onPressed: () => _onWillPopHandler(context),
+                          icon: const Icon(Icons.arrow_back),
+                        ),
                       ),
-                    );
-                  } else {
-                    final participantsData = participantsSnapshot.data?.docs;
-                    final foundUser = participantsData?.firstWhereOrNull(
-                      (element) => element.id == currentUser?.uid,
-                    );
-                    if (foundUser == null) {
-                      return WillPopScope(
-                        onWillPop: () {
-                          Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const PrivateChatsListScreen(),
+                      body: const Center(
+                        child:
+                            Text('Something Went Wrong, \n You May Have Been Removed From Chat :('),
+                      ),
+                    ),
+                  );
+                } else {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                    child: WillPopScope(
+                      onWillPop: () => _onWillPopHandler(context),
+                      child: Scaffold(
+                        appBar: _buildPrivateChatAppBar(context),
+                        body: Column(
+                          children: [
+                            Messages(
+                              chatId: chatId,
+                              participantsData: participantsData,
+                              usersData: usersData,
                             ),
-                          );
-                          return Future.value(true);
-                        },
-                        child: Scaffold(
-                          appBar: AppBar(
-                            leading: IconButton(
-                              onPressed: () {
-                                Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const PrivateChatsListScreen(),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.arrow_back),
-                            ),
-                          ),
-                          body: const Center(
-                            child: Text(
-                                'Something Went Wrong, \n You May Have Been Removed From Chat :('),
-                          ),
+                            const ReplyWidget(),
+                            NewMessageWidget(chatId: chatId),
+                          ],
                         ),
-                      );
-                    } else {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                        child: WillPopScope(
-                          onWillPop: () {
-                            Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const PrivateChatsListScreen(),
-                              ),
-                            );
-                            return Future.value(true);
-                          },
-                          child: Scaffold(
-                            appBar: AppBar(
-                              leading: IconButton(
-                                onPressed: () {
-                                  Provider.of<ReplyProvider>(context, listen: false).closeReply();
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const PrivateChatsListScreen(),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.arrow_back),
-                              ),
-                              title: InkWell(
-                                borderRadius: BorderRadius.circular(25),
-                                splashColor: Colors.amber,
-                                onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtherUserDataScreen(
-                                        user: otherUser,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            width: 2,
-                                            color: Colors.amber,
-                                          ),
-                                          borderRadius: BorderRadius.circular(22),
-                                        ),
-                                        child: CircleAvatar(
-                                          radius: 20,
-                                          backgroundImage: NetworkImage(
-                                            otherUser?['userImageUrl'] ?? '',
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(otherUser?['username'] ?? ''),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              actions: [
-                                IconButton(
-                                  onPressed: () {
-                                    FocusManager.instance.primaryFocus?.unfocus();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PrivateChatParticipantsScreen(
-                                          chatId: chatId,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.manage_accounts),
-                                ),
-                              ],
-                            ),
-                            body: Column(
-                              children: [
-                                Messages(
-                                  chatId: chatId,
-                                  participantsData: participantsData,
-                                  usersData: usersData,
-                                ),
-                                const ReplyWidget(),
-                                NewMessageWidget(chatId: chatId),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                },
-              );
+                      ),
+                    ),
+                  );
+                }
+              }
             },
           );
         },
       );
     }
+  }
+
+  Future<bool> _onWillPopHandler(BuildContext context) {
+    Provider.of<ReplyProvider>(context, listen: false).closeReply();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PrivateChatsListScreen(),
+      ),
+    );
+    return Future.value(true);
+  }
+
+  AppBar _buildPrivateChatAppBar(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        onPressed: () {
+          Provider.of<ReplyProvider>(context, listen: false).closeReply();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PrivateChatsListScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.arrow_back),
+      ),
+      title: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: Colors.amber,
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtherUserDataScreen(
+                user: otherUser,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    width: 2,
+                    color: Colors.amber,
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(
+                    otherUser?['userImageUrl'] ?? '',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(otherUser?['username'] ?? ''),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          onPressed: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PrivateChatParticipantsScreen(
+                  chatId: chatId,
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.manage_accounts),
+        ),
+      ],
+    );
   }
 }
 
@@ -253,8 +209,8 @@ class Messages extends StatelessWidget {
   final String chatId;
   final List<QueryDocumentSnapshot<Object?>>? participantsData;
   final List<QueryDocumentSnapshot<Object?>>? usersData;
-
   final ValueNotifier<int> _itemCount = ValueNotifier<int>(10);
+
   Messages({super.key, required this.chatId, this.participantsData, required this.usersData});
 
   _refreshFunction() async {
@@ -264,7 +220,6 @@ class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-
     final scrollController = ScrollController();
 
     return Expanded(
@@ -313,6 +268,7 @@ class Messages extends StatelessWidget {
               builder: (_, int itemCountValue, __) {
                 return SizedBox.expand(
                   child: SingleChildScrollView(
+                    controller: scrollController,
                     reverse: true,
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Column(
@@ -392,8 +348,8 @@ class MessageWidget extends StatelessWidget {
     required this.isReplyToCurrentUser,
     required this.isReplyToSelf,
   }) : super(key: key);
-  final String chatId;
 
+  final String chatId;
   final QueryDocumentSnapshot<Object?>? currentMessage;
   final QueryDocumentSnapshot<Object?>? whichUser;
   final bool isMe;

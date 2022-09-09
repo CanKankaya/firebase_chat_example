@@ -61,7 +61,6 @@ class ChatsList extends StatelessWidget {
               (element) => element.id.contains('${currentUser?.uid}'),
             )
             .toList();
-
         // **
 
         return Expanded(
