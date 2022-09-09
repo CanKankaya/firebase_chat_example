@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -44,15 +45,16 @@ class AudioManager {
     init();
   }
 
-  Future<void> changeUrl(String newUrl, int index) async {
+  Future<void> changeUrl(String newUrl, int index, Duration savedPos) async {
     lastActiveIndex.value = index;
+    log('seeking $savedPos');
+    _audioPlayer.seek(savedPos);
 
     if (url == newUrl) {
     } else {
       initIcon.value = false;
       buttonNotifier.value = ButtonState.loading;
       await _audioPlayer.pause();
-      await _audioPlayer.seek(Duration.zero);
       await _audioPlayer.dispose();
       url = newUrl;
       await init();
@@ -71,10 +73,7 @@ class AudioManager {
     _audioPlayer.pause();
   }
 
-  void seek({required Duration position, required int index, required String urlToChange}) {
-    if (lastActiveIndex.value != index) {
-      changeUrl(urlToChange, index);
-    }
+  void seek({required Duration position}) async {
     _audioPlayer.seek(position);
   }
 

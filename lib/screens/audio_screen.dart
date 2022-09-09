@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
@@ -142,6 +144,12 @@ class CustomPlayer extends StatelessWidget {
 //TODO: save the last progress location and use it later
   @override
   Widget build(BuildContext context) {
+    log('PlayerWidget build method ran');
+    var lastPosition = Duration.zero;
+    var savedPosition = Duration.zero;
+
+    //TODO: when you switch to new player, first thing to do: somehow set value.current to lastPosition
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Material(
@@ -163,37 +171,34 @@ class CustomPlayer extends StatelessWidget {
                       ValueListenableBuilder<ProgressBarState>(
                         valueListenable: audioManager.progressNotifier,
                         builder: (_, value, __) {
+                          var isThisOnePlaying = audioManager.lastActiveIndex.value == index;
+                          if (isThisOnePlaying) {
+                            lastPosition = value.current;
+                          }
                           return ProgressBar(
-                            progress: audioManager.lastActiveIndex.value == index
-                                ? value.current
-                                : Duration.zero,
-                            //TODO:
-                            buffered: audioManager.lastActiveIndex.value == index
-                                ? value.buffered
-                                : Duration.zero,
+                            progress: isThisOnePlaying ? value.current : lastPosition,
+                            buffered: isThisOnePlaying ? value.buffered : Duration.zero,
                             total: futureValue.data ?? Duration.zero,
-                            onSeek: audioManager.lastActiveIndex.value == index
+                            onSeek: isThisOnePlaying
                                 ? (position) {
+                                    log('triggered onSeek');
                                     audioManager.seek(
-                                      index: index,
                                       position: position,
-                                      urlToChange: url,
                                     );
                                     audioManager.isPlaying
                                         ? audioManager.initIcon.value = false
                                         : audioManager.initIcon.value = true;
                                   }
                                 : (position) async {
-                                    await audioManager.changeUrl(url, index);
-                                    audioManager.play(index);
+                                    log('triggered onSeek');
+                                    await audioManager.changeUrl(url, index, position);
                                     audioManager.seek(
-                                      index: index,
                                       position: position,
-                                      urlToChange: url,
                                     );
+                                    audioManager.play(index);
                                   },
-                            progressBarColor: Colors.amber,
-                            thumbColor: Colors.amber,
+                            progressBarColor: isThisOnePlaying ? Colors.amber : Colors.teal,
+                            thumbColor: isThisOnePlaying ? Colors.amber : Colors.teal,
                             baseBarColor: Colors.grey[800],
                             bufferedBarColor: Colors.grey,
                           );
@@ -237,7 +242,12 @@ class CustomPlayer extends StatelessWidget {
                                       case ButtonState.paused:
                                         return IconButton(
                                           onPressed: () async {
-                                            await audioManager.changeUrl(url, index);
+                                            savedPosition = lastPosition;
+                                            log(savedPosition.toString());
+                                            await audioManager.changeUrl(url, index, savedPosition);
+                                            audioManager.seek(
+                                              position: savedPosition,
+                                            );
                                             audioManager.play(index);
                                           },
                                           icon: const Icon(Icons.play_arrow),
@@ -247,7 +257,12 @@ class CustomPlayer extends StatelessWidget {
                                       case ButtonState.playing:
                                         return IconButton(
                                           onPressed: () async {
-                                            await audioManager.changeUrl(url, index);
+                                            savedPosition = lastPosition;
+                                            log(savedPosition.toString());
+                                            await audioManager.changeUrl(url, index, savedPosition);
+                                            audioManager.seek(
+                                              position: savedPosition,
+                                            );
                                             audioManager.play(index);
                                           },
                                           icon: const Icon(Icons.play_arrow),

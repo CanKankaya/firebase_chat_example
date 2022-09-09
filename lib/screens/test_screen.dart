@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-import 'package:firebase_chat_example/route_test_screens/route_test_1.dart';
-import 'package:firebase_chat_example/route_test_screens/route_test_3.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -17,6 +15,9 @@ import 'package:firebase_chat_example/widgets/simpler_custom_loading.dart';
 import 'package:firebase_chat_example/widgets/expandable_fab.dart';
 
 import 'package:firebase_chat_example/screens/holacon_test_screen.dart';
+
+import 'package:firebase_chat_example/route_test_screens/route_test_1.dart';
+import 'package:firebase_chat_example/route_test_screens/route_test_3.dart';
 
 class TestScreen extends StatelessWidget {
   TestScreen({Key? key}) : super(key: key);
