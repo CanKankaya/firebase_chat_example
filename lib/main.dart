@@ -17,6 +17,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
             title: 'Flutter Demo',
             theme: themeNotifier.isDark ? ThemeData.dark() : ThemeData.light(),
             home: AuthScreen(),
+            navigatorObservers: [routeObserver],
             //TODO: add a proper home screen, navigate user from there
           );
         },

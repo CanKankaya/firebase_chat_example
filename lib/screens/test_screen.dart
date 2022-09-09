@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:firebase_chat_example/routetest1.dart';
+import 'package:firebase_chat_example/routetest3.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
@@ -140,6 +142,28 @@ class TestHome extends StatelessWidget {
             );
           },
           child: const Text('Go to Holacon test screen'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RouteTest1(),
+              ),
+            );
+          },
+          child: const Text('Go to RouteObserver test screen(Stateful)'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RouteTest3(),
+              ),
+            );
+          },
+          child: const Text('Go to RouteObserver test screen(Stateless)'),
         ),
         Expanded(
           flex: 2,

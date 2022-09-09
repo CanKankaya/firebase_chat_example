@@ -25,7 +25,6 @@ class _SimplerCustomLoaderState extends State<SimplerCustomLoader> with TickerPr
   @override
   void initState() {
     super.initState();
-
     controller1 = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);
 
     controller2 = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);

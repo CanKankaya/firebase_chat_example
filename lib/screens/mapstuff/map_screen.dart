@@ -113,7 +113,7 @@ class MapScreen extends StatelessWidget {
                               builder: (_, map, __) => CustomIconButton(
                                 iconSize: 32,
                                 icon: AnimatedIcons.search_ellipsis,
-                                buttonFon: map.searchButtonHandler,
+                                onPressed: map.searchButtonHandler,
                               ),
                             ),
                           ],

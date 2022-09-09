@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomIconButton extends StatefulWidget {
   final AnimatedIconData icon;
-  final Function buttonFon;
+  final Function? onPressed;
   final double? iconSize;
   final Color? iconColor;
   final Duration duration;
@@ -13,7 +13,7 @@ class CustomIconButton extends StatefulWidget {
     this.iconSize,
     this.iconColor,
     this.duration = const Duration(milliseconds: 500),
-    required this.buttonFon,
+    required this.onPressed,
   }) : super(key: key);
 
   @override
@@ -26,12 +26,18 @@ class CustomIconButtonState extends State<CustomIconButton> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
+    //** INFO: Bu Widget'a onPressed null atandığında animasyon çalışmaz,
+    //() {} atandığında animasyon çalışır
+    //Dolu fonksiyon atandığında animasyon ve fonksiyon çalışır
+    //*/
     return IconButton(
       iconSize: widget.iconSize,
-      onPressed: () {
-        _handleOnPressed();
-        widget.buttonFon();
-      },
+      onPressed: widget.onPressed != null
+          ? () {
+              _handleOnPressed();
+              widget.onPressed!();
+            }
+          : () {},
       icon: AnimatedIcon(
         icon: widget.icon,
         progress: _animationController,

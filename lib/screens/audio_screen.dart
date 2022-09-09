@@ -30,7 +30,6 @@ class _AudioScreenState extends State<AudioScreen> {
     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
   ];
-  List<Duration> urlDurations = [];
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
@@ -113,13 +112,6 @@ class _AudioScreenState extends State<AudioScreen> {
     super.dispose();
   }
 
-  void initDurations() async {
-    for (var element in urls) {
-      var item = await _audioManager.getDuration(element);
-      urlDurations.add(item);
-    }
-  }
-
   Future<bool> onWillPopHandler() {
     if (_scaffoldKey.currentState != null) {
       if (_scaffoldKey.currentState!.isDrawerOpen) {
@@ -175,6 +167,7 @@ class CustomPlayer extends StatelessWidget {
                             progress: audioManager.lastActiveIndex.value == index
                                 ? value.current
                                 : Duration.zero,
+                            //TODO:
                             buffered: audioManager.lastActiveIndex.value == index
                                 ? value.buffered
                                 : Duration.zero,
@@ -225,7 +218,7 @@ class CustomPlayer extends StatelessWidget {
                                             icon: initValue
                                                 ? AnimatedIcons.play_pause
                                                 : AnimatedIcons.pause_play,
-                                            buttonFon: audioManager.isPlaying
+                                            onPressed: audioManager.isPlaying
                                                 ? () {
                                                     audioManager.pause();
                                                   }
