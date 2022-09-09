@@ -1,7 +1,11 @@
-import 'package:firebase_chat_example/route_test_screens/route_test_2.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
 import '../main.dart';
+
+import 'package:firebase_chat_example/route_test_screens/route_test_2.dart';
 
 class RouteTest1 extends StatefulWidget {
   const RouteTest1({Key? key}) : super(key: key);
@@ -13,25 +17,25 @@ class RouteTest1 extends StatefulWidget {
 class _RouteTest1State extends State<RouteTest1> with RouteAware {
   @override
   void didPush() {
-    print('//////////////\nTest1: Called didPush');
+    log('Test1: Called didPush');
     super.didPush();
   }
 
   @override
   void didPop() {
-    print('//////////////\nTest1: Called didPop');
+    log('Test1: Called didPop');
     super.didPop();
   }
 
   @override
   void didPopNext() {
-    print('//////////////\nTest1: Called didPopNext');
+    log('Test1: Called didPopNext');
     super.didPopNext();
   }
 
   @override
   void didPushNext() {
-    print('//////////////\nTest1: Called didPushNext');
+    log('Test1: Called didPushNext');
     super.didPushNext();
   }
 
