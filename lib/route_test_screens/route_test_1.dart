@@ -1,16 +1,16 @@
-import 'package:firebase_chat_example/routetest4.dart';
+import 'package:firebase_chat_example/route_test_screens/route_test_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'main.dart';
+import '../main.dart';
 
-class RouteTest3 extends StatefulWidget {
-  const RouteTest3({Key? key}) : super(key: key);
+class RouteTest1 extends StatefulWidget {
+  const RouteTest1({Key? key}) : super(key: key);
 
   @override
-  State<RouteTest3> createState() => _RouteTest3State();
+  State<RouteTest1> createState() => _RouteTest1State();
 }
 
-class _RouteTest3State extends State<RouteTest3> with RouteAware {
+class _RouteTest1State extends State<RouteTest1> with RouteAware {
   @override
   void didPush() {
     print('//////////////\nTest1: Called didPush');
@@ -49,7 +49,7 @@ class _RouteTest3State extends State<RouteTest3> with RouteAware {
       appBar: AppBar(
         backgroundColor: Colors.cyan,
         automaticallyImplyLeading: false,
-        title: const Text('Flutter RouteAware Test Page 3'),
+        title: const Text('Flutter RouteAware Test Page 1'),
       ),
       body: Center(
         child: Padding(
@@ -67,11 +67,11 @@ class _RouteTest3State extends State<RouteTest3> with RouteAware {
                     Navigator.pop(context);
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RouteTest4(),
+                        builder: (context) => const RouteTest2(),
                       ),
                     );
                   },
-                  child: const Text("RouteTest3")),
+                  child: const Text("RouteTest1")),
             ],
           ),
         ),
