@@ -1,4 +1,4 @@
-const String googleMapsApiKey = 'AIzaSyDzZ2C6Y0se34juPZZl8zqzc2XnRFBNL6I';
+const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
 
 double deviceHeight = 0.0;
 double deviceWidth = 0.0;
