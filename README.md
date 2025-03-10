@@ -2,7 +2,9 @@
 
 
 
-<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&link=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fcan-kankaya-738518158%2F" />
+<a href="mailto:can.kankaya@outlook.com">
+  <img src="https://img.shields.io/badge/Microsoft_Outlook-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white" alt="Outlook" />
+</a>
 
 <a href="https://www.linkedin.com/in/can-kankaya-738518158/">
   <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
