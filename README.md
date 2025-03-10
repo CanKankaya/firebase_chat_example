@@ -1,9 +1,8 @@
 # firebase_chat_example
 
 
-<img src="{[BadgeURLHere](https://img.shields.io/badge/LINKEDIN?style=flat&logo=linkedin&link=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fcan-kankaya-738518158%2F)}" />
 
-
+<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
 
 A new Flutter project.
 
